@@ -1,0 +1,51 @@
+# ============================================================
+# SMC - Docker Compose
+# ============================================================
+# Yeh file 2 services start karti hai:
+#   1. PostgreSQL  → database (users, posts, tokens)
+#   2. Redis       → queue (scheduling / background jobs)
+#
+# Commands:
+#   docker-compose up -d      → start (background mein)
+#   docker-compose down       → stop + remove containers
+#   docker-compose ps         → status dekho
+#   docker-compose logs -f    → live logs dekho
+# ============================================================
+
+services:
+
+  # ── PostgreSQL Database ─────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine       # Official PostgreSQL image (lightweight Alpine Linux)
+    container_name: smc-postgres    # Container ka naam (easy to identify)
+    restart: unless-stopped         # Crash hone par auto-restart
+
+    environment:
+      POSTGRES_USER: smc             # Database username
+      POSTGRES_PASSWORD: password    # Database password (dev only — production mein strong rakho)
+      POSTGRES_DB: smc_db            # Database ka naam
+
+    ports:
+      - "5433:5432"                  # host 5433 → container 5432 (local postgres 5432 use kar raha hai)
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data   # Data persist — container delete hone par bhi data safe
+
+  # ── Redis (Queue / Cache) ───────────────────────────────────
+  redis:
+    image: redis:7-alpine           # Official Redis image
+    container_name: smc-redis
+    restart: unless-stopped
+
+    ports:
+      - "6379:6379"                  # localhost:6379 se connect hoga
+
+    volumes:
+      - redisdata:/data              # Redis data persist
+
+# ── Named Volumes ─────────────────────────────────────────────
+# Docker in volumes ko manage karta hai — tumhari actual files
+# Docker ke internal storage mein safe rehti hain
+volumes:
+  pgdata:      # PostgreSQL ka data yahan store hoga
+  redisdata:   # Redis ka data yahan store hoga
