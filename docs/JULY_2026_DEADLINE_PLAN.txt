@@ -1,5 +1,5 @@
 ================================================================================
-PRODUCT VERSION: 0.9.0-beta.4 (BETA)
+PRODUCT VERSION: 1.0.0-rc.1 (RC — staging ready)
 Tracking: version.json | CHANGELOG.md | docs/VERSIONING.md
 ================================================================================
 
@@ -53,6 +53,7 @@ Goal: Jo bana hai wo break na ho; master clean ho; Maria ke liye branch ready.
   [DONE] Phase 3 — Reddit OAuth, cross-post, platform hints, per-target status
   [DONE] Phase 4 (partial) — LinkedIn dashboard analytics, calendar/dashboard polish
   [DONE] Phase 4 — profile name edit in Settings
+  [DONE] Phase 5 (configs) — deploy docs, Dockerfile, vercel.json, CI, limitations
 
 ------------------------------------------------------------------------------
 PHASE 2 — CORE PRODUCT POLISH (Deadline: 18 July, Friday) [DONE 11 Jul]
@@ -115,25 +116,23 @@ Goal: Dashboard useful ho; settings complete feel de.
     [x] Analytics panel kam az kam LinkedIn ke liye dashboard par dikhaye
 
 ------------------------------------------------------------------------------
-PHASE 5 — DEPLOY + MONTH-END LAUNCH (Deadline: 31 July, Thursday)
+PHASE 5 — DEPLOY + MONTH-END LAUNCH (Deadline: 31 July, Thursday) [IN PROGRESS]
 Goal: Staging/production URL; month complete.
 
   Tasks:
-    - Staging deploy: backend (Railway/Render) + frontend (Vercel)
-    - Production PostgreSQL + S3 bucket
-    - OAuth redirect URLs production par update
-    - README: setup + env vars + Maria test steps
-    - Final regression on testing/maria → merge to master
-    - Known limitations doc (Instagram review pending, etc.)
-
-  Kaam ka tareeqa (29–31 July):
-    - 29: deploy staging
-    - 30: Maria full regression staging par
-    - 31: fixes + tag v1.0.0 (optional)
+    [x] Deploy configs: Dockerfile, render.yaml, vercel.json, GitHub Actions CI
+    [x] Production npm scripts (migrate deploy, build:prod)
+    [x] OAuth redirect URL docs for production
+    [x] README: setup + env vars + Maria test steps
+    [x] Known limitations doc (LIMITATIONS.md)
+    [ ] Staging deploy: backend (Render/Railway) + frontend (Vercel) — manual
+    [ ] Production PostgreSQL + S3 bucket — manual
+    [ ] Maria full regression on staging URL
+    [ ] Tag v1.0.0 stable after sign-off
 
   Exit criteria:
-    - Public/staging URL se login → compose → publish ho
-    - Month-end demo ready
+    [ ] Public/staging URL se login → compose → publish ho
+    [ ] Month-end demo ready
 
 ================================================================================
 WEEKLY CALENDAR (July 2026)
@@ -163,6 +162,9 @@ KAAM KAISE KAREIN (Daily rhythm)
 MARIA TEST CHECKLIST (testing/maria branch)
 ================================================================================
 
+  Full checklist (37 cases): docs/MARIA_TEST_CHECKLIST.md
+
+  Quick smoke (local or staging):
   [ ] Register / Login / Logout
   [ ] Connect LinkedIn account
   [ ] Compose text-only post → Publish now → Posts / Published

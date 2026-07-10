@@ -16,6 +16,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.0-rc.1] - 2026-07-11
+
+### Added
+- **Deploy readiness:** backend `Dockerfile`, `render.yaml`, frontend `vercel.json`, GitHub Actions CI
+- **docs/DEPLOY.md** — staging/production step-by-step (Render + Vercel)
+- **docs/LIMITATIONS.md** — known product gaps for launch
+- **docs/MARIA_TEST_CHECKLIST.md** — 37-case QA regression (incl. staging + Reddit)
+- Production npm scripts: `build:prod`, `start:prod`, `db:migrate:deploy`, `postinstall`
+
+### Changed
+- Health check returns **503** when DB down in production (load balancer friendly)
+- README overhaul: env vars, deploy, Maria checklist links
+- `.env.example` files document production OAuth redirect pattern
+
+---
+
 ## [0.9.0-beta.4] - 2026-07-11
 
 ### Added

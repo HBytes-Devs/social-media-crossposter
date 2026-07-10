@@ -1,12 +1,12 @@
 {
   "product": "Social Media Crossposter",
   "shortName": "SMC",
-  "version": "0.9.0",
-  "channel": "beta",
-  "prerelease": "beta.4",
-  "fullVersion": "0.9.0-beta.4",
+  "version": "1.0.0",
+  "channel": "rc",
+  "prerelease": "rc.1",
+  "fullVersion": "1.0.0-rc.1",
   "apiVersion": "v1",
   "releaseDate": "2026-07-11",
-  "codename": "Insights Beta",
-  "status": "active-development"
+  "codename": "Launch Candidate",
+  "status": "staging-ready"
 }

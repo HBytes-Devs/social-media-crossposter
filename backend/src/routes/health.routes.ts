@@ -31,9 +31,13 @@ router.get("/", async (_req, res) => {
     product: product.product,
   };
 
-  // 200 even when DB is down — useful during local setup without PostgreSQL
-  res.status(200).json({
-    success: true,
+  // 503 in production when DB is down — load balancers treat as unhealthy.
+  // 200 in development — useful during local setup without PostgreSQL.
+  const httpStatus =
+    database === "connected" ? 200 : process.env.NODE_ENV === "production" ? 503 : 200;
+
+  res.status(httpStatus).json({
+    success: database === "connected",
     data: health,
   });
 });

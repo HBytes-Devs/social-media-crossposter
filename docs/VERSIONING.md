@@ -1,6 +1,6 @@
 # SMC Versioning & Release Tracking
 
-**Current release:** `0.9.0-beta.2` (Beta)  
+**Current release:** `1.0.0-rc.1` (Release Candidate)  
 **Target stable:** `1.0.0` — end of July 2026 (see `JULY_2026_DEADLINE_PLAN.txt`)
 
 ---
@@ -33,8 +33,8 @@ Update **only** this file when bumping versions. Then update `CHANGELOG.md`.
 |---------|---------|--------|-------|
 | **0.9.0-beta.1** | Beta | 10 Jul | Core v1 features, Maria testing |
 | **0.9.0-beta.2** | Beta | 11 Jul | Phase 2 polish — retry, mobile, token alerts |
-| 0.9.0-beta.3 | Beta | 24 Jul | 2nd platform live |
-| 1.0.0-rc.1 | RC | 28 Jul | Staging deploy, regression |
+| **0.9.0-beta.4** | Beta | 11 Jul | Phase 4 — analytics, calendar polish |
+| **1.0.0-rc.1** | RC | 11 Jul | Phase 5 — deploy configs, docs, staging ready |
 | **1.0.0** | Stable | 31 Jul | Month-end launch |
 
 ### After 1.0 (professional product)
