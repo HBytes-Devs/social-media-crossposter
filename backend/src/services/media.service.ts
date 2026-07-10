@@ -3,6 +3,8 @@ import { randomUUID } from "crypto";
 import { prisma } from "../config/database.js";
 import { deleteFromS3, getPublicUrl, isS3Configured, uploadToS3 } from "../config/s3.js";
 import { AppError } from "../middleware/error.middleware.js";
+import { LINKEDIN_IMAGE, validateLinkedInDimensions } from "../lib/linkedin-image.js";
+import { buildUserMediaKey } from "../lib/s3-paths.js";
 import type { MediaItem } from "../types/index.js";
 
 const MIME_TO_EXT: Record<string, string> = {
@@ -10,6 +12,78 @@ const MIME_TO_EXT: Record<string, string> = {
   "image/png": "png",
   "image/webp": "webp",
 };
+
+function normalizeFileStem(fileName: string): string {
+  return fileName
+    .replace(/\.[^.]+$/, "")
+    .replace(/\s*\(\d+\)\s*$/, "")
+    .replace(/\s*-\s*copy\s*$/i, "")
+    .trim()
+    .toLowerCase();
+}
+
+function mediaDedupeKey(item: {
+  width: number | null;
+  height: number | null;
+  sizeBytes: number;
+  fileName: string;
+}): string {
+  const stem = normalizeFileStem(item.fileName);
+  return `${item.width ?? 0}x${item.height ?? 0}:${stem}`;
+}
+
+function dedupeMediaRecords<
+  T extends {
+    id: string;
+    s3Url: string;
+    width: number | null;
+    height: number | null;
+    sizeBytes: number;
+    fileName: string;
+    createdAt: Date;
+  },
+>(items: T[]): T[] {
+  const byKey = new Map<string, T>();
+
+  for (const item of items) {
+    const key = mediaDedupeKey(item);
+    const existing = byKey.get(key);
+
+    if (!existing || item.createdAt > existing.createdAt) {
+      byKey.set(key, item);
+    }
+  }
+
+  return Array.from(byKey.values()).sort(
+    (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+  );
+}
+
+function dedupeByPixelFingerprint<
+  T extends {
+    width: number | null;
+    height: number | null;
+    sizeBytes: number;
+    createdAt: Date;
+  },
+>(items: T[]): T[] {
+  const result: T[] = [];
+
+  for (const item of items) {
+    const duplicate = result.find(
+      (existing) =>
+        existing.width === item.width &&
+        existing.height === item.height &&
+        existing.sizeBytes === item.sizeBytes,
+    );
+
+    if (!duplicate) {
+      result.push(item);
+    }
+  }
+
+  return result;
+}
 
 function toMediaItem(media: {
   id: string;
@@ -43,16 +117,21 @@ function ensureS3Configured(): void {
   }
 }
 
-async function processImage(buffer: Buffer, mimeType: string) {
+async function processImage(buffer: Buffer, mimeType: string, fileName: string) {
   const image = sharp(buffer);
   const metadata = await image.metadata();
+  const width = metadata.width ?? 0;
+  const height = metadata.height ?? 0;
+
+  validateLinkedInDimensions(width, height, fileName);
 
   let processed = image.rotate();
 
-  if ((metadata.width ?? 0) > 2000 || (metadata.height ?? 0) > 2000) {
+  // LinkedIn-optimized: max width 1200px, maintain aspect ratio
+  if (width > LINKEDIN_IMAGE.optimizeWidth || height > LINKEDIN_IMAGE.optimizeWidth) {
     processed = processed.resize({
-      width: 2000,
-      height: 2000,
+      width: LINKEDIN_IMAGE.optimizeWidth,
+      height: LINKEDIN_IMAGE.optimizeWidth,
       fit: "inside",
       withoutEnlargement: true,
     });
@@ -68,6 +147,13 @@ async function processImage(buffer: Buffer, mimeType: string) {
 
   const output = await processed.toBuffer({ resolveWithObject: true });
 
+  if (output.data.length > LINKEDIN_IMAGE.maxBytes) {
+    throw new AppError(
+      400,
+      `${fileName}: Image exceeds 8 MB after optimization (LinkedIn limit)`,
+    );
+  }
+
   return {
     buffer: output.data,
     width: output.info.width,
@@ -82,13 +168,51 @@ export async function uploadImage(
 ): Promise<MediaItem> {
   ensureS3Configured();
 
+  const sourceMeta = await sharp(file.buffer).metadata();
+  const sourceWidth = sourceMeta.width ?? 0;
+  const sourceHeight = sourceMeta.height ?? 0;
+
+  const existing = await prisma.media.findFirst({
+    where: {
+      userId,
+      fileName: file.originalname,
+      width: sourceWidth,
+      height: sourceHeight,
+      sizeBytes: file.size,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (existing) {
+    return toMediaItem(existing);
+  }
+
   const { buffer, width, height, sizeBytes } = await processImage(
     file.buffer,
     file.mimetype,
+    file.originalname,
   );
 
+  const processedKey = mediaDedupeKey({
+    width,
+    height,
+    sizeBytes,
+    fileName: file.originalname,
+  });
+
+  const existingProcessed = (
+    await prisma.media.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+    })
+  ).find((item) => mediaDedupeKey(item) === processedKey);
+
+  if (existingProcessed) {
+    return toMediaItem(existingProcessed);
+  }
+
   const ext = MIME_TO_EXT[file.mimetype] ?? "jpg";
-  const key = `media/${userId}/${randomUUID()}.${ext}`;
+  const key = buildUserMediaKey(userId, `${randomUUID()}.${ext}`);
   const contentType = file.mimetype;
 
   await uploadToS3(key, buffer, contentType);
@@ -133,7 +257,7 @@ export async function listMedia(userId: string): Promise<MediaItem[]> {
     orderBy: { createdAt: "desc" },
   });
 
-  return media.map(toMediaItem);
+  return dedupeByPixelFingerprint(dedupeMediaRecords(media)).map(toMediaItem);
 }
 
 export async function deleteMedia(userId: string, mediaId: string): Promise<void> {

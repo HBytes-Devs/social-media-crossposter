@@ -1,0 +1,209 @@
+================================================================================
+  SMC (Social Media Crossposter) — JULY 2026 COMPLETION PLAN
+  Month deadline: 31 July 2026
+  Plan date: 10 July 2026 (Friday)
+  Branch for Maria testing: testing/maria
+================================================================================
+
+KHULASA (Summary)
+-----------------
+Is mahine ka goal: SMC ko usable v1 product banana — LinkedIn solid ho, schedule/
+compose/dashboard stable ho, kam az kam 1 extra platform live ho, aur Maria
+testing/maria branch par poora flow test kar sake.
+
+Aaj (10 July) tak jo ho chuka:
+  [DONE] Auth (login, register, forgot/reset password)
+  [DONE] LinkedIn connect + publish + image post
+  [DONE] Composer (hashtags, language, images, preview)
+  [DONE] Schedule post + scheduler + calendar + dashboard
+  [DONE] Posts tabs (all, published, scheduled, drafts, trash)
+  [DONE] AI Assist (improve, hashtags, localize, smart suggest, auto-correct)
+  [DONE] Settings — user apni AI API key + naam add kar sakta hai (Claude, GPT, etc.)
+  [DONE] UI i18n (en, ur, roman-ur, hi) + theme
+  [DONE] Schedule duplicate fix
+  [PARTIAL] Reddit fields UI (backend adapter exists)
+  [PARTIAL] Instagram / Facebook / Twitter adapters (code hai, OAuth + live test pending)
+  [PARTIAL] Analytics (LinkedIn analytics scripts/docs)
+
+================================================================================
+PHASES + DEADLINES (July 2026)
+================================================================================
+
+------------------------------------------------------------------------------
+PHASE 1 — STABILIZE & COMMIT (Deadline: 12 July, Saturday)
+Goal: Jo bana hai wo break na ho; master clean ho; Maria ke liye branch ready.
+
+  Tasks:
+    - Saari current changes commit + push master par
+    - Branch testing/maria cut karo (Maria QA ke liye)
+    - Backend + frontend .env.example update check
+    - LinkedIn end-to-end test: connect → compose → publish → schedule
+    - Schedule: 1 click = 1 post (duplicate na ho) — verify
+    - Settings: AI key add → Compose AI Assist chale — verify
+
+  Daily work (11–12 July):
+    - Subah: 1 bug fix ya smoke test
+    - Sham: Maria ko testing/maria branch + short test checklist bhejo
+
+  Exit criteria:
+    - testing/maria branch remote par hai
+    - LinkedIn publish + schedule dono pass
+    - Koi blocker crash / white screen nahi
+
+------------------------------------------------------------------------------
+PHASE 2 — CORE PRODUCT POLISH (Deadline: 18 July, Friday)
+Goal: Daily use ke liye app smooth ho — errors, loading, edge cases.
+
+  Tasks:
+    - Failed post retry button (PostCard)
+    - Publish now on scheduled/draft posts — stable
+    - Token expiry message (account reconnect prompt)
+    - Mobile responsive pass (sidebar + compose)
+    - Empty states + error messages Roman Urdu / English consistent
+    - Media library: upload fail, size limit messages clear
+    - Password reset email flow production .env ke sath test
+
+  Kaam ka tareeqa (13–18 July):
+    - Mon–Wed: backend fixes + API errors
+    - Thu–Fri: frontend polish + Maria feedback from Phase 1
+
+  Exit criteria:
+    - 30 min demo bina crash ke chal sake
+    - Maria 10 test cases pass kare (checklist neeche)
+
+------------------------------------------------------------------------------
+PHASE 3 — SECOND PLATFORM LIVE (Deadline: 24 July, Thursday)
+Goal: LinkedIn ke alawa kam az kam EK platform fully working.
+
+  Recommended order (pick ONE first):
+    Option A — Reddit (fastest dev test, no app review)
+    Option B — Facebook Page (Meta app chahiye)
+    Option C — Instagram Business (Meta + app review risk)
+
+  Tasks (whichever chosen):
+    - OAuth connect flow UI + backend callback test
+    - Publish text + image from composer
+    - Multi-platform: ek post 2 platforms par
+    - Platform-specific validation (Reddit title/subreddit, X char limit, etc.)
+    - Accounts page: "configured" badges sahi hon
+
+  Kaam ka tareeqa (19–24 July):
+    - Pehle 2 din: sirf OAuth connect + 1 test post
+    - Agle 3 din: composer integration + failure handling
+    - Last day: Maria cross-platform test
+
+  Exit criteria:
+    - LinkedIn + 1 other platform same post se publish
+    - Failed target clearly dikhe (PARTIAL status)
+
+------------------------------------------------------------------------------
+PHASE 4 — ANALYTICS + SETTINGS EXPAND (Deadline: 28 July, Monday)
+Goal: Dashboard useful ho; settings complete feel de.
+
+  Tasks:
+    - LinkedIn post analytics basic (views/reactions if API allow)
+    - Dashboard: upcoming scheduled + recent activity polish
+    - Settings: profile name edit (optional)
+    - AI: multiple keys, default key switch — already done, test only
+    - Calendar: month navigation + day detail stable
+
+  Kaam ka tareeqa (25–28 July):
+    - Analytics read-only pehle (no heavy charts)
+    - Maria se UI feedback
+
+  Exit criteria:
+    - Dashboard par real numbers dikhen (accounts, scheduled count)
+    - Analytics panel kam az kam LinkedIn ke liye kuch dikhaye
+
+------------------------------------------------------------------------------
+PHASE 5 — DEPLOY + MONTH-END LAUNCH (Deadline: 31 July, Thursday)
+Goal: Staging/production URL; month complete.
+
+  Tasks:
+    - Staging deploy: backend (Railway/Render) + frontend (Vercel)
+    - Production PostgreSQL + S3 bucket
+    - OAuth redirect URLs production par update
+    - README: setup + env vars + Maria test steps
+    - Final regression on testing/maria → merge to master
+    - Known limitations doc (Instagram review pending, etc.)
+
+  Kaam ka tareeqa (29–31 July):
+    - 29: deploy staging
+    - 30: Maria full regression staging par
+    - 31: fixes + tag v1.0.0 (optional)
+
+  Exit criteria:
+    - Public/staging URL se login → compose → publish ho
+    - Month-end demo ready
+
+================================================================================
+WEEKLY CALENDAR (July 2026)
+================================================================================
+
+  Week 1 (7–13 Jul)   Phase 1 — Stabilize, branch testing/maria, smoke tests
+  Week 2 (14–20 Jul)  Phase 2 — Polish + Maria feedback loop
+  Week 3 (21–27 Jul)  Phase 3 — 2nd platform + Phase 4 start (analytics)
+  Week 4 (28–31 Jul)  Phase 4 finish + Phase 5 deploy + launch
+
+================================================================================
+KAAM KAISE KAREIN (Daily rhythm)
+================================================================================
+
+  1. Subah (30 min): ek clear task — bug YA feature, dono nahi
+  2. Dopahar: implement + local test (backend :3001, frontend :5173)
+  3. Sham (20 min): git commit, chhota message, push
+  4. Har Juma: Maria ko testing/maria par kya test karna hai — 3 bullets bhejo
+  5. Blocker > 2 ghante: scope cut karo, agle phase mein shift
+
+  Git workflow:
+    - master = stable development
+    - testing/maria = Maria QA / demo (merge from master weekly)
+    - feature branches optional: feature/reddit-oauth, fix/schedule-dup
+
+================================================================================
+MARIA TEST CHECKLIST (testing/maria branch)
+================================================================================
+
+  [ ] Register / Login / Logout
+  [ ] Connect LinkedIn account
+  [ ] Compose text-only post → Publish now → Posts / Published
+  [ ] Compose with image → Publish
+  [ ] Schedule post (future time) → Posts / Scheduled → exactly ONE entry
+  [ ] Cancel schedule → moves to drafts
+  [ ] Dashboard counts match posts tabs
+  [ ] Calendar shows scheduled post
+  [ ] Settings → Add AI key (name + provider) → Compose AI Assist works
+  [ ] Change UI language → auth + main labels translate
+  [ ] Trash post → restore → permanent delete
+
+  Report format: screenshot + step + expected vs actual → WhatsApp/doc
+
+================================================================================
+RISKS & SCOPE CUTS (agar time kam ho)
+================================================================================
+
+  Must have by 31 Jul:
+    - LinkedIn publish + schedule stable
+    - Dashboard + calendar + posts
+    - Settings AI keys
+    - Staging deploy
+
+  Can slip to August:
+    - Instagram production (Meta review)
+    - Full analytics dashboard
+    - Facebook + Twitter + Reddit all together (pick ONE in July)
+
+================================================================================
+SUCCESS = MONTH END
+================================================================================
+
+  Product "complete" for July means:
+    - Real user (Maria) staging par poora flow test kar sake
+    - LinkedIn reliable
+    - 1 bonus platform OR polish so good that demo impresses
+    - No duplicate schedule posts
+    - AI keys user Settings se add kar sake
+
+================================================================================
+END OF PLAN — update this file after each phase milestone
+================================================================================

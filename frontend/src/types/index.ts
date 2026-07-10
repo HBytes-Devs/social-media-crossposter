@@ -46,6 +46,27 @@ export type PlatformStatus = {
   setupHint?: string;
 };
 
+export type AiProviderId = "MINIMAX" | "OPENAI" | "ANTHROPIC" | "CUSTOM";
+
+export type AiCredential = {
+  id: string;
+  name: string;
+  provider: AiProviderId;
+  model: string | null;
+  baseUrl: string | null;
+  isDefault: boolean;
+  keyHint: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AiProviderPreset = {
+  id: AiProviderId;
+  label: string;
+  baseUrl: string;
+  model: string;
+};
+
 export type MediaItem = {
   id: string;
   url: string;
@@ -81,6 +102,7 @@ export type Post = {
   status: string;
   scheduledFor: string | null;
   publishedAt: string | null;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
   targets: PostTarget[];
@@ -99,6 +121,7 @@ export type CreatePostPayload = {
     subreddit?: string;
   }>;
   publish?: boolean;
+  scheduledFor?: string;
 };
 
 export type PreviewPayload = {
@@ -107,4 +130,64 @@ export type PreviewPayload = {
   hashtagMode: HashtagMode;
   hashtags: string[];
   language: string;
+};
+
+export type LinkedInPostAnalytics = {
+  impressions: number;
+  membersReached: number;
+  reactions: number;
+  comments: number;
+  reshares: number;
+};
+
+export type PostTargetAnalytics = {
+  targetId: string;
+  platform: string;
+  accountName: string | null;
+  platformPostId: string | null;
+  status: string;
+  analytics: LinkedInPostAnalytics | null;
+  error?: string;
+};
+
+export type PostAnalytics = {
+  postId: string;
+  fetchedAt: string;
+  targets: PostTargetAnalytics[];
+};
+
+export type PostCounts = {
+  all: number;
+  drafts: number;
+  scheduled: number;
+  published: number;
+  trashed: number;
+  failed: number;
+};
+
+export type CalendarPostItem = {
+  id: string;
+  contentPreview: string;
+  status: string;
+  scheduledFor: string | null;
+  publishedAt: string | null;
+  platforms: string[];
+  imageCount: number;
+  createdAt: string;
+};
+
+export type DashboardData = {
+  generatedAt: string;
+  accounts: {
+    total: number;
+    byPlatform: Record<string, number>;
+    connected: Array<{
+      id: string;
+      platform: string;
+      accountName: string | null;
+    }>;
+  };
+  posts: PostCounts;
+  upcoming: Post[];
+  recent: Post[];
 };

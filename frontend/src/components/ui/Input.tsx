@@ -1,3 +1,4 @@
+import TextField from "@mui/material/TextField";
 import type { InputHTMLAttributes } from "react";
 
 type InputProps = InputHTMLAttributes<HTMLInputElement> & {
@@ -9,18 +10,33 @@ export function Input({ label, error, className = "", id, ...props }: InputProps
   const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-");
 
   return (
-    <div className="space-y-1.5">
-      {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-slate-300">
-          {label}
-        </label>
-      )}
-      <input
-        id={inputId}
-        className={`w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 ${className}`}
-        {...props}
-      />
-      {error && <p className="text-xs text-red-400">{error}</p>}
-    </div>
+    <TextField
+      id={inputId}
+      label={label}
+      className={className}
+      fullWidth
+      margin="none"
+      error={Boolean(error)}
+      helperText={error}
+      value={props.value ?? ""}
+      onChange={props.onChange}
+      onBlur={props.onBlur}
+      name={props.name}
+      type={props.type}
+      placeholder={props.placeholder}
+      autoComplete={props.autoComplete}
+      required={props.required}
+      disabled={props.disabled}
+      inputProps={{
+        min: props.min,
+        max: props.max,
+        step: props.step,
+        minLength: props.minLength,
+        maxLength: props.maxLength,
+        pattern: props.pattern,
+        inputMode: props.inputMode,
+      }}
+      sx={{ my: 0 }}
+    />
   );
 }

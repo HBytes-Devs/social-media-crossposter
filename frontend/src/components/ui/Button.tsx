@@ -1,3 +1,5 @@
+import MuiButton from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -6,11 +8,11 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
 };
 
-const variants = {
-  primary: "bg-brand-600 text-white hover:bg-brand-700 disabled:bg-brand-600/50",
-  secondary: "border border-slate-600 bg-slate-800 text-slate-100 hover:bg-slate-700",
-  ghost: "text-slate-300 hover:bg-slate-800",
-  danger: "bg-red-600 text-white hover:bg-red-700",
+const variantMap = {
+  primary: { mui: "contained" as const, color: "primary" as const },
+  secondary: { mui: "outlined" as const, color: "inherit" as const },
+  ghost: { mui: "text" as const, color: "inherit" as const },
+  danger: { mui: "contained" as const, color: "error" as const },
 };
 
 export function Button({
@@ -19,19 +21,39 @@ export function Button({
   disabled,
   className = "",
   children,
+  type = "button",
   ...props
 }: ButtonProps) {
+  const mapped = variantMap[variant];
+  const fullWidth = className.includes("w-full");
+
   return (
-    <button
-      type="button"
+    <MuiButton
+      type={type}
+      variant={mapped.mui}
+      color={mapped.color}
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+      fullWidth={fullWidth}
+      className={className}
+      startIcon={loading ? <CircularProgress size={16} color="inherit" /> : undefined}
+      sx={{
+        minWidth: 0,
+        ...(variant === "secondary" && {
+          color: "text.primary",
+          borderColor: "divider",
+          "&:hover": {
+            borderColor: "text.secondary",
+            bgcolor: "action.hover",
+          },
+        }),
+        ...(variant === "ghost" && {
+          color: "text.secondary",
+          "&:hover": { bgcolor: "action.hover" },
+        }),
+      }}
       {...props}
     >
-      {loading && (
-        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-      )}
       {children}
-    </button>
+    </MuiButton>
   );
 }

@@ -1,4 +1,5 @@
 import { env } from "../../config/env.js";
+import { resolvePublicImageUrl } from "../../config/s3.js";
 import type {
   PlatformAdapter,
   PublishResult,
@@ -131,7 +132,7 @@ export class InstagramAdapter implements PlatformAdapter {
         };
       }
 
-      const imageUrl = post.images[0];
+      const imageUrl = await resolvePublicImageUrl(post.images[0]);
 
       const container = await fetchJson<{ id: string }>(
         `https://graph.facebook.com/${META_GRAPH_VERSION}/${igUserId}/media`,

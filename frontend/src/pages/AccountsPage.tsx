@@ -1,3 +1,7 @@
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 import { useEffect } from "react";
 import { PlatformGrid } from "../components/accounts/PlatformCard";
 import { Button } from "../components/ui/Button";
@@ -35,58 +39,56 @@ export function AccountsPage() {
   const configuredCount = platforms.filter((p) => p.configured).length;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold text-white">Connected Accounts</h1>
-        <p className="mt-1 text-sm text-slate-400">
+    <Box sx={{ display: "flex", width: "100%", flexDirection: "column", gap: 2 }}>
+      <Box>
+        <Typography variant="h4" fontWeight={800}>
+          Connected Accounts
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           Social platforms connect karo taake post publish ho sake
-        </p>
-      </header>
+        </Typography>
+      </Box>
 
-      {error && (
-        <div className="rounded-lg border border-red-800 bg-red-950/50 px-4 py-3 text-sm text-red-300">
-          {error}
-        </div>
-      )}
+      {error && <Alert severity="error">{error}</Alert>}
 
       <Card
         title="How to connect?"
         description="Manual username/password enter nahi hota — sirf OAuth"
       >
-        <div className="space-y-3 text-sm text-slate-300">
-          <p>
-            Har platform <strong className="text-white">OAuth</strong> se connect hota hai. Ek click
-            par official login popup khulta hai.
-          </p>
-          <ol className="list-inside list-decimal space-y-1 text-slate-400">
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <Typography variant="body2" color="text.primary">
+            Har platform <strong>OAuth</strong> se connect hota hai. Ek click par official login
+            popup khulta hai.
+          </Typography>
+          <Box component="ol" sx={{ m: 0, pl: 2.5, color: "text.secondary", fontSize: 14 }}>
             <li>Neeche se platform choose karo</li>
             <li>
-              <strong className="text-slate-300">Connect</strong> dabao — popup mein authorize karo
+              <strong>Connect</strong> dabao — popup mein authorize karo
             </li>
             <li>
-              Wapas aake <strong className="text-slate-300">Refresh</strong> dabao
+              Wapas aake <strong>Refresh</strong> dabao
             </li>
-          </ol>
+          </Box>
           {configuredCount < platforms.length && (
-            <p className="rounded-lg border border-amber-800/50 bg-amber-950/30 px-3 py-2 text-xs text-amber-200">
+            <Alert severity="warning" sx={{ mt: 0.5 }}>
               {platforms.length - configuredCount} platform(s) ke liye abhi{" "}
-              <code className="text-amber-100">backend/.env</code> mein API keys add karni hain.
-              &quot;Setup required&quot; wale cards dekho.
-            </p>
+              <code>backend/.env</code> mein API keys add karni hain. &quot;Setup required&quot;
+              wale cards dekho.
+            </Alert>
           )}
-        </div>
-        <div className="mt-4">
+        </Box>
+        <Box sx={{ mt: 2 }}>
           <Button variant="secondary" onClick={refreshAll}>
             Refresh list
           </Button>
-        </div>
+        </Box>
       </Card>
 
       <Card title="Platforms" description={`${configuredCount} configured · ${platforms.length} total`}>
         {loading || platformsLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-          </div>
+          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+            <CircularProgress size={28} />
+          </Box>
         ) : (
           <PlatformGrid
             platforms={platforms}
@@ -97,6 +99,6 @@ export function AccountsPage() {
           />
         )}
       </Card>
-    </div>
+    </Box>
   );
 }

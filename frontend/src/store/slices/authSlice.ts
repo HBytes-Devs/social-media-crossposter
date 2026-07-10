@@ -39,11 +39,15 @@ export const initializeAuth = createAsyncThunk(
 export const loginUser = createAsyncThunk(
   "auth/login",
   async (
-    { email, password }: { email: string; password: string },
+    {
+      email,
+      password,
+      recaptchaToken,
+    }: { email: string; password: string; recaptchaToken?: string },
     { rejectWithValue },
   ) => {
     try {
-      const res = await api.login(email, password);
+      const res = await api.login(email, password, recaptchaToken);
       localStorage.setItem(TOKEN_KEY, res.data.token);
       return { user: res.data.user, token: res.data.token };
     } catch (err) {

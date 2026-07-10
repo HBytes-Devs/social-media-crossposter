@@ -17,6 +17,7 @@ const envSchema = z.object({
   AWS_REGION: z.string().default("us-east-1"),
   AWS_S3_BUCKET: z.string().optional(),
   AWS_S3_PUBLIC_URL: z.string().optional(),
+  AWS_S3_ROOT_PREFIX: z.string().default("smc"),
   LINKEDIN_CLIENT_ID: z.string().optional(),
   LINKEDIN_CLIENT_SECRET: z.string().optional(),
   LINKEDIN_REDIRECT_URI: z.string().optional(),
@@ -33,6 +34,20 @@ const envSchema = z.object({
   REDDIT_USER_AGENT: z.string().optional(),
   FRONTEND_URL: z.string().url().default("http://localhost:5173"),
   LINKEDIN_API_VERSION: z.string().default("202601"),
+  RECAPTCHA_SECRET_KEY: z.string().optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_SECURE: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().optional(),
+  MINIMAX_API_KEY: z.string().optional(),
+  MINIMAX_BASE_URL: z.string().url().default("https://api.minimax.io/v1"),
+  MINIMAX_MODEL: z.string().default("MiniMax-M2.5"),
+  SCHEDULER_POLL_INTERVAL_MS: z.coerce.number().int().min(10_000).default(60_000),
 });
 
 function loadEnv() {
@@ -50,6 +65,7 @@ function loadEnv() {
   if (data.AWS_ACCESS_KEY_ID) data.AWS_ACCESS_KEY_ID = data.AWS_ACCESS_KEY_ID.trim();
   if (data.AWS_SECRET_ACCESS_KEY) data.AWS_SECRET_ACCESS_KEY = data.AWS_SECRET_ACCESS_KEY.trim();
   if (data.AWS_S3_BUCKET) data.AWS_S3_BUCKET = data.AWS_S3_BUCKET.trim();
+  if (data.MINIMAX_API_KEY) data.MINIMAX_API_KEY = data.MINIMAX_API_KEY.trim();
 
   return data;
 }

@@ -8,16 +8,49 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  avatarUrl String?
-  accounts  SocialAccount[]
-  posts     Post[]
-  media     Media[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  password           String
+  name               String?
+  avatarUrl          String?
+  accounts           SocialAccount[]
+  posts              Post[]
+  media              Media[]
+  passwordResetCodes PasswordResetCode[]
+  aiCredentials      UserAiCredential[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model UserAiCredential {
+  id        String     @id @default(cuid())
+  userId    String
+  name      String
+  provider  AiProvider
+  apiKeyEnc String
+  baseUrl   String?
+  model     String?
+  isDefault Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model PasswordResetCode {
+  id        String    @id @default(cuid())
+  userId    String
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model SocialAccount {
@@ -55,6 +88,7 @@ model Post {
   scheduledFor DateTime?
   publishedAt  DateTime?
   status       PostStatus   @default(DRAFT)
+  deletedAt    DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -63,6 +97,7 @@ model Post {
   publishLogs  PublishLog[]
 
   @@index([userId, status])
+  @@index([userId, deletedAt])
   @@index([scheduledFor])
 }
 
@@ -111,7 +146,7 @@ model Media {
   height    Int?
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -145,4 +180,11 @@ enum PublishStatus {
   SUCCESS
   FAILED
   SKIPPED
+}
+
+enum AiProvider {
+  MINIMAX
+  OPENAI
+  ANTHROPIC
+  CUSTOM
 }

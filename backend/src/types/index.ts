@@ -57,6 +57,7 @@ export type PostPublic = {
   status: string;
   scheduledFor: string | null;
   publishedAt: string | null;
+  deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
   targets: PostTargetPublic[];
@@ -69,4 +70,64 @@ export type HealthStatus = {
   environment: string;
   database: "connected" | "disconnected";
   version: string;
+};
+
+export type LinkedInPostAnalytics = {
+  impressions: number;
+  membersReached: number;
+  reactions: number;
+  comments: number;
+  reshares: number;
+};
+
+export type PostTargetAnalyticsPublic = {
+  targetId: string;
+  platform: string;
+  accountName: string | null;
+  platformPostId: string | null;
+  status: string;
+  analytics: LinkedInPostAnalytics | null;
+  error?: string;
+};
+
+export type PostAnalyticsPublic = {
+  postId: string;
+  fetchedAt: string;
+  targets: PostTargetAnalyticsPublic[];
+};
+
+export type PostCounts = {
+  all: number;
+  drafts: number;
+  scheduled: number;
+  published: number;
+  trashed: number;
+  failed: number;
+};
+
+export type CalendarPostItem = {
+  id: string;
+  contentPreview: string;
+  status: string;
+  scheduledFor: string | null;
+  publishedAt: string | null;
+  platforms: string[];
+  imageCount: number;
+  createdAt: string;
+};
+
+export type DashboardData = {
+  generatedAt: string;
+  accounts: {
+    total: number;
+    byPlatform: Record<string, number>;
+    connected: Array<{
+      id: string;
+      platform: string;
+      accountName: string | null;
+    }>;
+  };
+  posts: PostCounts;
+  upcoming: PostPublic[];
+  recent: PostPublic[];
 };

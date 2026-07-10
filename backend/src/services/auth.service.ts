@@ -5,6 +5,7 @@ import { env } from "../config/env.js";
 import { AppError } from "../middleware/error.middleware.js";
 import type { RegisterInput, LoginInput } from "../validators/auth.validator.js";
 import type { AuthUser, AuthResponse } from "../types/index.js";
+import { verifyRecaptcha } from "./recaptcha.service.js";
 
 const SALT_ROUNDS = 12;
 
@@ -58,6 +59,10 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
 }
 
 export async function login(input: LoginInput): Promise<AuthResponse> {
+  await verifyRecaptcha(input.recaptchaToken, "login").catch(() => {
+    throw new AppError(400, "reCAPTCHA verification failed");
+  });
+
   const user = await prisma.user.findUnique({
     where: { email: input.email.toLowerCase() },
   });

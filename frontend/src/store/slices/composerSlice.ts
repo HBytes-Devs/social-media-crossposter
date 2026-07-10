@@ -1,7 +1,13 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { api } from "../../lib/api";
+import {
+  dedupeMediaLibrary,
+  validateLinkedInImageFiles,
+} from "../../lib/linkedin-image";
 import type { HashtagMode, MediaItem, PostOptions, SocialAccount } from "../../types";
 import { DEFAULT_POST_OPTIONS } from "../constants";
+import { fromLocalDatetimeValue, defaultScheduleDatetime } from "../../lib/datetime";
+import { getComposerDraft, resetComposerDraft } from "../../lib/composerDraft";
 import type { RootState } from "../types";
 import { selectToken } from "./authSlice";
 
@@ -22,6 +28,8 @@ type ComposerState = {
   previewLoading: boolean;
   uploading: boolean;
   submitting: boolean;
+  scheduledForLocal: string;
+  imageWarnings: string[];
   error: string | null;
   success: string | null;
   initialized: boolean;
@@ -44,6 +52,8 @@ const initialState: ComposerState = {
   previewLoading: false,
   uploading: false,
   submitting: false,
+  scheduledForLocal: defaultScheduleDatetime(),
+  imageWarnings: [],
   error: null,
   success: null,
   initialized: false,
@@ -105,53 +115,89 @@ export const uploadImages = createAsyncThunk(
     const token = selectToken(getState() as RootState);
     if (!token) return rejectWithValue("Not authenticated");
 
+    const { validFiles, errors, warnings } = await validateLinkedInImageFiles(files);
+
+    if (errors.length > 0) {
+      return rejectWithValue(errors.join(" "));
+    }
+
+    if (validFiles.length === 0) {
+      return rejectWithValue("No valid images to upload");
+    }
+
     try {
-      const res = await api.uploadImages(token, files);
-      return res.data.media;
+      const res = await api.uploadImages(token, validFiles);
+      return { media: res.data.media, warnings };
     } catch (err) {
       return rejectWithValue(err instanceof Error ? err.message : "Upload failed");
     }
   },
 );
 
+export type SubmitMode = "draft" | "publish" | "schedule";
+
+let submitInFlight = false;
+
 export const submitPost = createAsyncThunk(
   "composer/submitPost",
-  async (publish: boolean, { getState, rejectWithValue }) => {
-    const state = (getState() as RootState).composer;
-    const token = selectToken(getState() as RootState);
-    if (!token) return rejectWithValue("Not authenticated");
-
-    if (!state.content.trim() && state.images.length === 0) {
-      return rejectWithValue("Content ya kam az kam ek image zaroori hai");
+  async (mode: SubmitMode, { getState, rejectWithValue }) => {
+    if (submitInFlight) {
+      return rejectWithValue("Post is already being submitted");
     }
 
-    if (state.selectedAccounts.length === 0) {
-      return rejectWithValue("Kam az kam ek platform account select karo");
-    }
-
-    const hasReddit = state.selectedAccounts.some((id) => {
-      const acc = state.accounts.find((a) => a.id === id);
-      return acc?.platform === "REDDIT";
-    });
-
-    if (hasReddit) {
-      if (!state.title.trim()) {
-        return rejectWithValue("Reddit ke liye title zaroori hai");
-      }
-      if (!state.subreddit.trim()) {
-        return rejectWithValue("Reddit ke liye subreddit zaroori hai (e.g. test)");
-      }
-    }
+    submitInFlight = true;
 
     try {
+      const state = (getState() as RootState).composer;
+      const token = selectToken(getState() as RootState);
+      if (!token) return rejectWithValue("Not authenticated");
+
+      const content = getComposerDraft().trim() || state.content.trim();
+
+      if (!content && state.images.length === 0) {
+        return rejectWithValue("Content ya kam az kam ek image zaroori hai");
+      }
+
+      if (state.selectedAccounts.length === 0) {
+        return rejectWithValue("Kam az kam ek platform account select karo");
+      }
+
+      const hasReddit = state.selectedAccounts.some((id) => {
+        const acc = state.accounts.find((a) => a.id === id);
+        return acc?.platform === "REDDIT";
+      });
+
+      if (hasReddit) {
+        if (!state.title.trim()) {
+          return rejectWithValue("Reddit ke liye title zaroori hai");
+        }
+        if (!state.subreddit.trim()) {
+          return rejectWithValue("Reddit ke liye subreddit zaroori hai (e.g. test)");
+        }
+      }
+
+      if (mode === "schedule") {
+        const scheduledFor = fromLocalDatetimeValue(state.scheduledForLocal);
+        if (!scheduledFor) {
+          return rejectWithValue("Valid schedule date/time select karo");
+        }
+        if (new Date(scheduledFor).getTime() <= Date.now() + 60_000) {
+          return rejectWithValue("Schedule time kam az kam 1 minute future mein hona chahiye");
+        }
+      }
+
+      const scheduledFor =
+        mode === "schedule" ? fromLocalDatetimeValue(state.scheduledForLocal) ?? undefined : undefined;
+
       const res = await api.createPost(token, {
-        content: state.content,
+        content,
         title: state.title.trim() || undefined,
         images: state.images,
         hashtagMode: state.hashtagMode,
         hashtags: state.hashtags,
         language: state.language,
-        publish,
+        publish: mode === "publish",
+        scheduledFor,
         targets: state.selectedAccounts.map((id) => {
           const acc = state.accounts.find((a) => a.id === id);
           return {
@@ -163,11 +209,15 @@ export const submitPost = createAsyncThunk(
         }),
       });
 
-      return { post: res.data.post, publish };
+      resetComposerDraft("");
+
+      return { post: res.data.post, mode };
     } catch (err) {
       return rejectWithValue(
         err instanceof Error ? err.message : "Failed to create post",
       );
+    } finally {
+      submitInFlight = false;
     }
   },
 );
@@ -178,7 +228,6 @@ const composerSlice = createSlice({
   reducers: {
     setContent(state, action: PayloadAction<string>) {
       state.content = action.payload;
-      state.success = null;
     },
     setTitle(state, action: PayloadAction<string>) {
       state.title = action.payload;
@@ -200,20 +249,29 @@ const composerSlice = createSlice({
       state.language = action.payload;
       state.success = null;
     },
+    setScheduledForLocal(state, action: PayloadAction<string>) {
+      state.scheduledForLocal = action.payload;
+      state.success = null;
+    },
     setImages(state, action: PayloadAction<string[]>) {
       state.images = action.payload;
       state.success = null;
     },
     toggleImage(state, action: PayloadAction<string>) {
       const url = action.payload;
-      state.images = state.images.includes(url)
-        ? state.images.filter((u) => u !== url)
-        : [...state.images, url];
+      if (state.images.includes(url)) {
+        state.images = state.images.filter((u) => u !== url);
+      } else if (!state.images.includes(url)) {
+        state.images = [...state.images, url];
+      }
       state.success = null;
     },
     removeImage(state, action: PayloadAction<string>) {
       state.images = state.images.filter((u) => u !== action.payload);
       state.success = null;
+    },
+    clearImageWarnings(state) {
+      state.imageWarnings = [];
     },
     toggleAccount(state, action: PayloadAction<string>) {
       const id = action.payload;
@@ -231,8 +289,10 @@ const composerSlice = createSlice({
       state.subreddit = "test";
       state.hashtags = [];
       state.images = [];
+      state.imageWarnings = [];
       state.previewContent = "";
       state.previewTags = [];
+      state.scheduledForLocal = defaultScheduleDatetime();
       state.success = null;
       state.error = null;
     },
@@ -242,7 +302,7 @@ const composerSlice = createSlice({
       .addCase(fetchComposerData.fulfilled, (state, action) => {
         state.options = action.payload.options;
         state.accounts = action.payload.accounts;
-        state.mediaLibrary = action.payload.media;
+        state.mediaLibrary = dedupeMediaLibrary(action.payload.media);
         state.initialized = true;
 
         if (
@@ -269,9 +329,20 @@ const composerSlice = createSlice({
       })
       .addCase(uploadImages.fulfilled, (state, action) => {
         state.uploading = false;
-        const urls = action.payload.map((m) => m.url);
-        state.mediaLibrary = [...action.payload, ...state.mediaLibrary];
-        state.images = [...state.images, ...urls];
+        const newItems = dedupeMediaLibrary(action.payload.media);
+        const newUrls = newItems.map((m) => m.url);
+
+        state.mediaLibrary = dedupeMediaLibrary([...newItems, ...state.mediaLibrary]);
+
+        for (const url of newUrls) {
+          if (!state.images.includes(url)) {
+            state.images.push(url);
+          }
+        }
+
+        state.imageWarnings = [
+          ...new Set([...state.imageWarnings, ...action.payload.warnings]),
+        ];
       })
       .addCase(uploadImages.rejected, (state, action) => {
         state.uploading = false;
@@ -284,17 +355,22 @@ const composerSlice = createSlice({
       })
       .addCase(submitPost.fulfilled, (state, action) => {
         state.submitting = false;
-        const { post, publish } = action.payload;
-        state.success = publish
-          ? `Post published! Status: ${post.status}`
-          : "Draft saved successfully";
+        const { post, mode } = action.payload;
+        state.success =
+          mode === "publish"
+            ? `Post published! Status: ${post.status}`
+            : mode === "schedule"
+              ? `Post scheduled for ${new Date(post.scheduledFor ?? "").toLocaleString()}`
+              : "Draft saved successfully";
 
-        if (publish) {
+        if (mode === "publish" || mode === "schedule") {
           state.content = "";
           state.hashtags = [];
           state.images = [];
+          state.imageWarnings = [];
           state.previewContent = "";
           state.previewTags = [];
+          state.scheduledForLocal = defaultScheduleDatetime();
         }
       })
       .addCase(submitPost.rejected, (state, action) => {
@@ -311,10 +387,12 @@ export const {
   setHashtagMode,
   setHashtags,
   setLanguage,
+  setScheduledForLocal,
   toggleImage,
   removeImage,
   toggleAccount,
   clearComposerMessages,
+  clearImageWarnings,
   resetComposerForm,
 } = composerSlice.actions;
 

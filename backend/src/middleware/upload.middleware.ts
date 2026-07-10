@@ -6,7 +6,7 @@ const ALLOWED_MIME_TYPES = new Set([
   "image/webp",
 ]);
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8 MB — LinkedIn limit
 
 export const upload = multer({
   storage: multer.memoryStorage(),

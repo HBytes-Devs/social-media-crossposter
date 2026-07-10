@@ -4,6 +4,9 @@ import authRoutes from "./auth.routes.js";
 import mediaRoutes from "./media.routes.js";
 import accountsRoutes from "./accounts.routes.js";
 import postsRoutes from "./posts.routes.js";
+import aiRoutes from "./ai.routes.js";
+import dashboardRoutes from "./dashboard.routes.js";
+import settingsRoutes from "./settings.routes.js";
 
 const router = Router();
 
@@ -12,6 +15,9 @@ router.use("/auth", authRoutes);
 router.use("/media", mediaRoutes);
 router.use("/accounts", accountsRoutes);
 router.use("/posts", postsRoutes);
+router.use("/ai", aiRoutes);
+router.use("/dashboard", dashboardRoutes);
+router.use("/settings", settingsRoutes);
 
 router.get("/", (_req, res) => {
   res.json({

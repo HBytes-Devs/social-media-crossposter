@@ -1,12 +1,21 @@
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthBootstrap } from "./components/AuthBootstrap";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AccountsPage } from "./pages/AccountsPage";
+import { SettingsPage } from "./pages/SettingsPage";
+import { CalendarPage } from "./pages/CalendarPage";
 import { ComposePage } from "./pages/ComposePage";
+import { DashboardPage } from "./pages/DashboardPage";
 import { LoginPage } from "./pages/LoginPage";
 import { PostsPage } from "./pages/PostsPage";
+import { ComingSoonPage } from "./pages/ComingSoonPage";
+import { WorkingOnItPage } from "./pages/WorkingOnItPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { useAppSelector } from "./store/hooks";
 import { selectAuth } from "./store/slices/authSlice";
 
@@ -15,9 +24,9 @@ function PublicOnly({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-500 border-t-transparent" />
-      </div>
+      <Box sx={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
@@ -46,12 +55,34 @@ export default function App() {
               </PublicOnly>
             }
           />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicOnly>
+                <ForgotPasswordPage />
+              </PublicOnly>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <PublicOnly>
+                <ResetPasswordPage />
+              </PublicOnly>
+            }
+          />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
-              <Route index element={<ComposePage />} />
+              <Route index element={<DashboardPage />} />
+              <Route path="compose" element={<ComposePage />} />
+              <Route path="calendar" element={<CalendarPage />} />
               <Route path="posts" element={<PostsPage />} />
+              <Route path="posts/:tab" element={<PostsPage />} />
+              <Route path="coming-soon" element={<ComingSoonPage />} />
+              <Route path="working-on-it" element={<WorkingOnItPage />} />
               <Route path="accounts" element={<AccountsPage />} />
+              <Route path="settings" element={<SettingsPage />} />
             </Route>
           </Route>
 
