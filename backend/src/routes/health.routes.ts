@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { prisma } from "../config/database.js";
+import { getProductVersion } from "../lib/product-version.js";
 import type { HealthStatus } from "../types/index.js";
 
 const router = Router();
@@ -15,13 +16,19 @@ router.get("/", async (_req, res) => {
     database = "disconnected";
   }
 
+  const product = getProductVersion();
+
   const health: HealthStatus = {
     status: database === "connected" ? "ok" : "degraded",
     timestamp: new Date().toISOString(),
     uptime: Math.floor((Date.now() - startTime) / 1000),
     environment: process.env.NODE_ENV ?? "development",
     database,
-    version: "1.0.0",
+    version: product.version,
+    channel: product.channel,
+    fullVersion: product.fullVersion,
+    apiVersion: product.apiVersion,
+    product: product.product,
   };
 
   // 200 even when DB is down — useful during local setup without PostgreSQL

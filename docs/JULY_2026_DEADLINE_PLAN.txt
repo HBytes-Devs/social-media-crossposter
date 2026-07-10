@@ -1,8 +1,6 @@
 ================================================================================
-  SMC (Social Media Crossposter) — JULY 2026 COMPLETION PLAN
-  Month deadline: 31 July 2026
-  Plan date: 10 July 2026 (Friday)
-  Branch for Maria testing: testing/maria
+PRODUCT VERSION: 0.9.0-beta.1 (BETA)
+Tracking: version.json | CHANGELOG.md | docs/VERSIONING.md
 ================================================================================
 
 KHULASA (Summary)
@@ -203,6 +201,7 @@ SUCCESS = MONTH END
     - 1 bonus platform OR polish so good that demo impresses
     - No duplicate schedule posts
     - AI keys user Settings se add kar sake
+    - Stable release cut as v1.0.0 (see docs/VERSIONING.md)
 
 ================================================================================
 END OF PLAN — update this file after each phase milestone

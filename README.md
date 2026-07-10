@@ -4,8 +4,12 @@ Ek hi jagah se apna tech content **LinkedIn, Facebook, Instagram, X (Twitter), a
 
 ## Status
 
-🟢 **Backend Setup Done** — Express + TypeScript + Prisma scaffold ready.  
-🟡 **Database** — PostgreSQL abhi connect nahi (Docker skip). Baad mein setup karenge.
+**Version:** `0.9.0-beta.1` (Beta) — active development  
+See [CHANGELOG.md](CHANGELOG.md) and [Versioning guide](docs/VERSIONING.md).
+
+🟢 **Backend** — Express + TypeScript + Prisma  
+🟢 **Frontend** — React + Vite + MUI  
+🟡 **Platforms** — LinkedIn live; others in progress
 
 ## Tech Stack
 
@@ -24,6 +28,8 @@ Ek hi jagah se apna tech content **LinkedIn, Facebook, Instagram, X (Twitter), a
 |------|-------------|
 | [Developer Documentation](docs/DEVELOPER_DOCUMENTATION.md) | Complete technical docs (Roman Urdu) |
 | [Roadmap](docs/ROADMAP.md) | Phase-by-phase development plan |
+| [Versioning](docs/VERSIONING.md) | Beta → stable release tracking |
+| [Changelog](../CHANGELOG.md) | What changed in each release |
 
 ## MVP Scope
 

@@ -70,6 +70,10 @@ export type HealthStatus = {
   environment: string;
   database: "connected" | "disconnected";
   version: string;
+  channel: string;
+  fullVersion: string;
+  apiVersion: string;
+  product: string;
 };
 
 export type LinkedInPostAnalytics = {

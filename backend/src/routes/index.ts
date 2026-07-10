@@ -7,6 +7,8 @@ import postsRoutes from "./posts.routes.js";
 import aiRoutes from "./ai.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
 import settingsRoutes from "./settings.routes.js";
+import versionRoutes from "./version.routes.js";
+import { getProductVersion } from "../lib/product-version.js";
 
 const router = Router();
 
@@ -18,12 +20,16 @@ router.use("/posts", postsRoutes);
 router.use("/ai", aiRoutes);
 router.use("/dashboard", dashboardRoutes);
 router.use("/settings", settingsRoutes);
+router.use("/version", versionRoutes);
 
 router.get("/", (_req, res) => {
+  const product = getProductVersion();
   res.json({
     success: true,
-    message: "Social Media Crossposter API",
-    version: "1.0.0",
+    message: product.product,
+    version: product.fullVersion,
+    channel: product.channel,
+    apiVersion: product.apiVersion,
     docs: "/api/v1/health",
   });
 });

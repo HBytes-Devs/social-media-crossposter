@@ -20,6 +20,7 @@ import { isPostTab, selectPosts } from "../store/slices/postsSlice";
 import { Button } from "./ui/Button";
 import { ThemeToggle } from "./ui/ThemeToggle";
 import { UiLanguageSelect } from "./ui/UiLanguageSelect";
+import { VersionBadge } from "./ui/VersionBadge";
 
 const navItems = [
   { to: "/", label: "Dashboard", icon: <DashboardOutlinedIcon fontSize="small" />, end: true },
@@ -108,6 +109,9 @@ export function Layout() {
               <Typography variant="caption" color="text.secondary">
                 Social Media Crossposter
               </Typography>
+              <Box sx={{ mt: 0.75 }}>
+                <VersionBadge compact />
+              </Box>
             </div>
             <ThemeToggle size="small" />
           </Box>
