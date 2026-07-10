@@ -623,6 +623,22 @@ export async function publishPost(
   return toPostPublic(updated);
 }
 
+export async function retryPost(userId: string, postId: string): Promise<PostPublic> {
+  const post = await prisma.post.findFirst({
+    where: { id: postId, userId, deletedAt: null },
+  });
+
+  if (!post) {
+    throw new AppError(404, "Post not found");
+  }
+
+  if (post.status !== "FAILED" && post.status !== "PARTIAL") {
+    throw new AppError(400, "Only failed or partial posts can be retried");
+  }
+
+  return publishPost(userId, postId);
+}
+
 export async function getPublishLogs(userId: string, postId: string) {
   const post = await prisma.post.findFirst({
     where: { id: postId, userId },

@@ -13,7 +13,10 @@ import type { Post } from "../../types";
 
 type StatusKey = "DRAFT" | "SCHEDULED" | "PUBLISHED" | "PUBLISHING" | "FAILED" | "PARTIAL";
 
-const STATUS_CHIP: Record<StatusKey, { color: "default" | "success" | "warning" | "error" | "info"; variant?: "filled" | "outlined" }> = {
+const STATUS_CHIP: Record<
+  StatusKey,
+  { color: "default" | "success" | "warning" | "error" | "info"; variant?: "filled" | "outlined" }
+> = {
   DRAFT: { color: "default", variant: "outlined" },
   SCHEDULED: { color: "default", variant: "outlined" },
   PUBLISHED: { color: "success", variant: "outlined" },
@@ -32,6 +35,7 @@ type Props = {
   onPermanentDelete: (id: string) => void;
   onPublishNow?: (id: string) => void;
   onCancelSchedule?: (id: string) => void;
+  onRetryFailed?: (id: string) => void;
 };
 
 export function PostCard({
@@ -44,6 +48,7 @@ export function PostCard({
   onPermanentDelete,
   onPublishNow,
   onCancelSchedule,
+  onRetryFailed,
 }: Props) {
   const theme = useTheme();
   const isTrashed = Boolean(post.deletedAt);
@@ -51,6 +56,11 @@ export function PostCard({
   const hasLinkedInSuccess = post.targets.some(
     (t) => t.platform === "LINKEDIN" && t.status === "SUCCESS",
   );
+  const failedTargets = post.targets.filter((t) => t.status === "FAILED");
+  const canRetry =
+    !isTrashed &&
+    (post.status === "FAILED" || post.status === "PARTIAL") &&
+    failedTargets.length > 0;
   const showPlatformBadges =
     !groupPlatform ||
     post.targets.length !== 1 ||
@@ -58,9 +68,73 @@ export function PostCard({
   const showStats = !isTrashed && hasLinkedInSuccess;
   const status = STATUS_CHIP[post.status as StatusKey] ?? STATUS_CHIP.DRAFT;
 
+  const actions = (
+    <Stack
+      direction={{ xs: "row", sm: "column" }}
+      flexWrap="wrap"
+      spacing={1}
+      sx={{ flexShrink: 0, justifyContent: { xs: "flex-start", sm: "flex-end" } }}
+    >
+      {isTrashed ? (
+        <>
+          <Button variant="secondary" className="text-xs" loading={acting} onClick={() => onRestore(post.id)}>
+            Restore
+          </Button>
+          <Button
+            variant="danger"
+            className="text-xs"
+            loading={acting}
+            onClick={() => {
+              if (window.confirm("Permanently delete this post? This cannot be undone.")) {
+                onPermanentDelete(post.id);
+              }
+            }}
+          >
+            Delete forever
+          </Button>
+        </>
+      ) : (
+        <>
+          {canRetry && onRetryFailed && (
+            <Button variant="secondary" className="text-xs" loading={acting} onClick={() => onRetryFailed(post.id)}>
+              Retry failed
+            </Button>
+          )}
+          {(post.status === "SCHEDULED" || post.status === "DRAFT") && onPublishNow && (
+            <Button variant="secondary" className="text-xs" loading={acting} onClick={() => onPublishNow(post.id)}>
+              Publish now
+            </Button>
+          )}
+          {post.status === "SCHEDULED" && onCancelSchedule && (
+            <Button variant="ghost" className="text-xs" loading={acting} onClick={() => onCancelSchedule(post.id)}>
+              Cancel schedule
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            className="text-xs"
+            loading={acting}
+            onClick={() => {
+              if (window.confirm("Move this post to trash?")) {
+                onTrash(post.id);
+              }
+            }}
+          >
+            Move to trash
+          </Button>
+        </>
+      )}
+    </Stack>
+  );
+
   const content = (
     <Box sx={{ p: { xs: 2, sm: 2.5 } }}>
-      <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={2}>
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        alignItems={{ xs: "stretch", md: "flex-start" }}
+        justifyContent="space-between"
+        gap={2}
+      >
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Stack direction="row" flexWrap="wrap" alignItems="center" gap={1} sx={{ mb: 1 }}>
             <Chip label={post.status} size="small" color={status.color} variant={status.variant} />
@@ -93,6 +167,23 @@ export function PostCard({
             {post.finalContent || post.content || "(image only)"}
           </Typography>
 
+          {failedTargets.length > 0 && (
+            <Stack spacing={0.75} sx={{ mt: 1.5 }}>
+              {failedTargets.map((target) => (
+                <Typography
+                  key={target.id}
+                  variant="caption"
+                  color="error"
+                  sx={{ display: "block", lineHeight: 1.45 }}
+                >
+                  {target.platform}
+                  {target.accountName ? ` (${target.accountName})` : ""}:{" "}
+                  {target.errorMessage ?? "Publish failed"}
+                </Typography>
+              ))}
+            </Stack>
+          )}
+
           {post.images.length > 0 && (
             <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 1.5 }}>
               {post.images.slice(0, 4).map((url) => (
@@ -106,11 +197,7 @@ export function PostCard({
                     lineHeight: 0,
                   }}
                 >
-                  <PostImage
-                    src={url}
-                    token={token}
-                    className="h-20 w-20 object-cover"
-                  />
+                  <PostImage src={url} token={token} className="h-20 w-20 object-cover" />
                 </Box>
               ))}
               {post.images.length > 4 && (
@@ -135,69 +222,18 @@ export function PostCard({
             </Stack>
           )}
 
-          <Typography variant="caption" color="text.secondary" sx={{ mt: post.images.length > 0 ? 1.5 : 1, display: "block" }}>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ mt: post.images.length > 0 ? 1.5 : 1, display: "block" }}
+          >
             {new Date(post.createdAt).toLocaleString()}
             {post.scheduledFor && ` · Scheduled ${new Date(post.scheduledFor).toLocaleString()}`}
             {post.publishedAt && ` · Published ${new Date(post.publishedAt).toLocaleString()}`}
           </Typography>
         </Box>
 
-        <Stack spacing={1} sx={{ flexShrink: 0 }}>
-          {isTrashed ? (
-            <>
-              <Button variant="secondary" className="text-xs" loading={acting} onClick={() => onRestore(post.id)}>
-                Restore
-              </Button>
-              <Button
-                variant="danger"
-                className="text-xs"
-                loading={acting}
-                onClick={() => {
-                  if (window.confirm("Permanently delete this post? This cannot be undone.")) {
-                    onPermanentDelete(post.id);
-                  }
-                }}
-              >
-                Delete forever
-              </Button>
-            </>
-          ) : (
-            <>
-              {(post.status === "SCHEDULED" || post.status === "DRAFT") && onPublishNow && (
-                <Button
-                  variant="secondary"
-                  className="text-xs"
-                  loading={acting}
-                  onClick={() => onPublishNow(post.id)}
-                >
-                  Publish now
-                </Button>
-              )}
-              {post.status === "SCHEDULED" && onCancelSchedule && (
-                <Button
-                  variant="ghost"
-                  className="text-xs"
-                  loading={acting}
-                  onClick={() => onCancelSchedule(post.id)}
-                >
-                  Cancel schedule
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                className="text-xs"
-                loading={acting}
-                onClick={() => {
-                  if (window.confirm("Move this post to trash?")) {
-                    onTrash(post.id);
-                  }
-                }}
-              >
-                Move to trash
-              </Button>
-            </>
-          )}
-        </Stack>
+        {actions}
       </Stack>
     </Box>
   );

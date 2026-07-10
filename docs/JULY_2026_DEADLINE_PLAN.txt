@@ -1,5 +1,5 @@
 ================================================================================
-PRODUCT VERSION: 0.9.0-beta.1 (BETA)
+PRODUCT VERSION: 0.9.0-beta.2 (BETA)
 Tracking: version.json | CHANGELOG.md | docs/VERSIONING.md
 ================================================================================
 
@@ -48,18 +48,21 @@ Goal: Jo bana hai wo break na ho; master clean ho; Maria ke liye branch ready.
     - LinkedIn publish + schedule dono pass
     - Koi blocker crash / white screen nahi
 
+  [DONE] Phase 1 — branch push, versioning
+  [DONE] Phase 2 — retry failed, token expiry banner, mobile drawer, upload errors
+
 ------------------------------------------------------------------------------
-PHASE 2 — CORE PRODUCT POLISH (Deadline: 18 July, Friday)
+PHASE 2 — CORE PRODUCT POLISH (Deadline: 18 July, Friday) [DONE 11 Jul]
 Goal: Daily use ke liye app smooth ho — errors, loading, edge cases.
 
   Tasks:
-    - Failed post retry button (PostCard)
-    - Publish now on scheduled/draft posts — stable
-    - Token expiry message (account reconnect prompt)
-    - Mobile responsive pass (sidebar + compose)
-    - Empty states + error messages Roman Urdu / English consistent
-    - Media library: upload fail, size limit messages clear
-    - Password reset email flow production .env ke sath test
+    [x] Failed post retry button (PostCard)
+    [x] Publish now on scheduled/draft posts — stable
+    [x] Token expiry message (account reconnect prompt)
+    [x] Mobile responsive pass (sidebar + compose)
+    [x] Empty states + error messages Roman Urdu / English consistent
+    [x] Media library: upload fail, size limit messages clear
+    [ ] Password reset email flow production .env ke sath test
 
   Kaam ka tareeqa (13–18 July):
     - Mon–Wed: backend fixes + API errors

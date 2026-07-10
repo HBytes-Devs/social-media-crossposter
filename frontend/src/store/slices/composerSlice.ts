@@ -30,6 +30,7 @@ type ComposerState = {
   submitting: boolean;
   scheduledForLocal: string;
   imageWarnings: string[];
+  uploadError: string | null;
   error: string | null;
   success: string | null;
   initialized: boolean;
@@ -54,6 +55,7 @@ const initialState: ComposerState = {
   submitting: false,
   scheduledForLocal: defaultScheduleDatetime(),
   imageWarnings: [],
+  uploadError: null,
   error: null,
   success: null,
   initialized: false,
@@ -282,6 +284,10 @@ const composerSlice = createSlice({
     clearComposerMessages(state) {
       state.error = null;
       state.success = null;
+      state.uploadError = null;
+    },
+    clearUploadError(state) {
+      state.uploadError = null;
     },
     resetComposerForm(state) {
       state.content = "";
@@ -325,6 +331,7 @@ const composerSlice = createSlice({
       })
       .addCase(uploadImages.pending, (state) => {
         state.uploading = true;
+        state.uploadError = null;
         state.error = null;
       })
       .addCase(uploadImages.fulfilled, (state, action) => {
@@ -346,7 +353,9 @@ const composerSlice = createSlice({
       })
       .addCase(uploadImages.rejected, (state, action) => {
         state.uploading = false;
-        state.error = (action.payload as string) ?? "Upload failed";
+        const message = (action.payload as string) ?? "Image upload fail — size ya format check karo";
+        state.uploadError = message;
+        state.error = message;
       })
       .addCase(submitPost.pending, (state) => {
         state.submitting = true;

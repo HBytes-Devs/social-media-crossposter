@@ -30,6 +30,7 @@ import {
   permanentlyDeletePost,
   publishPostNow,
   restorePost,
+  retryFailedPost,
   selectPosts,
   setActiveTab,
   setPostFilters,
@@ -176,6 +177,7 @@ export function PostsPage() {
         onPermanentDelete={(id) => dispatch(permanentlyDeletePost(id))}
         onPublishNow={(id) => dispatch(publishPostNow(id))}
         onCancelSchedule={(id) => dispatch(cancelPostSchedule(id))}
+        onRetryFailed={(id) => dispatch(retryFailedPost(id))}
       />
     );
   }

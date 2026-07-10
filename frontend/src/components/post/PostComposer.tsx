@@ -1,7 +1,11 @@
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { useEffect } from "react";
 import { ComposerFormSkeleton, LinkedInPreviewSkeleton } from "../ui/Skeleton";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
+  clearComposerMessages,
   fetchComposerData,
   selectComposer,
 } from "../../store/slices/composerSlice";
@@ -16,49 +20,67 @@ export function PostComposer() {
     dispatch(fetchComposerData());
   }, [dispatch]);
 
+  useEffect(() => {
+    if (!success && !error) return;
+    const timer = setTimeout(() => dispatch(clearComposerMessages()), 6000);
+    return () => clearTimeout(timer);
+  }, [success, error, dispatch]);
+
   if (!initialized) {
     return (
-      <div className="mx-auto max-w-6xl space-y-6">
-        <header>
-          <h1 className="text-2xl font-bold text-white">New Post</h1>
-          <p className="mt-1 text-sm text-slate-400">Loading composer…</p>
-        </header>
-        <div className="grid gap-6 lg:grid-cols-5">
-          <div className="lg:col-span-3">
-            <ComposerFormSkeleton />
-          </div>
-          <div className="lg:col-span-2">
-            <LinkedInPreviewSkeleton />
-          </div>
-        </div>
-      </div>
+      <Box sx={{ mx: "auto", maxWidth: 1152 }}>
+        <Typography variant="h4" fontWeight={800}>
+          New Post
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Loading composer…
+        </Typography>
+        <Box
+          sx={{
+            mt: 3,
+            display: "grid",
+            gap: 3,
+            gridTemplateColumns: { xs: "1fr", lg: "3fr 2fr" },
+          }}
+        >
+          <ComposerFormSkeleton />
+          <LinkedInPreviewSkeleton />
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold text-white">New Post</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Hashtags, language aur images — sab control yahan se
-        </p>
-      </header>
+    <Box sx={{ mx: "auto", maxWidth: 1152 }}>
+      <Typography variant="h4" fontWeight={800}>
+        New Post
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+        Hashtags, language aur images — sab control yahan se
+      </Typography>
 
       {error && (
-        <div className="rounded-lg border border-red-800 bg-red-950/50 px-4 py-3 text-sm text-red-300">
+        <Alert severity="error" sx={{ mt: 2 }} onClose={() => dispatch(clearComposerMessages())}>
           {error}
-        </div>
+        </Alert>
       )}
       {success && (
-        <div className="rounded-lg border border-green-800 bg-green-950/50 px-4 py-3 text-sm text-green-300">
+        <Alert severity="success" sx={{ mt: 2 }} onClose={() => dispatch(clearComposerMessages())}>
           {success}
-        </div>
+        </Alert>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-5">
+      <Box
+        sx={{
+          mt: 3,
+          display: "grid",
+          gap: 3,
+          gridTemplateColumns: { xs: "1fr", lg: "3fr 2fr" },
+        }}
+      >
         <ComposerFormPanel />
         <ComposerPreviewPanel />
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

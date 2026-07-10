@@ -16,6 +16,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.9.0-beta.2] - 2026-07-11
+
+### Added
+- Failed/partial post **Retry failed** button (`POST /posts/:id/retry`)
+- Token expiry banner in app layout + reconnect prompts on Accounts
+- Mobile responsive sidebar (hamburger drawer on small screens)
+- Per-platform publish error messages on post cards
+- Dedicated image upload error + warning alerts in composer
+
+### Changed
+- Post card actions stack better on mobile
+- Composer uses MUI alerts and responsive grid layout
+- Posts action error messages in Roman Urdu
+
+---
+
 ## [0.9.0-beta.1] - 2026-07-10
 
 ### Added

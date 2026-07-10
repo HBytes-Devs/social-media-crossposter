@@ -40,6 +40,8 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
     accounts,
     selectedAccounts,
     mediaLibrary,
+    imageWarnings,
+    uploadError,
     uploading,
   } = useAppSelector(selectComposer);
 
@@ -153,6 +155,8 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
           mediaLibrary={mediaLibrary}
           token={token}
           uploading={uploading}
+          uploadError={uploadError}
+          imageWarnings={imageWarnings}
           onUpload={handleUpload}
           onToggle={(url) => dispatch(toggleImage(url))}
           onRemove={(url) => dispatch(removeImage(url))}

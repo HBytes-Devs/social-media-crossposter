@@ -164,6 +164,14 @@ export const api = {
     ).then((res) => res.data);
   },
 
+  async retryPost(token: string, postId: string) {
+    return request<{
+      success: boolean;
+      message: string;
+      data: { post: import("../types").Post };
+    }>(`/posts/${postId}/retry`, { method: "POST" }, token).then((res) => res.data);
+  },
+
   async getDashboard(token: string) {
     return request<{ success: boolean; data: import("../types").DashboardData }>(
       "/dashboard",

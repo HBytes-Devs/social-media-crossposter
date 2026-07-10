@@ -6,6 +6,7 @@ import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { PlatformStatus, SocialAccount } from "../../types";
+import { formatTokenExpiryLabel } from "../../lib/accountTokenHealth";
 import { Button } from "../ui/Button";
 
 const PLATFORM_COLORS: Record<string, string> = {
@@ -64,6 +65,9 @@ export function PlatformCard({
   const isConnected = Boolean(account);
   const canConnect = platform.configured && platform.implemented;
   const needsSetup = !platform.configured;
+  const expiryLabel = account ? formatTokenExpiryLabel(account.expiresAt) : null;
+  const tokenExpired = expiryLabel?.includes("expired") ?? false;
+  const tokenExpiringSoon = expiryLabel?.includes("expire hoga") ?? false;
 
   const cardSx = (() => {
     if (isConnected) {
@@ -111,11 +115,29 @@ export function PlatformCard({
                   sx={{ height: 22, fontSize: 10, fontWeight: 700 }}
                 />
               )}
-              {isConnected && (
+              {isConnected && !tokenExpired && !tokenExpiringSoon && (
                 <Chip
                   label="Connected"
                   size="small"
                   color="success"
+                  variant="outlined"
+                  sx={{ height: 22, fontSize: 10, fontWeight: 700 }}
+                />
+              )}
+              {isConnected && tokenExpired && (
+                <Chip
+                  label="Reconnect required"
+                  size="small"
+                  color="error"
+                  variant="filled"
+                  sx={{ height: 22, fontSize: 10, fontWeight: 700 }}
+                />
+              )}
+              {isConnected && tokenExpiringSoon && !tokenExpired && (
+                <Chip
+                  label="Expiring soon"
+                  size="small"
+                  color="warning"
                   variant="outlined"
                   sx={{ height: 22, fontSize: 10, fontWeight: 700 }}
                 />
@@ -129,10 +151,14 @@ export function PlatformCard({
             {isConnected && account && (
               <Typography variant="body2" color="text.primary" sx={{ mt: 1 }}>
                 {account.accountName ?? account.accountId}
-                {account.expiresAt && (
-                  <Typography component="span" variant="body2" color="text.secondary">
+                {expiryLabel && (
+                  <Typography
+                    component="span"
+                    variant="body2"
+                    color={tokenExpired ? "error.main" : tokenExpiringSoon ? "warning.main" : "text.secondary"}
+                  >
                     {" "}
-                    · expires {new Date(account.expiresAt).toLocaleDateString()}
+                    · {expiryLabel}
                   </Typography>
                 )}
               </Typography>
@@ -162,9 +188,16 @@ export function PlatformCard({
               Setup .env
             </Button>
           ) : isConnected ? (
-            <Button variant="ghost" onClick={() => onDisconnect?.(account!.id)}>
-              Disconnect
-            </Button>
+            <Stack spacing={1} alignItems={{ xs: "stretch", sm: "flex-end" }}>
+              {(tokenExpired || tokenExpiringSoon) && (
+                <Button loading={connecting} onClick={() => onConnect(platform.slug)}>
+                  Reconnect
+                </Button>
+              )}
+              <Button variant="ghost" onClick={() => onDisconnect?.(account!.id)}>
+                Disconnect
+              </Button>
+            </Stack>
           ) : (
             <Button loading={connecting} onClick={() => onConnect(platform.slug)}>
               Connect

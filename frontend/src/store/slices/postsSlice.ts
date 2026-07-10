@@ -87,7 +87,9 @@ export const fetchPosts = createAsyncThunk(
       const res = await api.listPosts(token, { tab: activeTab, ...filters });
       return res.data.posts;
     } catch (err) {
-      return rejectWithValue(err instanceof Error ? err.message : "Failed to load posts");
+      return rejectWithValue(
+        err instanceof Error ? err.message : "Posts load nahi hui — page refresh karo",
+      );
     }
   },
 );
@@ -158,7 +160,33 @@ export const publishPostNow = createAsyncThunk(
       await refreshPosts(dispatch);
       return { postId, message: `Published — status: ${result.post.status}` };
     } catch (err) {
-      return rejectWithValue(err instanceof Error ? err.message : "Failed to publish post");
+      return rejectWithValue(
+        err instanceof Error ? err.message : "Publish fail — account connected hai check karo",
+      );
+    }
+  },
+);
+
+export const retryFailedPost = createAsyncThunk(
+  "posts/retryFailedPost",
+  async (postId: string, { getState, rejectWithValue, dispatch }) => {
+    const token = selectToken(getState() as RootState);
+    if (!token) return rejectWithValue("Login zaroori hai");
+
+    try {
+      const result = await api.retryPost(token, postId);
+      await refreshPosts(dispatch);
+      const statusMsg =
+        result.post.status === "PUBLISHED"
+          ? "Retry successful — post publish ho gayi"
+          : result.post.status === "PARTIAL"
+            ? "Kuch platforms ab bhi fail — neeche errors dekho"
+            : "Retry fail — account reconnect ya content check karo";
+      return { postId, message: statusMsg };
+    } catch (err) {
+      return rejectWithValue(
+        err instanceof Error ? err.message : "Retry nahi ho saki — dubara try karo",
+      );
     }
   },
 );
@@ -237,6 +265,7 @@ const postsSlice = createSlice({
           restorePost.pending.match(action) ||
           permanentlyDeletePost.pending.match(action) ||
           publishPostNow.pending.match(action) ||
+          retryFailedPost.pending.match(action) ||
           cancelPostSchedule.pending.match(action),
         (state, action) => {
           state.actingOnPostId = action.meta.arg as string;
@@ -249,6 +278,7 @@ const postsSlice = createSlice({
           restorePost.fulfilled.match(action) ||
           permanentlyDeletePost.fulfilled.match(action) ||
           publishPostNow.fulfilled.match(action) ||
+          retryFailedPost.fulfilled.match(action) ||
           cancelPostSchedule.fulfilled.match(action),
         (state, action) => {
           state.actingOnPostId = null;
@@ -261,6 +291,7 @@ const postsSlice = createSlice({
           restorePost.rejected.match(action) ||
           permanentlyDeletePost.rejected.match(action) ||
           publishPostNow.rejected.match(action) ||
+          retryFailedPost.rejected.match(action) ||
           cancelPostSchedule.rejected.match(action),
         (state, action) => {
           state.actingOnPostId = null;

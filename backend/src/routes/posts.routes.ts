@@ -230,6 +230,23 @@ router.post("/:id/publish", authenticate, async (req: AuthRequest, res) => {
   });
 });
 
+router.post("/:id/retry", authenticate, async (req: AuthRequest, res) => {
+  if (!req.userId) throw new AppError(401, "Authentication required");
+
+  const post = await postsService.retryPost(req.userId, String(req.params.id));
+
+  res.json({
+    success: true,
+    message:
+      post.status === "PUBLISHED"
+        ? "Retry successful — post published"
+        : post.status === "PARTIAL"
+          ? "Retry partial — some platforms still failed"
+          : "Retry failed — check platform errors",
+    data: { post },
+  });
+});
+
 router.get("/:id/logs", authenticate, async (req: AuthRequest, res) => {
   if (!req.userId) throw new AppError(401, "Authentication required");
 
