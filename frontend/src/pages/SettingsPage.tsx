@@ -3,6 +3,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { AiKeysPanel } from "../components/settings/AiKeysPanel";
+import { ProfilePanel } from "../components/settings/ProfilePanel";
 import { Card } from "../components/ui/Card";
 import { VersionBadge } from "../components/ui/VersionBadge";
 import { PRODUCT_VERSION } from "../lib/productVersion";
@@ -43,7 +44,12 @@ export function SettingsPage() {
         </Stack>
       </Card>
 
-      {token ? <AiKeysPanel token={token} /> : null}
+      {token ? (
+        <>
+          <ProfilePanel token={token} />
+          <AiKeysPanel token={token} />
+        </>
+      ) : null}
     </Box>
   );
 }

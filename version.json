@@ -3,10 +3,10 @@
   "shortName": "SMC",
   "version": "0.9.0",
   "channel": "beta",
-  "prerelease": "beta.3",
-  "fullVersion": "0.9.0-beta.3",
+  "prerelease": "beta.4",
+  "fullVersion": "0.9.0-beta.4",
   "apiVersion": "v1",
   "releaseDate": "2026-07-11",
-  "codename": "Crosspost Beta",
+  "codename": "Insights Beta",
   "status": "active-development"
 }

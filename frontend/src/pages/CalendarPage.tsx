@@ -1,5 +1,6 @@
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
@@ -13,6 +14,7 @@ import {
   calendarEventDate,
   dateKey,
   endOfMonth,
+  formatDateLabel,
   formatMonthLabel,
   startOfMonth,
 } from "../lib/datetime";
@@ -46,13 +48,47 @@ function buildMonthGrid(month: Date): Array<Date | null> {
   return cells;
 }
 
+function defaultSelectedDay(month: Date): string {
+  const today = new Date();
+  if (today.getFullYear() === month.getFullYear() && today.getMonth() === month.getMonth()) {
+    return dateKey(today);
+  }
+  return dateKey(startOfMonth(month));
+}
+
+function calendarChipLabel(post: CalendarPostItem): string {
+  const platform = post.platforms[0] ? platformLabel(post.platforms[0]).slice(0, 4) : "Post";
+  const preview = post.contentPreview.replace(/\s+/g, " ").trim().slice(0, 10);
+  return preview ? `${platform}: ${preview}` : platform;
+}
+
+function statusChipColor(
+  status: string,
+): "default" | "success" | "warning" | "error" {
+  if (status === "SCHEDULED") return "default";
+  if (status === "PUBLISHED") return "success";
+  if (status === "PARTIAL") return "warning";
+  if (status === "FAILED") return "error";
+  return "success";
+}
+
+function statusChipLabel(status: string): string {
+  if (status === "SCHEDULED") return "Sched";
+  if (status === "PARTIAL") return "Partial";
+  if (status === "FAILED") return "Failed";
+  return "Live";
+}
+
 export function CalendarPage() {
   const navigate = useNavigate();
   const token = useAppSelector(selectToken);
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [posts, setPosts] = useState<CalendarPostItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDay, setSelectedDay] = useState<string | null>(dateKey(new Date()));
+  const [error, setError] = useState<string | null>(null);
+  const [selectedDay, setSelectedDay] = useState<string | null>(() =>
+    defaultSelectedDay(startOfMonth(new Date())),
+  );
 
   const range = useMemo(
     () => ({
@@ -65,10 +101,14 @@ export function CalendarPage() {
   useEffect(() => {
     if (!token) return;
     setLoading(true);
+    setError(null);
     api
       .getCalendarPosts(token, range.from, range.to)
       .then((data) => setPosts(data.posts))
-      .catch(() => setPosts([]))
+      .catch((err) => {
+        setPosts([]);
+        setError(err instanceof Error ? err.message : "Failed to load calendar");
+      })
       .finally(() => setLoading(false));
   }, [token, range.from, range.to]);
 
@@ -89,7 +129,11 @@ export function CalendarPage() {
   const cells = buildMonthGrid(month);
 
   function shiftMonth(delta: number) {
-    setMonth((current) => new Date(current.getFullYear(), current.getMonth() + delta, 1));
+    setMonth((current) => {
+      const next = new Date(current.getFullYear(), current.getMonth() + delta, 1);
+      setSelectedDay(defaultSelectedDay(next));
+      return next;
+    });
   }
 
   return (
@@ -113,6 +157,12 @@ export function CalendarPage() {
         </Button>
       </Stack>
 
+      {error && (
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
       <Card padding="none" className="overflow-hidden">
         <Stack
           direction="row"
@@ -120,13 +170,21 @@ export function CalendarPage() {
           justifyContent="space-between"
           sx={{ px: 2, py: 1.5, borderBottom: 1, borderColor: "divider" }}
         >
-          <IconButton aria-label="Previous month" onClick={() => shiftMonth(-1)}>
+          <IconButton
+            aria-label="Previous month"
+            onClick={() => shiftMonth(-1)}
+            disabled={loading}
+          >
             <ChevronLeftIcon />
           </IconButton>
           <Typography variant="h6" fontWeight={700}>
             {formatMonthLabel(month)}
           </Typography>
-          <IconButton aria-label="Next month" onClick={() => shiftMonth(1)}>
+          <IconButton
+            aria-label="Next month"
+            onClick={() => shiftMonth(1)}
+            disabled={loading}
+          >
             <ChevronRightIcon />
           </IconButton>
         </Stack>
@@ -167,7 +225,7 @@ export function CalendarPage() {
             >
               {cells.map((date, index) => {
                 if (!date) {
-                  return <Box key={`empty-${index}`} sx={{ minHeight: 88 }} />;
+                  return <Box key={`empty-${index}`} sx={{ minHeight: 96 }} />;
                 }
 
                 const key = dateKey(date);
@@ -181,7 +239,7 @@ export function CalendarPage() {
                     variant="outlined"
                     onClick={() => setSelectedDay(key)}
                     sx={{
-                      minHeight: 88,
+                      minHeight: 96,
                       p: 1,
                       borderRadius: 2,
                       cursor: "pointer",
@@ -200,10 +258,15 @@ export function CalendarPage() {
                       {dayPosts.slice(0, 2).map((post) => (
                         <Chip
                           key={post.id}
-                          label={post.status === "SCHEDULED" ? "Sched" : "Live"}
+                          label={calendarChipLabel(post)}
                           size="small"
-                          color={post.status === "SCHEDULED" ? "default" : "success"}
-                          sx={{ height: 20, fontSize: 10, maxWidth: "100%" }}
+                          color={statusChipColor(post.status)}
+                          sx={{
+                            height: 20,
+                            fontSize: 9,
+                            maxWidth: "100%",
+                            "& .MuiChip-label": { px: 0.75 },
+                          }}
                         />
                       ))}
                       {dayPosts.length > 2 && (
@@ -221,7 +284,7 @@ export function CalendarPage() {
       </Card>
 
       <Card
-        title={selectedDay ? `Posts — ${new Date(selectedDay).toLocaleDateString()}` : "Posts"}
+        title={selectedDay ? `Posts — ${formatDateLabel(selectedDay)}` : "Posts"}
         description="Is din ki scheduled / published posts"
       >
         {selectedPosts.length === 0 ? (
@@ -231,13 +294,31 @@ export function CalendarPage() {
         ) : (
           <Stack spacing={1.5}>
             {selectedPosts.map((post) => (
-              <Paper key={post.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+              <Paper
+                key={post.id}
+                variant="outlined"
+                onClick={() =>
+                  navigate(
+                    post.status === "SCHEDULED" ? "/posts/scheduled" : "/posts/published",
+                  )
+                }
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  cursor: "pointer",
+                  "&:hover": { borderColor: "primary.main" },
+                }}
+              >
                 <Stack direction="row" justifyContent="space-between" gap={1}>
                   <Box sx={{ minWidth: 0 }}>
                     <Typography variant="body2" fontWeight={600}>
                       {post.contentPreview}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{ display: "block", mt: 0.5 }}
+                    >
                       {post.scheduledFor
                         ? `Scheduled ${new Date(post.scheduledFor).toLocaleString()}`
                         : post.publishedAt
@@ -255,7 +336,12 @@ export function CalendarPage() {
                       ))}
                     </Stack>
                   </Box>
-                  <Chip label={post.status} size="small" variant="outlined" />
+                  <Chip
+                    label={statusChipLabel(post.status)}
+                    size="small"
+                    color={statusChipColor(post.status)}
+                    variant="outlined"
+                  />
                 </Stack>
               </Paper>
             ))}

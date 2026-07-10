@@ -1,5 +1,5 @@
 ================================================================================
-PRODUCT VERSION: 0.9.0-beta.3 (BETA)
+PRODUCT VERSION: 0.9.0-beta.4 (BETA)
 Tracking: version.json | CHANGELOG.md | docs/VERSIONING.md
 ================================================================================
 
@@ -51,6 +51,8 @@ Goal: Jo bana hai wo break na ho; master clean ho; Maria ke liye branch ready.
   [DONE] Phase 1 — branch push, versioning
   [DONE] Phase 2 — retry failed, token expiry banner, mobile drawer, upload errors
   [DONE] Phase 3 — Reddit OAuth, cross-post, platform hints, per-target status
+  [DONE] Phase 4 (partial) — LinkedIn dashboard analytics, calendar/dashboard polish
+  [DONE] Phase 4 — profile name edit in Settings
 
 ------------------------------------------------------------------------------
 PHASE 2 — CORE PRODUCT POLISH (Deadline: 18 July, Friday) [DONE 11 Jul]
@@ -98,23 +100,19 @@ Goal: LinkedIn ke alawa kam az kam EK platform fully working.
     - Failed target clearly dikhe (PARTIAL status)
 
 ------------------------------------------------------------------------------
-PHASE 4 — ANALYTICS + SETTINGS EXPAND (Deadline: 28 July, Monday)
+PHASE 4 — ANALYTICS + SETTINGS EXPAND (Deadline: 28 July, Monday) [DONE 11 Jul]
 Goal: Dashboard useful ho; settings complete feel de.
 
   Tasks:
-    - LinkedIn post analytics basic (views/reactions if API allow)
-    - Dashboard: upcoming scheduled + recent activity polish
-    - Settings: profile name edit (optional)
-    - AI: multiple keys, default key switch — already done, test only
-    - Calendar: month navigation + day detail stable
-
-  Kaam ka tareeqa (25–28 July):
-    - Analytics read-only pehle (no heavy charts)
-    - Maria se UI feedback
+    [x] LinkedIn post analytics basic on dashboard (views/reactions)
+    [x] Dashboard: upcoming scheduled + recent activity polish
+    [x] Settings: profile name edit
+    [x] Calendar: month navigation + day detail stable
+    [x] AI: multiple keys — already done, test only
 
   Exit criteria:
-    - Dashboard par real numbers dikhen (accounts, scheduled count)
-    - Analytics panel kam az kam LinkedIn ke liye kuch dikhaye
+    [x] Dashboard par real numbers dikhen (accounts, scheduled count, LinkedIn stats)
+    [x] Analytics panel kam az kam LinkedIn ke liye dashboard par dikhaye
 
 ------------------------------------------------------------------------------
 PHASE 5 — DEPLOY + MONTH-END LAUNCH (Deadline: 31 July, Thursday)

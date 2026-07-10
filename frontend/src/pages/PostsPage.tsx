@@ -108,11 +108,14 @@ export function PostsPage() {
 
   useEffect(() => {
     const platformParam = searchParams.get("platform") ?? undefined;
-    if (platformParam !== filters.platform) {
+    const statusParam = searchParams.get("status") ?? undefined;
+
+    if (platformParam !== filters.platform || statusParam !== filters.status) {
       dispatch(
         setPostFilters({
           ...filters,
           platform: platformParam,
+          status: statusParam,
         }),
       );
     }
@@ -142,10 +145,10 @@ export function PostsPage() {
     };
     dispatch(setPostFilters(nextFilters));
 
-    if (key === "platform") {
+    if (key === "platform" || key === "status") {
       const nextParams = new URLSearchParams(searchParams);
-      if (value) nextParams.set("platform", value);
-      else nextParams.delete("platform");
+      if (value) nextParams.set(key, value);
+      else nextParams.delete(key);
 
       const path = activeTab === "all" ? "/posts" : `/posts/${activeTab}`;
       navigate(nextParams.toString() ? `${path}?${nextParams}` : path, { replace: true });

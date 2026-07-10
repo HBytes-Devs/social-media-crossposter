@@ -5,8 +5,9 @@ import { alpha, useTheme } from "@mui/material/styles";
 import { PLATFORM_META } from "../lib/platforms";
 import { api } from "../lib/api";
 import type { PostAnalytics } from "../types";
-import { PlatformIcon } from "./platforms/PlatformBadge";
+import { LinkedInStatsGrid } from "./analytics/LinkedInStatsGrid";
 import { Button } from "./ui/Button";
+import { PlatformIcon } from "./platforms/PlatformBadge";
 
 type PostAnalyticsPanelProps = {
   postId: string;
@@ -110,29 +111,7 @@ export function PostAnalyticsPanel({
         </Box>
       )}
 
-      {stats && (
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "repeat(5, 1fr)" },
-            borderTop: 1,
-            borderColor: "divider",
-            "& > *": {
-              borderColor: "divider",
-              borderRight: { sm: 1 },
-              borderBottom: { xs: 1, sm: 0 },
-            },
-            "& > *:nth-of-type(2n)": { borderRight: { xs: 0, sm: 1 } },
-            "& > *:last-child": { borderRight: 0 },
-          }}
-        >
-          <Stat label="Impressions" value={stats.impressions} />
-          <Stat label="Reached" value={stats.membersReached} />
-          <Stat label="Reactions" value={stats.reactions} />
-          <Stat label="Comments" value={stats.comments} />
-          <Stat label="Reshares" value={stats.reshares} />
-        </Box>
-      )}
+      {stats && <LinkedInStatsGrid stats={stats} />}
 
       {data && (
         <Typography
@@ -150,19 +129,6 @@ export function PostAnalyticsPanel({
           Updated {new Date(data.fetchedAt).toLocaleString()}
         </Typography>
       )}
-    </Box>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <Box sx={{ px: 2, py: 1.75, textAlign: { xs: "center", sm: "left" } }}>
-      <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: 0.6 }}>
-        {label}
-      </Typography>
-      <Typography variant="h6" fontWeight={700} color="text.primary" sx={{ mt: 0.5, lineHeight: 1.2 }}>
-        {value.toLocaleString()}
-      </Typography>
     </Box>
   );
 }

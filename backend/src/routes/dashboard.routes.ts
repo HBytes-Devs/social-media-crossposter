@@ -8,7 +8,8 @@ const router = Router();
 router.get("/", authenticate, async (req: AuthRequest, res) => {
   if (!req.userId) throw new AppError(401, "Authentication required");
 
-  const data = await dashboardService.getDashboard(req.userId);
+  const includeAnalytics = req.query.analytics === "true";
+  const data = await dashboardService.getDashboard(req.userId, { includeAnalytics });
   res.json({ success: true, data });
 });
 

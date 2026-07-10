@@ -16,6 +16,23 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.9.0-beta.4] - 2026-07-11
+
+### Added
+- **LinkedIn analytics on dashboard** — totals + per-post stats from last 5 published posts
+- `LinkedInStatsGrid` shared component (dashboard + post cards)
+- Dashboard `?analytics=true` API flag
+- **Settings profile edit** — display name via `PATCH /auth/me`
+
+### Changed
+- Dashboard: platform breakdown chips, clickable post snippets, accurate 7-day scheduled hint
+- Failed posts banner links to `/posts/published?status=FAILED`
+- Calendar: error alerts, timezone-safe day labels, month navigation polish
+- Calendar day chips show platform + content preview; PARTIAL/FAILED status colors
+- Posts page reads `?status=` URL filter
+
+---
+
 ## [0.9.0-beta.3] - 2026-07-11
 
 ### Added

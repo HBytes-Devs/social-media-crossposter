@@ -32,7 +32,12 @@ export const resetPasswordSchema = z.object({
     .max(128, "Password too long"),
 });
 
+export const updateProfileSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100, "Name too long"),
+});
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

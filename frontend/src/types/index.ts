@@ -165,6 +165,29 @@ export type PostCounts = {
   failed: number;
 };
 
+export type LinkedInAnalyticsSummaryPost = {
+  postId: string;
+  contentPreview: string;
+  publishedAt: string | null;
+  impressions: number;
+  reactions: number;
+  comments: number;
+  error?: string;
+};
+
+export type LinkedInAnalyticsSummary = {
+  postsChecked: number;
+  postsWithStats: number;
+  totalImpressions: number;
+  totalMembersReached: number;
+  totalReactions: number;
+  totalComments: number;
+  totalReshares: number;
+  lastFetchedAt: string;
+  topPosts: LinkedInAnalyticsSummaryPost[];
+  error?: string;
+};
+
 export type CalendarPostItem = {
   id: string;
   contentPreview: string;
@@ -187,7 +210,8 @@ export type DashboardData = {
       accountName: string | null;
     }>;
   };
-  posts: PostCounts;
+  posts: PostCounts & { scheduledNext7Days: number };
   upcoming: Post[];
   recent: Post[];
+  linkedInAnalytics: LinkedInAnalyticsSummary | null;
 };

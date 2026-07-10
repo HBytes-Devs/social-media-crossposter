@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { prisma } from "../config/database.js";
 import { env } from "../config/env.js";
 import { AppError } from "../middleware/error.middleware.js";
-import type { RegisterInput, LoginInput } from "../validators/auth.validator.js";
+import type { RegisterInput, LoginInput, UpdateProfileInput } from "../validators/auth.validator.js";
 import type { AuthUser, AuthResponse } from "../types/index.js";
 import { verifyRecaptcha } from "./recaptcha.service.js";
 
@@ -93,6 +93,18 @@ export async function getProfile(userId: string): Promise<AuthUser> {
   if (!user) {
     throw new AppError(404, "User not found");
   }
+
+  return sanitizeUser(user);
+}
+
+export async function updateProfile(
+  userId: string,
+  input: UpdateProfileInput,
+): Promise<AuthUser> {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { name: input.name },
+  });
 
   return sanitizeUser(user);
 }

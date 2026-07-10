@@ -4,6 +4,7 @@ import {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  updateProfileSchema,
 } from "../validators/auth.validator.js";
 import * as authService from "../services/auth.service.js";
 import * as passwordResetService from "../services/password-reset.service.js";
@@ -83,6 +84,21 @@ router.get("/me", authenticate, async (req: AuthRequest, res) => {
 
   res.json({
     success: true,
+    data: { user },
+  });
+});
+
+router.patch("/me", authenticate, async (req: AuthRequest, res) => {
+  if (!req.userId) {
+    throw new AppError(401, "Authentication required");
+  }
+
+  const input = updateProfileSchema.parse(req.body);
+  const user = await authService.updateProfile(req.userId, input);
+
+  res.json({
+    success: true,
+    message: "Profile updated",
     data: { user },
   });
 });

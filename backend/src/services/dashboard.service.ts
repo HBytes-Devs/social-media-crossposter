@@ -1,7 +1,12 @@
 import { prisma } from "../config/database.js";
+import * as analyticsService from "./analytics.service.js";
 import { getPostCounts, toPostPublic } from "./posts.service.js";
 
-export async function getDashboard(userId: string) {
+type DashboardOptions = {
+  includeAnalytics?: boolean;
+};
+
+export async function getDashboard(userId: string, options: DashboardOptions = {}) {
   const now = new Date();
   const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
@@ -9,35 +14,47 @@ export async function getDashboard(userId: string) {
     targets: { include: { socialAccount: { select: { accountName: true } } } },
   } as const;
 
-  const [counts, accounts, upcomingRaw, recentRaw] = await Promise.all([
-    getPostCounts(userId),
-    prisma.socialAccount.findMany({
-      where: { userId, isActive: true },
-      select: { id: true, platform: true, accountName: true },
-      orderBy: { createdAt: "asc" },
-    }),
-    prisma.post.findMany({
-      where: {
-        userId,
-        deletedAt: null,
-        status: "SCHEDULED",
-        scheduledFor: { gte: now, lte: weekAhead },
-      },
-      orderBy: { scheduledFor: "asc" },
-      take: 5,
-      include: postInclude,
-    }),
-    prisma.post.findMany({
-      where: {
-        userId,
-        deletedAt: null,
-        status: { in: ["PUBLISHED", "PARTIAL"] },
-      },
-      orderBy: { publishedAt: "desc" },
-      take: 5,
-      include: postInclude,
-    }),
-  ]);
+  const [counts, scheduledNext7Days, accounts, upcomingRaw, recentRaw, linkedInAnalytics] =
+    await Promise.all([
+      getPostCounts(userId),
+      prisma.post.count({
+        where: {
+          userId,
+          deletedAt: null,
+          status: "SCHEDULED",
+          scheduledFor: { gte: now, lte: weekAhead },
+        },
+      }),
+      prisma.socialAccount.findMany({
+        where: { userId, isActive: true },
+        select: { id: true, platform: true, accountName: true },
+        orderBy: { createdAt: "asc" },
+      }),
+      prisma.post.findMany({
+        where: {
+          userId,
+          deletedAt: null,
+          status: "SCHEDULED",
+          scheduledFor: { gte: now, lte: weekAhead },
+        },
+        orderBy: { scheduledFor: "asc" },
+        take: 5,
+        include: postInclude,
+      }),
+      prisma.post.findMany({
+        where: {
+          userId,
+          deletedAt: null,
+          status: { in: ["PUBLISHED", "PARTIAL"] },
+        },
+        orderBy: { publishedAt: "desc" },
+        take: 5,
+        include: postInclude,
+      }),
+      options.includeAnalytics
+        ? analyticsService.getLinkedInAnalyticsSummary(userId)
+        : Promise.resolve(null),
+    ]);
 
   const accountsByPlatform = accounts.reduce<Record<string, number>>((acc, account) => {
     acc[account.platform] = (acc[account.platform] ?? 0) + 1;
@@ -55,8 +72,12 @@ export async function getDashboard(userId: string) {
         accountName: a.accountName,
       })),
     },
-    posts: counts,
+    posts: {
+      ...counts,
+      scheduledNext7Days,
+    },
     upcoming: upcomingRaw.map(toPostPublic),
     recent: recentRaw.map(toPostPublic),
+    linkedInAnalytics,
   };
 }

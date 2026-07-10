@@ -93,6 +93,18 @@ export const api = {
     );
   },
 
+  async updateProfile(token: string, name: string) {
+    return request<{
+      success: boolean;
+      message: string;
+      data: { user: import("../types").AuthUser };
+    }>(
+      "/auth/me",
+      { method: "PATCH", body: JSON.stringify({ name }) },
+      token,
+    );
+  },
+
   async getPostOptions(token: string) {
     return request<{ success: boolean; data: import("../types").PostOptions }>(
       "/posts/options",
@@ -172,9 +184,10 @@ export const api = {
     }>(`/posts/${postId}/retry`, { method: "POST" }, token).then((res) => res.data);
   },
 
-  async getDashboard(token: string) {
+  async getDashboard(token: string, options?: { analytics?: boolean }) {
+    const query = options?.analytics ? "?analytics=true" : "";
     return request<{ success: boolean; data: import("../types").DashboardData }>(
-      "/dashboard",
+      `/dashboard${query}`,
       {},
       token,
     ).then((res) => res.data);

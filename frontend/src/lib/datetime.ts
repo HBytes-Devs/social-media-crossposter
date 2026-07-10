@@ -36,10 +36,18 @@ export function formatMonthLabel(date: Date): string {
 }
 
 export function calendarEventDate(post: {
+  status?: string;
   scheduledFor: string | null;
   publishedAt: string | null;
 }): Date | null {
-  const raw = post.scheduledFor ?? post.publishedAt;
+  const usePublished =
+    post.status &&
+    ["PUBLISHED", "PARTIAL", "FAILED", "PUBLISHING"].includes(post.status);
+
+  const raw = usePublished
+    ? post.publishedAt ?? post.scheduledFor
+    : post.scheduledFor ?? post.publishedAt;
+
   if (!raw) return null;
   const date = new Date(raw);
   return Number.isNaN(date.getTime()) ? null : date;
@@ -47,4 +55,18 @@ export function calendarEventDate(post: {
 
 export function dateKey(date: Date): string {
   return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+export function parseDateKey(key: string): Date {
+  const [year, month, day] = key.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+export function formatDateLabel(key: string): string {
+  return parseDateKey(key).toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 }
