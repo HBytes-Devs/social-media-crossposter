@@ -44,7 +44,7 @@ Health check: `GET http://localhost:3001/api/v1/health`
 | [backend/.env.example](backend/.env.example) | API, DB, JWT, S3, OAuth, SMTP |
 | [frontend/.env.example](frontend/.env.example) | `VITE_API_BASE_URL`, reCAPTCHA |
 
-**Production:** set `VITE_API_BASE_URL=https://<api-host>/api/v1` at Vercel build time.
+**Production:** set `VITE_API_BASE_URL=https://<api-host>/api/v1` (GitHub Actions variable or Vercel env).
 
 ## Deploy (staging / production)
 
@@ -53,16 +53,13 @@ Full guide: **[docs/DEPLOY.md](docs/DEPLOY.md)**
 | Component | Config |
 |-----------|--------|
 | Backend | [backend/Dockerfile](backend/Dockerfile), [render.yaml](render.yaml) |
-| Frontend | [frontend/vercel.json](frontend/vercel.json) |
+| Frontend (GitHub Pages) | [.github/workflows/pages.yml](.github/workflows/pages.yml) |
+| Frontend (Vercel alt.) | [frontend/vercel.json](frontend/vercel.json) |
 | CI | [.github/workflows/ci.yml](.github/workflows/ci.yml) |
 
-**OAuth redirect pattern (production):**
+**Frontend live (GitHub Pages):** `https://haseebcodejourney.github.io/social-media-crossposter/`
 
-```
-https://<API_HOST>/api/v1/accounts/{linkedin|reddit|facebook|instagram|twitter}/callback
-```
-
-Set `FRONTEND_URL` to your Vercel URL for CORS and post-OAuth redirects.
+Set repo variable `VITE_API_BASE_URL` → your backend URL. Backend `FRONTEND_URL` → `https://haseebcodejourney.github.io`
 
 ## Maria QA
 

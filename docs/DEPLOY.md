@@ -97,7 +97,45 @@ curl https://<API_HOST>/api/v1/health
 
 ---
 
-## 3. Frontend deploy (Vercel)
+## 3. Frontend deploy (GitHub Pages) — recommended
+
+**Live URL:** `https://haseebcodejourney.github.io/social-media-crossposter/`
+
+Workflow: `.github/workflows/pages.yml` — auto-deploy on `master` push when `frontend/` changes.
+
+### One-time GitHub setup
+
+1. Repo → **Settings** → **Pages**
+2. **Source:** GitHub Actions (not “Deploy from branch”)
+3. **Settings** → **Secrets and variables** → **Actions** → **Variables**:
+   - `VITE_API_BASE_URL` = `https://<API_HOST>/api/v1` (your Render/Railway backend)
+   - `VITE_RECAPTCHA_SITE_KEY` = optional
+
+4. Backend `FRONTEND_URL` must match Pages origin (CORS):
+
+```
+FRONTEND_URL=https://haseebcodejourney.github.io
+```
+
+GitHub Pages project sites use path `/social-media-crossposter/` — Vite `base` and React Router `basename` are set automatically in CI.
+
+### Manual local build (test before push)
+
+```bash
+cd frontend
+VITE_API_BASE_URL=https://<API_HOST>/api/v1 npm run build:pages
+npx vite preview --base /social-media-crossposter/
+```
+
+### Notes
+
+- GitHub Pages is **static only** — backend must be hosted separately (Render, etc.)
+- `404.html` copy enables SPA refresh on deep links (`/posts`, `/compose`, etc.)
+- reCAPTCHA admin mein domain add karo: `haseebcodejourney.github.io`
+
+---
+
+## 4. Frontend deploy (Vercel) — alternative
 
 1. Import GitHub repo in Vercel
 2. **Root directory:** `frontend`
@@ -115,7 +153,7 @@ Preview URL works immediately; add domain in Vercel settings for production.
 
 ---
 
-## 4. OAuth redirect URLs (production)
+## 5. OAuth redirect URLs (production)
 
 Register these in each platform developer console (`API_BASE_URL` = your backend host):
 
@@ -151,7 +189,7 @@ Platform setup guides:
 
 ---
 
-## 5. AWS S3
+## 6. AWS S3
 
 1. Create bucket (e.g. `smc-staging-media`)
 2. IAM user with `s3:PutObject`, `s3:GetObject` on bucket
@@ -167,7 +205,7 @@ AWS_S3_ROOT_PREFIX=smc
 
 ---
 
-## 6. reCAPTCHA (optional but recommended)
+## 7. reCAPTCHA (optional but recommended)
 
 1. Create reCAPTCHA v3 keys at https://www.google.com/recaptcha/admin
 2. Add domains: `localhost`, staging URL, production URL
@@ -176,7 +214,7 @@ AWS_S3_ROOT_PREFIX=smc
 
 ---
 
-## 7. SMTP (password reset)
+## 8. SMTP (password reset)
 
 If unset, forgot-password may fail silently or skip email. Gmail example:
 
@@ -191,7 +229,7 @@ SMTP_FROM="SMC <you@gmail.com>"
 
 ---
 
-## 8. Post-deploy smoke test
+## 9. Post-deploy smoke test
 
 ```text
 1. Open frontend URL → Register / Login
@@ -209,7 +247,7 @@ Full QA: [MARIA_TEST_CHECKLIST.md](MARIA_TEST_CHECKLIST.md)
 
 ---
 
-## 9. CI
+## 10. CI
 
 GitHub Actions (`.github/workflows/ci.yml`) runs on push to `master` / `testing/maria`:
 
@@ -218,7 +256,7 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on push to `master` / `testing/
 
 ---
 
-## 10. Version tags
+## 11. Version tags
 
 Staging RC:
 

@@ -14,6 +14,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 | `rc` | Release candidate | `1.0.0-rc.1` |
 | `stable` | Production-ready | `1.0.0` |
 
+## [Unreleased]
+
+### Added
+- **GitHub Pages deploy** — `.github/workflows/pages.yml`, Vite base path, SPA `404.html` fallback
+
+### Changed
+- README + DEPLOY docs updated for GitHub Pages URL
+
 ---
 
 ## [1.0.0-rc.1] - 2026-07-11
