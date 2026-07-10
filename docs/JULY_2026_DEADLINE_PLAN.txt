@@ -1,5 +1,5 @@
 ================================================================================
-PRODUCT VERSION: 0.9.0-beta.2 (BETA)
+PRODUCT VERSION: 0.9.0-beta.3 (BETA)
 Tracking: version.json | CHANGELOG.md | docs/VERSIONING.md
 ================================================================================
 
@@ -19,7 +19,7 @@ Aaj (10 July) tak jo ho chuka:
   [DONE] Settings — user apni AI API key + naam add kar sakta hai (Claude, GPT, etc.)
   [DONE] UI i18n (en, ur, roman-ur, hi) + theme
   [DONE] Schedule duplicate fix
-  [PARTIAL] Reddit fields UI (backend adapter exists)
+  [DONE] Reddit connect + cross-post (LinkedIn + Reddit same compose)
   [PARTIAL] Instagram / Facebook / Twitter adapters (code hai, OAuth + live test pending)
   [PARTIAL] Analytics (LinkedIn analytics scripts/docs)
 
@@ -50,6 +50,7 @@ Goal: Jo bana hai wo break na ho; master clean ho; Maria ke liye branch ready.
 
   [DONE] Phase 1 — branch push, versioning
   [DONE] Phase 2 — retry failed, token expiry banner, mobile drawer, upload errors
+  [DONE] Phase 3 — Reddit OAuth, cross-post, platform hints, per-target status
 
 ------------------------------------------------------------------------------
 PHASE 2 — CORE PRODUCT POLISH (Deadline: 18 July, Friday) [DONE 11 Jul]
@@ -73,20 +74,19 @@ Goal: Daily use ke liye app smooth ho — errors, loading, edge cases.
     - Maria 10 test cases pass kare (checklist neeche)
 
 ------------------------------------------------------------------------------
-PHASE 3 — SECOND PLATFORM LIVE (Deadline: 24 July, Thursday)
+PHASE 3 — SECOND PLATFORM LIVE (Deadline: 24 July, Thursday) [DONE 11 Jul]
 Goal: LinkedIn ke alawa kam az kam EK platform fully working.
 
-  Recommended order (pick ONE first):
-    Option A — Reddit (fastest dev test, no app review)
-    Option B — Facebook Page (Meta app chahiye)
-    Option C — Instagram Business (Meta + app review risk)
+  Chosen: Reddit (Option A)
 
-  Tasks (whichever chosen):
-    - OAuth connect flow UI + backend callback test
-    - Publish text + image from composer
-    - Multi-platform: ek post 2 platforms par
-    - Platform-specific validation (Reddit title/subreddit, X char limit, etc.)
-    - Accounts page: "configured" badges sahi hon
+  Tasks:
+    [x] OAuth connect flow UI + backend callback test
+    [x] Publish text + image from composer
+    [x] Multi-platform: ek post 2 platforms par
+    [x] Platform-specific validation (Reddit title/subreddit, X char limit, etc.)
+    [x] Accounts page: OAuth return messages + configured badges
+    [x] Per-target FAILED/SUCCESS on post cards (PARTIAL status)
+    [x] Token auto-refresh before publish
 
   Kaam ka tareeqa (19–24 July):
     - Pehle 2 din: sirf OAuth connect + 1 test post

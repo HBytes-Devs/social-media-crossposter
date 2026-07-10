@@ -511,7 +511,7 @@ export async function publishPost(
 
     try {
       const adapter = getPlatformAdapter(target.platform);
-      const tokenData = await accountsService.getDecryptedToken(
+      const tokenData = await accountsService.getDecryptedTokenFresh(
         target.socialAccountId,
         userId,
       );
@@ -573,7 +573,10 @@ export async function publishPost(
         failCount++;
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown error";
+      const raw = error instanceof Error ? error.message : "Unknown error";
+      const message = /401|403|unauthorized|token|expired/i.test(raw)
+        ? `${raw} — Accounts page se reconnect karo`
+        : raw;
 
       await prisma.publishLog.create({
         data: {

@@ -1,3 +1,5 @@
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { Input } from "../ui/Input";
 
 type Props = {
@@ -14,8 +16,21 @@ export function RedditFields({
   onSubredditChange,
 }: Props) {
   return (
-    <div className="space-y-4 rounded-xl border border-orange-800/40 bg-orange-950/20 p-4">
-      <p className="text-sm font-medium text-orange-200">Reddit options</p>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        borderRadius: 2,
+        border: 1,
+        borderColor: "warning.main",
+        bgcolor: "action.hover",
+        p: 2,
+      }}
+    >
+      <Typography variant="subtitle2" color="warning.main">
+        Reddit options
+      </Typography>
       <Input
         label="Post title *"
         value={title}
@@ -29,10 +44,9 @@ export function RedditFields({
         onChange={(e) => onSubredditChange(e.target.value)}
         placeholder="test (bina r/)"
       />
-      <p className="text-xs text-slate-500">
-        Testing ke liye <code className="text-slate-400">test</code> use karo. Production mein apni
-        subreddit likho.
-      </p>
-    </div>
+      <Typography variant="caption" color="text.secondary">
+        Testing ke liye <code>test</code> use karo. Production mein apni subreddit likho.
+      </Typography>
+    </Box>
   );
 }

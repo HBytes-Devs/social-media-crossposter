@@ -1,4 +1,7 @@
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { Card } from "../ui/Card";
 import { Select } from "../ui/Select";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -21,6 +24,7 @@ import { ComposeAssistToggles, useComposeAssistPrefs } from "./ComposeAssistTogg
 import { HashtagInput } from "./HashtagInput";
 import { HashtagOptions } from "./HashtagOptions";
 import { ImagePicker } from "./ImagePicker";
+import { PlatformComposeHints } from "./PlatformComposeHints";
 import { RedditFields } from "./RedditFields";
 import { AiAssistPanel } from "./AiAssistPanel";
 import { api } from "../../lib/api";
@@ -68,6 +72,14 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
   const { smartSuggest, autoCorrect, setSmartSuggest, setAutoCorrect } =
     useComposeAssistPrefs();
   const [aiConfigured, setAiConfigured] = useState(false);
+
+  const selectedPlatformNames = useMemo(
+    () =>
+      selectedAccounts
+        .map((id) => accounts.find((a) => a.id === id)?.platform)
+        .filter((p): p is string => Boolean(p)),
+    [selectedAccounts, accounts],
+  );
 
   useEffect(() => {
     if (!token) return;
@@ -163,38 +175,63 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
         />
       </Card>
 
-      <Card title="Platforms" description="Kahan publish karna hai">
-        {accounts.length === 0 ? (
-          <p className="text-sm text-slate-400">
-            Koi account connected nahi. Pehle{" "}
-            <a href="/accounts" className="text-brand-400 hover:underline">
-              Accounts
-            </a>{" "}
-            page se LinkedIn connect karo.
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {accounts.map((acc) => (
-              <label
-                key={acc.id}
-                className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-700 px-4 py-3 hover:bg-slate-800/50"
+      <Card title="Platforms" description="Kahan publish karna hai — multiple select = cross-post">
+        <PlatformComposeHints
+          selectedPlatforms={selectedPlatformNames}
+          contentLength={content.length}
+          imageCount={images.length}
+        />
+        <Box sx={{ mt: 2 }}>
+          {accounts.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              Koi account connected nahi. Pehle{" "}
+              <Typography
+                component="a"
+                href="/accounts"
+                color="primary"
+                sx={{ textDecoration: "underline" }}
               >
-                <input
-                  type="checkbox"
-                  checked={selectedAccounts.includes(acc.id)}
-                  onChange={() => dispatch(toggleAccount(acc.id))}
-                  className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-brand-600 focus:ring-brand-500"
-                />
-                <div>
-                  <p className="text-sm font-medium text-white">
-                    {acc.accountName ?? acc.accountId}
-                  </p>
-                  <p className="text-xs text-slate-500">{acc.platform}</p>
-                </div>
-              </label>
-            ))}
-          </div>
-        )}
+                Accounts
+              </Typography>{" "}
+              page se LinkedIn ya Reddit connect karo.
+            </Typography>
+          ) : (
+            <Stack spacing={1}>
+              {accounts.map((acc) => (
+                <Box
+                  key={acc.id}
+                  component="label"
+                  sx={{
+                    display: "flex",
+                    cursor: "pointer",
+                    alignItems: "center",
+                    gap: 1.5,
+                    borderRadius: 2,
+                    border: 1,
+                    borderColor: "divider",
+                    px: 2,
+                    py: 1.5,
+                    "&:hover": { bgcolor: "action.hover" },
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedAccounts.includes(acc.id)}
+                    onChange={() => dispatch(toggleAccount(acc.id))}
+                  />
+                  <Box>
+                    <Typography variant="body2" fontWeight={600}>
+                      {acc.accountName ?? acc.accountId}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {acc.platform}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))}
+            </Stack>
+          )}
+        </Box>
       </Card>
     </div>
   );

@@ -165,6 +165,35 @@ export async function getDecryptedToken(accountId: string, userId: string): Prom
   };
 }
 
+const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000;
+
+export async function getDecryptedTokenFresh(
+  accountId: string,
+  userId: string,
+): Promise<Awaited<ReturnType<typeof getDecryptedToken>>> {
+  const account = await prisma.socialAccount.findFirst({
+    where: { id: accountId, userId, isActive: true },
+  });
+
+  if (!account) {
+    throw new AppError(404, "Account not found");
+  }
+
+  const expiresSoon =
+    account.expiresAt &&
+    account.expiresAt.getTime() <= Date.now() + TOKEN_REFRESH_BUFFER_MS;
+
+  if (expiresSoon && account.refreshToken) {
+    try {
+      await refreshAccountToken(userId, accountId);
+    } catch {
+      // publish will surface auth error; reconnect prompt in UI
+    }
+  }
+
+  return getDecryptedToken(accountId, userId);
+}
+
 export async function refreshAccountToken(userId: string, accountId: string): Promise<SocialAccountPublic> {
   const account = await prisma.socialAccount.findFirst({
     where: { id: accountId, userId, isActive: true },

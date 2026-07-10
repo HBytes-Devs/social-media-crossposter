@@ -25,12 +25,14 @@ function parsePlatform(value: string): Platform {
   return upper as Platform;
 }
 
-function oauthSuccessUrl(platform: string): string {
-  return `${env.API_BASE_URL}/api/v1/accounts/oauth/success?platform=${platform.toLowerCase()}`;
+function oauthSuccessUrl(platform: string, accountName?: string): string {
+  const params = new URLSearchParams({ connected: platform.toLowerCase() });
+  if (accountName) params.set("account", accountName);
+  return `${env.FRONTEND_URL}/accounts?${params.toString()}`;
 }
 
 function oauthErrorUrl(message: string): string {
-  return `${env.API_BASE_URL}/api/v1/accounts/oauth/error?message=${encodeURIComponent(message)}`;
+  return `${env.FRONTEND_URL}/accounts?oauth_error=${encodeURIComponent(message)}`;
 }
 
 // OAuth success page (frontend nahi hone par)
@@ -165,7 +167,7 @@ router.get("/:platform/callback", async (req, res) => {
 
   try {
     const account = await accountsService.handleOAuthCallback(platform, code, state);
-    res.redirect(`${oauthSuccessUrl(platform)}&account=${account.accountName ?? account.accountId}`);
+    res.redirect(oauthSuccessUrl(platform, account.accountName ?? account.accountId));
   } catch (err) {
     const message = err instanceof Error ? err.message : "oauth_failed";
     res.redirect(oauthErrorUrl(message));

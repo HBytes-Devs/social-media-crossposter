@@ -16,6 +16,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.9.0-beta.3] - 2026-07-11
+
+### Added
+- **Reddit + multi-platform cross-post** (Phase 3): LinkedIn + Reddit same compose flow
+- Auto OAuth redirect back to `/accounts` after connect
+- Token auto-refresh before publish (Reddit/LinkedIn expiry)
+- Platform compose hints (Twitter 280 chars, Reddit title/subreddit, image limits)
+- Per-target publish status row on post cards (SUCCESS / FAILED / PARTIAL)
+
+### Changed
+- Accounts page shows OAuth success/error messages
+- Reddit fields + platform picker use theme-aware MUI styling
+- Composer validates Twitter length and Reddit image limit on submit
+
+---
+
 ## [0.9.0-beta.2] - 2026-07-11
 
 ### Added

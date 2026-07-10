@@ -176,6 +176,18 @@ export const submitPost = createAsyncThunk(
         if (!state.subreddit.trim()) {
           return rejectWithValue("Reddit ke liye subreddit zaroori hai (e.g. test)");
         }
+        if (state.images.length > 1) {
+          return rejectWithValue("Reddit par sirf 1 image allowed hai");
+        }
+      }
+
+      const hasTwitter = state.selectedAccounts.some((id) => {
+        const acc = state.accounts.find((a) => a.id === id);
+        return acc?.platform === "TWITTER";
+      });
+
+      if (hasTwitter && content.length > 280) {
+        return rejectWithValue("X (Twitter) ke liye post 280 characters se chhoti honi chahiye");
       }
 
       if (mode === "schedule") {

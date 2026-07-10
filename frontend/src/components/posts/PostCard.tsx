@@ -9,6 +9,7 @@ import { PostAnalyticsPanel } from "../PostAnalyticsPanel";
 import { PlatformBadge } from "../platforms/PlatformBadge";
 import { Button } from "../ui/Button";
 import { Card } from "../ui/Card";
+import { PostTargetStatus } from "./PostTargetStatus";
 import type { Post } from "../../types";
 
 type StatusKey = "DRAFT" | "SCHEDULED" | "PUBLISHED" | "PUBLISHING" | "FAILED" | "PARTIAL";
@@ -57,6 +58,10 @@ export function PostCard({
     (t) => t.platform === "LINKEDIN" && t.status === "SUCCESS",
   );
   const failedTargets = post.targets.filter((t) => t.status === "FAILED");
+  const showTargetStatus =
+    !isTrashed &&
+    post.targets.length > 0 &&
+    (post.status === "PARTIAL" || post.status === "FAILED" || post.status === "PUBLISHED");
   const canRetry =
     !isTrashed &&
     (post.status === "FAILED" || post.status === "PARTIAL") &&
@@ -242,6 +247,8 @@ export function PostCard({
     <PostAnalyticsPanel postId={post.id} token={token} hasLinkedInSuccess={hasLinkedInSuccess} />
   ) : null;
 
+  const targetStatus = showTargetStatus ? <PostTargetStatus targets={post.targets} /> : null;
+
   if (isNested) {
     return (
       <Paper
@@ -254,6 +261,7 @@ export function PostCard({
         }}
       >
         {content}
+        {targetStatus}
         {stats}
       </Paper>
     );
@@ -262,6 +270,7 @@ export function PostCard({
   return (
     <Card padding="none" className="overflow-hidden">
       {content}
+      {targetStatus}
       {stats}
     </Card>
   );

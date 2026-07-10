@@ -1,13 +1,16 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
+import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { PlatformGrid } from "../components/accounts/PlatformCard";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
+  clearAccountsError,
   connectPlatform,
   disconnectAccount,
   fetchAccounts,
@@ -17,6 +20,8 @@ import {
 
 export function AccountsPage() {
   const dispatch = useAppDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [oauthMessage, setOauthMessage] = useState<string | null>(null);
   const {
     items: accounts,
     platforms,
@@ -31,12 +36,33 @@ export function AccountsPage() {
     dispatch(fetchPlatforms());
   }, [dispatch]);
 
+  useEffect(() => {
+    const connected = searchParams.get("connected");
+    const account = searchParams.get("account");
+    const oauthError = searchParams.get("oauth_error");
+
+    if (connected) {
+      setOauthMessage(
+        account
+          ? `${connected.toUpperCase()} connected: ${account}`
+          : `${connected.toUpperCase()} account connected successfully`,
+      );
+      dispatch(fetchAccounts());
+      setSearchParams({}, { replace: true });
+    } else if (oauthError) {
+      setOauthMessage(`Connection failed: ${oauthError}`);
+      dispatch(clearAccountsError());
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, dispatch, setSearchParams]);
+
   function refreshAll() {
     dispatch(fetchAccounts());
     dispatch(fetchPlatforms());
   }
 
   const configuredCount = platforms.filter((p) => p.configured).length;
+  const redditConfigured = platforms.find((p) => p.id === "REDDIT")?.configured;
 
   return (
     <Box sx={{ display: "flex", width: "100%", flexDirection: "column", gap: 2 }}>
@@ -45,9 +71,18 @@ export function AccountsPage() {
           Connected Accounts
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Social platforms connect karo taake post publish ho sake
+          LinkedIn + Reddit (Phase 3) — OAuth se connect karo, phir Compose se cross-post
         </Typography>
       </Box>
+
+      {oauthMessage && (
+        <Alert
+          severity={oauthMessage.startsWith("Connection failed") ? "error" : "success"}
+          onClose={() => setOauthMessage(null)}
+        >
+          {oauthMessage}
+        </Alert>
+      )}
 
       {error && <Alert severity="error">{error}</Alert>}
 
@@ -57,23 +92,32 @@ export function AccountsPage() {
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           <Typography variant="body2" color="text.primary">
-            Har platform <strong>OAuth</strong> se connect hota hai. Ek click par official login
-            popup khulta hai.
+            Har platform <strong>OAuth</strong> se connect hota hai. Connect dabao — popup mein
+            authorize karo — wapas yahan redirect hoge.
           </Typography>
           <Box component="ol" sx={{ m: 0, pl: 2.5, color: "text.secondary", fontSize: 14 }}>
-            <li>Neeche se platform choose karo</li>
+            <li>Neeche se platform choose karo (LinkedIn + Reddit recommended)</li>
             <li>
               <strong>Connect</strong> dabao — popup mein authorize karo
             </li>
-            <li>
-              Wapas aake <strong>Refresh</strong> dabao
-            </li>
+            <li>Success par accounts list auto-refresh hogi</li>
           </Box>
+          {redditConfigured && (
+            <Typography variant="body2" color="text.secondary">
+              Reddit setup guide:{" "}
+              <Link
+                href="https://github.com/Haseebcodejourney/social-media-crossposter/blob/master/docs/REDDIT_SETUP.md"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                docs/REDDIT_SETUP.md
+              </Link>
+            </Typography>
+          )}
           {configuredCount < platforms.length && (
             <Alert severity="warning" sx={{ mt: 0.5 }}>
               {platforms.length - configuredCount} platform(s) ke liye abhi{" "}
-              <code>backend/.env</code> mein API keys add karni hain. &quot;Setup required&quot;
-              wale cards dekho.
+              <code>backend/.env</code> mein API keys add karni hain.
             </Alert>
           )}
         </Box>
