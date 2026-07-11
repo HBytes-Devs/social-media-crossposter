@@ -1,108 +1,32 @@
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
 import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
-import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
-import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
-import { LinkedInStatsGrid } from "../components/analytics/LinkedInStatsGrid";
-import { Button } from "../components/ui/Button";
-import { Card } from "../components/ui/Card";
+import { useNavigate } from "react-router-dom";
+import {
+  DashboardActivityPanel,
+  PublishedEmptyIcon,
+  ScheduleEmptyIcon,
+} from "../components/dashboard/DashboardActivityPanel";
+import { DashboardStatCard } from "../components/dashboard/DashboardStatCard";
+import { dashboardFonts, useDashboardTheme } from "../components/dashboard/dashboardTheme";
+import { LinkedInPerformancePanel } from "../components/dashboard/LinkedInPerformancePanel";
+import { PageHeaderButton } from "../components/ui/PageHeaderButton";
 import { PageStateLoader } from "../components/ui/PageState";
 import { api } from "../lib/api";
-import { platformLabel } from "../lib/platforms";
 import { useAppSelector } from "../store/hooks";
 import { selectToken } from "../store/slices/authSlice";
 import type { DashboardData } from "../types";
 
-function StatCard({
-  label,
-  value,
-  hint,
-  onClick,
-}: {
-  label: string;
-  value: number;
-  hint?: string;
-  onClick?: () => void;
-}) {
-  return (
-    <Paper
-      variant="outlined"
-      onClick={onClick}
-      sx={{
-        p: 2.5,
-        borderRadius: 2,
-        cursor: onClick ? "pointer" : "default",
-        transition: "border-color 0.2s ease",
-        "&:hover": onClick ? { borderColor: "primary.main" } : undefined,
-      }}
-    >
-      <Typography variant="caption" color="text.secondary" fontWeight={700}>
-        {label}
-      </Typography>
-      <Typography variant="h4" fontWeight={800} sx={{ mt: 0.5 }}>
-        {value}
-      </Typography>
-      {hint && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
-          {hint}
-        </Typography>
-      )}
-    </Paper>
-  );
-}
-
-function PostSnippet({
-  post,
-  meta,
-  onClick,
-}: {
-  post: DashboardData["upcoming"][number];
-  meta: string;
-  onClick?: () => void;
-}) {
-  return (
-    <Paper
-      variant="outlined"
-      onClick={onClick}
-      sx={{
-        p: 2,
-        borderRadius: 2,
-        cursor: onClick ? "pointer" : "default",
-        transition: "border-color 0.2s ease",
-        "&:hover": onClick ? { borderColor: "primary.main" } : undefined,
-      }}
-    >
-      <Stack direction="row" justifyContent="space-between" gap={1} alignItems="flex-start">
-        <Box sx={{ minWidth: 0 }}>
-          <Typography variant="body2" fontWeight={600} noWrap>
-            {post.finalContent || post.content || "(image post)"}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
-            {meta}
-          </Typography>
-          <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mt: 1 }}>
-            {post.targets.map((t) => (
-              <Chip key={t.id} label={platformLabel(t.platform)} size="small" variant="outlined" />
-            ))}
-          </Stack>
-        </Box>
-        <Chip label={post.status} size="small" variant="outlined" />
-      </Stack>
-    </Paper>
-  );
-}
-
 export function DashboardPage() {
   const navigate = useNavigate();
   const token = useAppSelector(selectToken);
+  const { colors } = useDashboardTheme();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -123,260 +47,211 @@ export function DashboardPage() {
 
   if (error || !data) {
     return (
-      <Card title="Dashboard">
-        <Typography color="error">{error ?? "Dashboard unavailable"}</Typography>
-      </Card>
+      <Box sx={{ p: 3 }}>
+        <Typography color="error" fontFamily={dashboardFonts.body}>
+          {error ?? "Dashboard unavailable"}
+        </Typography>
+      </Box>
     );
   }
 
-  const analytics = data.linkedInAnalytics;
-  const hasAnalyticsTotals =
-    analytics && analytics.postsWithStats > 0 && !analytics.error;
-
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 0,
+        fontFamily: dashboardFonts.body,
+        width: "100%",
+      }}
+    >
+      {/* Topbar */}
       <Stack
         direction={{ xs: "column", sm: "row" }}
         justifyContent="space-between"
-        alignItems={{ sm: "flex-end" }}
-        gap={1.5}
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        gap={2}
+        sx={{ mb: 3.75, width: "100%" }}
       >
         <Box>
-          <Typography variant="h4" fontWeight={800}>
+          <Typography
+            sx={{
+              fontFamily: dashboardFonts.heading,
+              fontSize: 28,
+              fontWeight: 700,
+              letterSpacing: "-0.4px",
+            }}
+          >
             Dashboard
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          <Typography
+            sx={{
+              color: colors.inkSoft,
+              fontSize: 13.5,
+              mt: 0.75,
+              fontFamily: dashboardFonts.body,
+            }}
+          >
             Overview — accounts, scheduled posts, LinkedIn analytics, aur recent activity
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-          <Button variant="secondary" onClick={() => navigate("/compose")}>
-            <EditOutlinedIcon sx={{ fontSize: 18, mr: 0.5 }} />
-            Compose
-          </Button>
-          <Button variant="secondary" onClick={() => navigate("/calendar")}>
-            <CalendarMonthOutlinedIcon sx={{ fontSize: 18, mr: 0.5 }} />
+
+        <Stack
+          direction="row"
+          spacing={1.25}
+          flexShrink={0}
+          sx={{ ml: { xs: 0, sm: "auto" } }}
+        >
+          <PageHeaderButton
+            variant="outlined"
+            onClick={() => navigate("/calendar")}
+            startIcon={<CalendarMonthOutlinedIcon sx={{ fontSize: 14 }} />}
+          >
             Calendar
-          </Button>
+          </PageHeaderButton>
+          <PageHeaderButton
+            variant="primary"
+            onClick={() => navigate("/compose")}
+            startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
+          >
+            Compose
+          </PageHeaderButton>
         </Stack>
       </Stack>
 
-      {data.accounts.total > 0 && (
-        <Stack direction="row" flexWrap="wrap" gap={1}>
-          {Object.entries(data.accounts.byPlatform).map(([platform, count]) => (
-            <Chip
-              key={platform}
-              label={`${platformLabel(platform)} · ${count}`}
-              size="small"
-              variant="outlined"
-              onClick={() => navigate(`/posts?platform=${platform}`)}
-              sx={{ cursor: "pointer" }}
-            />
-          ))}
-        </Stack>
-      )}
-
+      {/* Stats */}
       <Box
         sx={{
           display: "grid",
-          gap: 2,
+          gap: 2.25,
           gridTemplateColumns: {
             xs: "1fr",
             sm: "repeat(2, minmax(0, 1fr))",
-            md: "repeat(4, minmax(0, 1fr))",
+            lg: "repeat(4, minmax(0, 1fr))",
           },
+          mb: 2.75,
         }}
       >
-        <StatCard
+        <DashboardStatCard
+          variant="accounts"
           label="Connected accounts"
           value={data.accounts.total}
-          hint="Manage accounts"
+          foot={
+            <Link
+              component="button"
+              onClick={() => navigate("/accounts")}
+              sx={{
+                color: colors.accent,
+                fontWeight: 600,
+                fontSize: 12,
+                textDecoration: "none",
+                border: "none",
+                bgcolor: "transparent",
+                cursor: "pointer",
+                p: 0,
+                fontFamily: dashboardFonts.body,
+                "&:hover": { textDecoration: "underline" },
+              }}
+            >
+              Manage accounts →
+            </Link>
+          }
           onClick={() => navigate("/accounts")}
         />
-        <StatCard
+        <DashboardStatCard
+          variant="scheduled"
           label="Scheduled"
           value={data.posts.scheduled}
-          hint={`${data.posts.scheduledNext7Days} in next 7 days`}
+          foot={`${data.posts.scheduledNext7Days} in next 7 days`}
           onClick={() => navigate("/posts/scheduled")}
         />
-        <StatCard
+        <DashboardStatCard
+          variant="published"
           label="Published"
           value={data.posts.published}
+          foot="All time"
           onClick={() => navigate("/posts/published")}
         />
-        <StatCard
+        <DashboardStatCard
+          variant="drafts"
           label="Drafts"
           value={data.posts.drafts}
+          foot="Ready to schedule"
+          highlighted
           onClick={() => navigate("/posts/drafts")}
         />
       </Box>
 
-      <Card
-        title="LinkedIn performance"
-        description="Last 5 published posts — live from LinkedIn API"
-        action={
-          <Link component={RouterLink} to="/posts/published" underline="hover" variant="body2">
-            All posts
-          </Link>
-        }
-      >
-        {!analytics ? (
-          <Typography variant="body2" color="text.secondary">
-            Analytics loading unavailable.
-          </Typography>
-        ) : analytics.error && analytics.postsWithStats === 0 ? (
-          <Alert severity="info" icon={<InsightsOutlinedIcon fontSize="inherit" />}>
-            {analytics.error}
-          </Alert>
-        ) : (
-          <Stack spacing={2}>
-            {hasAnalyticsTotals && (
-              <LinkedInStatsGrid
-                stats={{
-                  impressions: analytics.totalImpressions,
-                  membersReached: analytics.totalMembersReached,
-                  reactions: analytics.totalReactions,
-                  comments: analytics.totalComments,
-                  reshares: analytics.totalReshares,
-                }}
-                compact
-              />
-            )}
+      <LinkedInPerformancePanel
+        analytics={data.linkedInAnalytics}
+        connectedPlatforms={data.accounts.byPlatform}
+      />
 
-            {analytics.topPosts.length > 0 ? (
-              <Stack spacing={1}>
-                <Typography variant="caption" color="text.secondary" fontWeight={700}>
-                  Recent posts
-                </Typography>
-                {analytics.topPosts.map((post) => (
-                  <Paper
-                    key={post.postId}
-                    variant="outlined"
-                    onClick={() => navigate("/posts/published")}
-                    sx={{
-                      p: 1.5,
-                      borderRadius: 2,
-                      cursor: "pointer",
-                      "&:hover": { borderColor: "primary.main" },
-                    }}
-                  >
-                    <Stack
-                      direction={{ xs: "column", sm: "row" }}
-                      justifyContent="space-between"
-                      gap={1}
-                      alignItems={{ sm: "center" }}
-                    >
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography variant="body2" fontWeight={600} noWrap>
-                          {post.contentPreview}
-                        </Typography>
-                        {post.error ? (
-                          <Typography variant="caption" color="warning.main">
-                            {post.error}
-                          </Typography>
-                        ) : (
-                          <Typography variant="caption" color="text.secondary">
-                            {post.impressions.toLocaleString()} impressions ·{" "}
-                            {post.reactions.toLocaleString()} reactions ·{" "}
-                            {post.comments.toLocaleString()} comments
-                          </Typography>
-                        )}
-                      </Box>
-                    </Stack>
-                  </Paper>
-                ))}
-              </Stack>
-            ) : null}
-
-            <Typography variant="caption" color="text.secondary">
-              Updated {new Date(analytics.lastFetchedAt).toLocaleString()} ·{" "}
-              {analytics.postsWithStats}/{analytics.postsChecked} posts with stats
-            </Typography>
-          </Stack>
-        )}
-      </Card>
-
+      {/* Two columns */}
       <Box
         sx={{
           display: "grid",
-          gap: 2,
-          gridTemplateColumns: { xs: "1fr", lg: "repeat(2, minmax(0, 1fr))" },
+          gap: 2.25,
+          gridTemplateColumns: { xs: "1fr", lg: "1.05fr 1fr" },
         }}
       >
-        <Card
+        <DashboardActivityPanel
           title="Upcoming scheduled"
-          description="Agle 7 din ki posts"
-          action={
-            <Link component={RouterLink} to="/posts/scheduled" underline="hover" variant="body2">
-              View all
-            </Link>
+          subtitle="Agle 7 din ki posts"
+          viewAllHref="/posts/scheduled"
+          emptyIcon={<ScheduleEmptyIcon />}
+          emptyText="Koi scheduled post nahi. Compose se schedule karo."
+          posts={data.upcoming}
+          postMeta={(post) =>
+            post.scheduledFor
+              ? `Scheduled ${new Date(post.scheduledFor).toLocaleString()}`
+              : "Scheduled"
           }
-        >
-          {data.upcoming.length === 0 ? (
-            <Stack spacing={1.5} alignItems="flex-start">
-              <Typography variant="body2" color="text.secondary">
-                Koi scheduled post nahi. Compose se schedule karo.
-              </Typography>
-              <Button variant="secondary" onClick={() => navigate("/compose")}>
-                Schedule a post
-              </Button>
-            </Stack>
-          ) : (
-            <Stack spacing={1.5}>
-              {data.upcoming.map((post) => (
-                <PostSnippet
-                  key={post.id}
-                  post={post}
-                  meta={
-                    post.scheduledFor
-                      ? `Scheduled ${new Date(post.scheduledFor).toLocaleString()}`
-                      : "Scheduled"
-                  }
-                  onClick={() => navigate("/posts/scheduled")}
-                />
-              ))}
-            </Stack>
-          )}
-        </Card>
+          onPostClick={() => navigate("/posts/scheduled")}
+          actionButton={
+            <Button
+              fullWidth
+              onClick={() => navigate("/compose")}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: 13,
+                borderRadius: "10px",
+                py: 1.4,
+                border: "1px dashed #CFCFF5",
+                bgcolor: colors.accentSoft,
+                color: colors.accent,
+                "&:hover": { bgcolor: "#E4E3FD" },
+              }}
+            >
+              Schedule a post
+            </Button>
+          }
+        />
 
-        <Card
+        <DashboardActivityPanel
           title="Recently published"
-          description="Latest live posts"
-          action={
-            <Link component={RouterLink} to="/posts/published" underline="hover" variant="body2">
-              View all
-            </Link>
+          subtitle="Latest live posts"
+          viewAllHref="/posts/published"
+          emptyIcon={<PublishedEmptyIcon />}
+          emptyText="Abhi tak koi published post nahi."
+          posts={data.recent}
+          postMeta={(post) =>
+            post.publishedAt
+              ? `Published ${new Date(post.publishedAt).toLocaleString()}`
+              : "Published"
           }
-        >
-          {data.recent.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              Abhi tak koi published post nahi.
-            </Typography>
-          ) : (
-            <Stack spacing={1.5}>
-              {data.recent.map((post) => (
-                <PostSnippet
-                  key={post.id}
-                  post={post}
-                  meta={
-                    post.publishedAt
-                      ? `Published ${new Date(post.publishedAt).toLocaleString()}`
-                      : "Published"
-                  }
-                  onClick={() => navigate("/posts/published")}
-                />
-              ))}
-            </Stack>
-          )}
-        </Card>
+          onPostClick={() => navigate("/posts/published")}
+        />
       </Box>
 
       {data.posts.failed > 0 && (
-        <Paper
-          variant="outlined"
+        <Box
           sx={{
+            mt: 2.25,
             p: 2,
-            borderRadius: 2,
+            borderRadius: "16px",
+            border: "1px solid",
             borderColor: "error.main",
             bgcolor: (theme) =>
               theme.palette.mode === "dark" ? "rgba(211,47,47,0.08)" : "rgba(211,47,47,0.04)",
@@ -385,18 +260,19 @@ export function DashboardPage() {
           <Stack direction="row" alignItems="center" justifyContent="space-between" gap={2}>
             <Stack direction="row" spacing={1} alignItems="center">
               <ScheduleOutlinedIcon color="error" fontSize="small" />
-              <Typography variant="body2">
+              <Typography variant="body2" fontFamily={dashboardFonts.body}>
                 {data.posts.failed} post(s) need attention (failed publish).
               </Typography>
             </Stack>
             <Button
-              variant="secondary"
+              variant="outlined"
               onClick={() => navigate("/posts/published?status=FAILED")}
+              sx={{ textTransform: "none", fontWeight: 600, borderRadius: "10px" }}
             >
               Review failed
             </Button>
           </Stack>
-        </Paper>
+        </Box>
       )}
     </Box>
   );

@@ -12,6 +12,7 @@ import {
   setComposerDraft,
   subscribeComposerDraft,
 } from "../../lib/composerDraft";
+import { useComposeTheme } from "./composeTheme";
 
 type Props = {
   value: string;
@@ -23,6 +24,7 @@ type Props = {
   aiConfigured: boolean;
   smartSuggest: boolean;
   autoCorrect: boolean;
+  composeTheme?: boolean;
 };
 
 const SYNC_DELAY_MS = 500;
@@ -38,10 +40,12 @@ export const ContentEditor = memo(function ContentEditor({
   aiConfigured,
   smartSuggest,
   autoCorrect,
+  composeTheme,
 }: Props) {
   const theme = useTheme();
+  const { colors } = useComposeTheme();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const syncTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const onSyncRef = useRef(onSync);
   onSyncRef.current = onSync;
 
@@ -104,7 +108,7 @@ export const ContentEditor = memo(function ContentEditor({
     onSyncRef.current(event.target.value);
   }
 
-  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function handleKeyDown(event: React.KeyboardEvent) {
     if (event.key === "Tab" && suggestion && !event.shiftKey) {
       event.preventDefault();
       acceptSuggestion();
@@ -118,19 +122,28 @@ export const ContentEditor = memo(function ContentEditor({
 
   const showGhost = Boolean(suggestion && smartSuggest && aiConfigured);
 
+  const borderColor = composeTheme ? colors.borderStrong : "divider";
+  const focusBorder = composeTheme ? colors.accent : theme.palette.primary.main;
+  const focusShadow = composeTheme
+    ? `0 0 0 3px ${colors.accentSoft}`
+    : `0 0 0 1px ${theme.palette.primary.main}`;
+  const editorBg = composeTheme ? colors.surface2 : "background.paper";
+  const focusBg = composeTheme ? colors.surface : editorBg;
+
   return (
     <Box>
       <Box
         sx={{
           position: "relative",
-          borderRadius: 2,
+          borderRadius: composeTheme ? "12px" : 2,
           border: 1,
-          borderColor: "divider",
-          bgcolor: "background.paper",
+          borderColor,
+          bgcolor: editorBg,
           overflow: "hidden",
           "&:focus-within": {
-            borderColor: "primary.main",
-            boxShadow: `0 0 0 1px ${theme.palette.primary.main}`,
+            borderColor: focusBorder,
+            boxShadow: focusShadow,
+            bgcolor: focusBg,
           },
         }}
       >
@@ -196,13 +209,20 @@ export const ContentEditor = memo(function ContentEditor({
 
       <Stack
         direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        flexWrap="wrap"
-        gap={1}
-        sx={{ mt: 1 }}
+        sx={{
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 1,
+          mt: 1,
+        }}
       >
-        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+        <Stack
+          direction="row"
+          spacing={1}
+          useFlexGap
+          sx={{ alignItems: "center", flexWrap: "wrap" }}
+        >
           {showGhost && (
             <Chip
               label="Tab to accept suggestion"

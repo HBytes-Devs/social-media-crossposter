@@ -11,6 +11,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import type { PaletteMode } from "@mui/material";
 import { createAppTheme } from "./muiTheme";
+import { getAppTokens, type AppTokens } from "./appTokens";
 
 export type ThemeMode = PaletteMode;
 
@@ -18,6 +19,7 @@ const STORAGE_KEY = "smc-theme-mode";
 
 type ThemeContextValue = {
   mode: ThemeMode;
+  tokens: AppTokens;
   toggleMode: () => void;
   setMode: (mode: ThemeMode) => void;
 };
@@ -45,10 +47,15 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.dataset.theme = mode;
+    document.documentElement.style.colorScheme = mode;
   }, [mode]);
 
-  const theme = useMemo(() => createAppTheme(mode), [mode]);
-  const value = useMemo(() => ({ mode, toggleMode, setMode }), [mode, toggleMode, setMode]);
+  const tokens = useMemo(() => getAppTokens(mode), [mode]);
+  const theme = useMemo(() => createAppTheme(mode, tokens), [mode, tokens]);
+  const value = useMemo(
+    () => ({ mode, tokens, toggleMode, setMode }),
+    [mode, tokens, toggleMode, setMode],
+  );
 
   return (
     <ThemeContext.Provider value={value}>
@@ -66,4 +73,8 @@ export function useThemeMode() {
     throw new Error("useThemeMode must be used within AppThemeProvider");
   }
   return ctx;
+}
+
+export function useAppTokens(): AppTokens {
+  return useThemeMode().tokens;
 }

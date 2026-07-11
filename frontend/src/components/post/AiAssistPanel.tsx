@@ -1,14 +1,14 @@
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import { Link as RouterLink } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
-import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import { Button } from "../ui/Button";
 import { api } from "../../lib/api";
 import { resetComposerDraft } from "../../lib/composerDraft";
 import type { HashtagMode } from "../../types";
+import { useComposeTheme } from "./composeTheme";
 
 type Props = {
   token: string | null;
@@ -29,6 +29,7 @@ export function AiAssistPanel({
   onHashtagsChange,
   onHashtagModeChange,
 }: Props) {
+  const { colors, fonts } = useComposeTheme();
   const [configured, setConfigured] = useState(false);
   const [keyName, setKeyName] = useState<string | null>(null);
   const [loading, setLoading] = useState<"improve" | "hashtags" | "localize" | null>(null);
@@ -108,28 +109,46 @@ export function AiAssistPanel({
     }
   }, [token, content, language, applyContent]);
 
+  const btnSx = {
+    textTransform: "none" as const,
+    fontWeight: 600,
+    fontSize: 13,
+    fontFamily: fonts.body,
+    px: "14px",
+    py: "9px",
+    borderRadius: "8px",
+    border: `1px solid ${colors.borderStrong}`,
+    bgcolor: colors.surface,
+    color: colors.textPrimary,
+    "&:hover": { borderColor: colors.accent, color: colors.accent },
+    "&.Mui-disabled": { opacity: 0.45 },
+  };
+
   if (!configured) {
     return (
       <Box
         sx={{
           mt: 2,
-          p: 2,
-          borderRadius: 2,
-          border: 1,
-          borderColor: "divider",
-          bgcolor: "action.hover",
+          p: "14px",
+          borderRadius: "12px",
+          border: `1px solid ${colors.border}`,
+          bgcolor: colors.surface2,
         }}
       >
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
-          <AutoAwesomeIcon fontSize="small" color="disabled" />
-          <Typography variant="subtitle2" color="text.secondary">
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.75 }}>
+          <AutoAwesomeIcon sx={{ fontSize: 16, color: colors.textTertiary }} />
+          <Typography sx={{ fontSize: 12.5, fontWeight: 600, color: colors.textSecondary }}>
             AI Assist
           </Typography>
-        </Stack>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+        </Box>
+        <Typography sx={{ fontSize: 13, color: colors.textSecondary, mb: 1.5, fontFamily: fonts.body }}>
           Settings mein apni AI API key add karo — naam de sakte ho jaise Claude, GPT, ya MiniMax.
         </Typography>
-        <Button component={RouterLink} to="/settings" variant="secondary" size="small">
+        <Button
+          component={RouterLink}
+          to="/settings"
+          sx={{ ...btnSx, display: "inline-flex" }}
+        >
           Open Settings
         </Button>
       </Box>
@@ -142,50 +161,50 @@ export function AiAssistPanel({
     <Box
       sx={{
         mt: 2,
-        p: 2,
-        borderRadius: 2,
-        border: 1,
-        borderColor: "divider",
-        bgcolor: "action.hover",
+        border: `1px solid ${colors.border}`,
+        bgcolor: colors.surface2,
+        borderRadius: "12px",
+        p: "14px",
       }}
     >
-      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
-        <AutoAwesomeIcon fontSize="small" color="primary" />
-        <Typography variant="subtitle2">AI Assist</Typography>
-        <Chip label={keyName ?? "AI"} size="small" variant="outlined" />
-      </Stack>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
+        <AutoAwesomeIcon sx={{ fontSize: 16, color: colors.accent }} />
+        <Typography sx={{ fontSize: 12.5, fontWeight: 600, color: colors.textPrimary }}>
+          ✨ AI Assist
+        </Typography>
+        <Box
+          component="span"
+          sx={{
+            fontSize: 10.5,
+            fontFamily: fonts.mono,
+            color: colors.textSecondary,
+            bgcolor: colors.surface,
+            border: `1px solid ${colors.borderStrong}`,
+            px: "8px",
+            py: "2px",
+            borderRadius: 999,
+          }}
+        >
+          {keyName ?? "AI"}
+        </Box>
+      </Box>
 
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={1} flexWrap="wrap" useFlexGap>
-        <Button
-          variant="secondary"
-          loading={loading === "improve"}
-          disabled={disabled || loading !== null}
-          onClick={runImprove}
-        >
-          Improve post
+      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+        <Button disabled={disabled || loading !== null} onClick={() => void runImprove()} sx={btnSx}>
+          {loading === "improve" ? <CircularProgress size={14} /> : "Improve post"}
         </Button>
-        <Button
-          variant="secondary"
-          loading={loading === "hashtags"}
-          disabled={disabled || loading !== null}
-          onClick={runHashtags}
-        >
-          Smart hashtags
+        <Button disabled={disabled || loading !== null} onClick={() => void runHashtags()} sx={btnSx}>
+          {loading === "hashtags" ? <CircularProgress size={14} /> : "Smart hashtags"}
         </Button>
         {language !== "en" && (
-          <Button
-            variant="secondary"
-            loading={loading === "localize"}
-            disabled={disabled || loading !== null}
-            onClick={runLocalize}
-          >
-            AI localize
+          <Button disabled={disabled || loading !== null} onClick={() => void runLocalize()} sx={btnSx}>
+            {loading === "localize" ? <CircularProgress size={14} /> : "AI localize"}
           </Button>
         )}
-      </Stack>
+      </Box>
 
       {error && (
-        <Typography variant="body2" color="error" sx={{ mt: 1.5 }}>
+        <Typography sx={{ fontSize: 13, color: colors.danger, mt: 1.5, fontFamily: fonts.body }}>
           {error}
         </Typography>
       )}

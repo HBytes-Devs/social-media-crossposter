@@ -1,9 +1,6 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { Card } from "../ui/Card";
-import { Select } from "../ui/Select";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
   selectComposer,
@@ -17,21 +14,29 @@ import {
   toggleImage,
   removeImage,
   uploadImages,
+  fetchComposerData,
 } from "../../store/slices/composerSlice";
 import { selectToken } from "../../store/slices/authSlice";
+import { selectAccounts } from "../../store/slices/accountsSlice";
+import { getComposerDraft, subscribeComposerDraft } from "../../lib/composerDraft";
 import { ContentEditor } from "./ContentEditor";
 import { ComposeAssistToggles, useComposeAssistPrefs } from "./ComposeAssistToggles";
 import { HashtagInput } from "./HashtagInput";
 import { HashtagOptions } from "./HashtagOptions";
 import { ImagePicker } from "./ImagePicker";
-import { PlatformComposeHints } from "./PlatformComposeHints";
 import { RedditFields } from "./RedditFields";
 import { AiAssistPanel } from "./AiAssistPanel";
+import { ComposerCard } from "./ComposerCard";
+import { ComposerPlatformGrid } from "./ComposerPlatformGrid";
+import { ComposerPublishPanel } from "./ComposerPublishPanel";
 import { api } from "../../lib/api";
+import { useComposeTheme } from "./composeTheme";
 
 export const ComposerFormPanel = memo(function ComposerFormPanel() {
+  const { colors, fonts, fieldLabelSx, selectSx } = useComposeTheme();
   const dispatch = useAppDispatch();
   const token = useAppSelector(selectToken);
+  const draft = useSyncExternalStore(subscribeComposerDraft, getComposerDraft);
   const {
     content,
     title,
@@ -47,7 +52,10 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
     imageWarnings,
     uploadError,
     uploading,
+    initialized,
+    error: composerError,
   } = useAppSelector(selectComposer);
+  const { items: accountsFromSlice } = useAppSelector(selectAccounts);
 
   const handleSyncContent = useCallback(
     (value: string) => dispatch(setContent(value)),
@@ -59,15 +67,17 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
     [dispatch],
   );
 
+  const platformAccounts = accounts.length > 0 ? accounts : accountsFromSlice;
+
   const hasRedditSelected = selectedAccounts.some((id) => {
-    const acc = accounts.find((a) => a.id === id);
+    const acc = platformAccounts.find((a) => a.id === id);
     return acc?.platform === "REDDIT";
   });
 
   const primaryPlatform =
     selectedAccounts.length > 0
-      ? accounts.find((a) => a.id === selectedAccounts[0])?.platform
-      : accounts[0]?.platform;
+      ? platformAccounts.find((a) => a.id === selectedAccounts[0])?.platform
+      : platformAccounts[0]?.platform;
 
   const { smartSuggest, autoCorrect, setSmartSuggest, setAutoCorrect } =
     useComposeAssistPrefs();
@@ -76,29 +86,68 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
   const selectedPlatformNames = useMemo(
     () =>
       selectedAccounts
-        .map((id) => accounts.find((a) => a.id === id)?.platform)
+        .map((id) => platformAccounts.find((a) => a.id === id)?.platform)
         .filter((p): p is string => Boolean(p)),
-    [selectedAccounts, accounts],
+    [selectedAccounts, platformAccounts],
   );
+
+  useEffect(() => {
+    if (!token) return;
+    if (accounts.length === 0 && initialized) {
+      dispatch(fetchComposerData());
+    }
+  }, [token, accounts.length, initialized, dispatch]);
 
   useEffect(() => {
     if (!token) return;
     api.getAiStatus(token).then((s) => setAiConfigured(s.configured)).catch(() => setAiConfigured(false));
   }, [token]);
 
+  const charCount = draft.length;
+  const twitterSelected = selectedPlatformNames.includes("TWITTER");
+
+  const tagPreview = useMemo(() => {
+    if (hashtagMode === "manual") return hashtags;
+    if (hashtagMode === "none") return [];
+    return hashtags;
+  }, [hashtagMode, hashtags]);
+
   return (
-    <div className="space-y-6 lg:col-span-3">
-      <Card title="Content" description="Text likho — ya sirf image bhejo">
+    <Box>
+      <ComposerCard title="Content" description="Write your text, or send an image on its own.">
         <ContentEditor
           value={content}
           onSync={handleSyncContent}
-          placeholder="Apna post likho... (optional agar image hai)"
+          placeholder="What do you want to share?"
           language={language}
           token={token}
           aiConfigured={aiConfigured}
           smartSuggest={smartSuggest}
           autoCorrect={autoCorrect}
+          composeTheme
         />
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
+          <Typography
+            sx={{
+              fontFamily: fonts.mono,
+              fontSize: 11.5,
+              color: twitterSelected && charCount > 280 ? colors.danger : colors.textTertiary,
+              fontWeight: twitterSelected && charCount > 280 ? 600 : 400,
+            }}
+          >
+            {charCount} character{charCount === 1 ? "" : "s"}
+          </Typography>
+          <Box
+            sx={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              bgcolor: colors.success,
+              boxShadow: `0 0 0 3px ${colors.successSoft}`,
+            }}
+            title="Ready to publish"
+          />
+        </Box>
         <ComposeAssistToggles
           aiConfigured={aiConfigured}
           smartSuggest={smartSuggest}
@@ -115,52 +164,72 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
           onHashtagsChange={(tags) => dispatch(setHashtags(tags))}
           onHashtagModeChange={(mode) => dispatch(setHashtagMode(mode))}
         />
-      </Card>
+      </ComposerCard>
 
       {hasRedditSelected && (
-        <Card title="Reddit" description="Title aur subreddit zaroori hain">
+        <ComposerCard title="Reddit" description="Title and subreddit are required for Reddit posts.">
           <RedditFields
             title={title}
             subreddit={subreddit}
             onTitleChange={(v) => dispatch(setTitle(v))}
             onSubredditChange={(v) => dispatch(setSubreddit(v))}
           />
-        </Card>
+        </ComposerCard>
       )}
 
-      <Card title="Hashtags" description="Auto, manual, ya bilkul none">
+      <ComposerCard title="Hashtags" description="Auto-generate, write your own, or skip them entirely.">
         <HashtagOptions
           value={hashtagMode}
           onChange={(mode) => dispatch(setHashtagMode(mode))}
           options={options.hashtagModes}
         />
         {hashtagMode === "manual" && (
-          <div className="mt-4">
-            <HashtagInput
-              tags={hashtags}
-              onChange={(tags) => dispatch(setHashtags(tags))}
-            />
-          </div>
+          <HashtagInput tags={hashtags} onChange={(tags) => dispatch(setHashtags(tags))} />
         )}
-      </Card>
+        {tagPreview.length > 0 && (
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75, mt: 1.25 }}>
+            {tagPreview.map((tag) => (
+              <Box
+                key={tag}
+                component="span"
+                sx={{
+                  fontFamily: fonts.mono,
+                  fontSize: 11.5,
+                  color: colors.accent,
+                  bgcolor: colors.accentSoft,
+                  px: "9px",
+                  py: "4px",
+                  borderRadius: 999,
+                }}
+              >
+                #{tag}
+              </Box>
+            ))}
+          </Box>
+        )}
+      </ComposerCard>
 
-      <Card title="Language" description="Post text aur hashtags is language mein convert honge">
-        <Select
-          label="Post language"
+      <ComposerCard title="Language" description="Post text and hashtags will be shown in this language.">
+        <Typography component="label" sx={fieldLabelSx}>
+          Post language
+        </Typography>
+        <Box
+          component="select"
           value={language}
-          onChange={(e) => dispatch(setLanguage(e.target.value))}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => dispatch(setLanguage(e.target.value))}
+          sx={selectSx}
         >
           {options.languages.map((lang) => (
             <option key={lang.code} value={lang.code}>
               {lang.label}
             </option>
           ))}
-        </Select>
-      </Card>
+        </Box>
+      </ComposerCard>
 
-      <Card
+      <ComposerCard
         title="Images"
-        description="LinkedIn ke liye — recommended 1200×627 ya 1200×1200"
+        description="LinkedIn recommends 1200×627 or 1200×1200 · min 552×276px · max 8MB · ratio 4:5 to 1.91:1"
       >
         <ImagePicker
           images={images}
@@ -172,67 +241,38 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
           onUpload={handleUpload}
           onToggle={(url) => dispatch(toggleImage(url))}
           onRemove={(url) => dispatch(removeImage(url))}
+          composeTheme
         />
-      </Card>
+      </ComposerCard>
 
-      <Card title="Platforms" description="Kahan publish karna hai — multiple select = cross-post">
-        <PlatformComposeHints
-          selectedPlatforms={selectedPlatformNames}
-          contentLength={content.length}
-          imageCount={images.length}
-        />
-        <Box sx={{ mt: 2 }}>
-          {accounts.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              Koi account connected nahi. Pehle{" "}
-              <Typography
-                component="a"
-                href="/accounts"
-                color="primary"
-                sx={{ textDecoration: "underline" }}
-              >
-                Accounts
-              </Typography>{" "}
-              page se LinkedIn ya Reddit connect karo.
-            </Typography>
-          ) : (
-            <Stack spacing={1}>
-              {accounts.map((acc) => (
-                <Box
-                  key={acc.id}
-                  component="label"
-                  sx={{
-                    display: "flex",
-                    cursor: "pointer",
-                    alignItems: "center",
-                    gap: 1.5,
-                    borderRadius: 2,
-                    border: 1,
-                    borderColor: "divider",
-                    px: 2,
-                    py: 1.5,
-                    "&:hover": { bgcolor: "action.hover" },
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={selectedAccounts.includes(acc.id)}
-                    onChange={() => dispatch(toggleAccount(acc.id))}
-                  />
-                  <Box>
-                    <Typography variant="body2" fontWeight={600}>
-                      {acc.accountName ?? acc.accountId}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {acc.platform}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
-            </Stack>
-          )}
-        </Box>
-      </Card>
-    </div>
+      <ComposerCard title="Platforms" description="Select where to publish — multiple selection cross-posts to all.">
+        {composerError && accounts.length === 0 && (
+          <Typography sx={{ fontSize: 12.5, color: colors.danger, mb: 1.5, fontFamily: fonts.body }}>
+            Could not load connected accounts. Refresh the page or check that the backend is running.
+          </Typography>
+        )}
+        <ComposerPlatformGrid
+          accounts={platformAccounts}
+            selectedAccounts={selectedAccounts}
+            onToggle={(id) => dispatch(toggleAccount(id))}
+          />
+      </ComposerCard>
+
+      <ComposerCard
+        title="Publish or schedule"
+        description="One action panel — no duplicate submissions."
+        sx={{
+          position: { xs: "sticky", md: "static" },
+          bottom: { xs: 12, md: "auto" },
+          zIndex: { xs: 2, md: "auto" },
+          boxShadow: {
+            xs: "0 -8px 24px rgba(16,24,40,0.08)",
+            md: "0 1px 2px rgba(16,24,40,0.03)",
+          },
+        }}
+      >
+        <ComposerPublishPanel />
+      </ComposerCard>
+    </Box>
   );
 });

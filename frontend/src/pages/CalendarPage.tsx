@@ -22,7 +22,7 @@ import { platformLabel } from "../lib/platforms";
 import type { CalendarPostItem } from "../types";
 import { useAppSelector } from "../store/hooks";
 import { selectToken } from "../store/slices/authSlice";
-import { Button } from "../components/ui/Button";
+import { PageHeaderButton } from "../components/ui/PageHeaderButton";
 import { Card } from "../components/ui/Card";
 import { PageStateLoader } from "../components/ui/PageState";
 
@@ -141,8 +141,9 @@ export function CalendarPage() {
       <Stack
         direction={{ xs: "column", sm: "row" }}
         justifyContent="space-between"
-        alignItems={{ sm: "center" }}
-        gap={1.5}
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        gap={2}
+        sx={{ width: "100%" }}
       >
         <Box>
           <Typography variant="h4" fontWeight={800}>
@@ -152,9 +153,16 @@ export function CalendarPage() {
             Scheduled aur published posts — month view
           </Typography>
         </Box>
-        <Button variant="secondary" onClick={() => navigate("/compose")}>
-          + Schedule post
-        </Button>
+        <Stack
+          direction="row"
+          spacing={1.25}
+          flexShrink={0}
+          sx={{ ml: { xs: 0, sm: "auto" } }}
+        >
+          <PageHeaderButton variant="outlined" onClick={() => navigate("/compose")}>
+            + Schedule post
+          </PageHeaderButton>
+        </Stack>
       </Stack>
 
       {error && (

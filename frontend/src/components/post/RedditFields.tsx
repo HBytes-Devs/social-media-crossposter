@@ -1,6 +1,6 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { Input } from "../ui/Input";
+import { useComposeTheme } from "./composeTheme";
 
 type Props = {
   title: string;
@@ -15,37 +15,57 @@ export function RedditFields({
   onTitleChange,
   onSubredditChange,
 }: Props) {
+  const { colors, fonts, fieldLabelSx } = useComposeTheme();
+
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 2,
-        borderRadius: 2,
-        border: 1,
-        borderColor: "warning.main",
-        bgcolor: "action.hover",
-        p: 2,
-      }}
-    >
-      <Typography variant="subtitle2" color="warning.main">
-        Reddit options
-      </Typography>
-      <Input
-        label="Post title *"
-        value={title}
-        onChange={(e) => onTitleChange(e.target.value)}
-        placeholder="Reddit post ka title"
-        maxLength={300}
-      />
-      <Input
-        label="Subreddit *"
-        value={subreddit}
-        onChange={(e) => onSubredditChange(e.target.value)}
-        placeholder="test (bina r/)"
-      />
-      <Typography variant="caption" color="text.secondary">
-        Testing ke liye <code>test</code> use karo. Production mein apni subreddit likho.
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box>
+        <Typography component="label" sx={fieldLabelSx}>
+          Post title *
+        </Typography>
+        <Box
+          component="input"
+          value={title}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onTitleChange(e.target.value)}
+          placeholder="Reddit post title"
+          maxLength={300}
+          sx={{
+            width: "100%",
+            border: "1px solid",
+            borderColor: colors.borderStrong,
+            borderRadius: "8px",
+            p: "10px 12px",
+            fontSize: 13.5,
+            fontFamily: fonts.body,
+            outline: "none",
+            "&:focus": { borderColor: colors.accent },
+          }}
+        />
+      </Box>
+      <Box>
+        <Typography component="label" sx={fieldLabelSx}>
+          Subreddit *
+        </Typography>
+        <Box
+          component="input"
+          value={subreddit}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSubredditChange(e.target.value)}
+          placeholder="test (without r/)"
+          sx={{
+            width: "100%",
+            border: "1px solid",
+            borderColor: colors.borderStrong,
+            borderRadius: "8px",
+            p: "10px 12px",
+            fontSize: 13.5,
+            fontFamily: fonts.body,
+            outline: "none",
+            "&:focus": { borderColor: colors.accent },
+          }}
+        />
+      </Box>
+      <Typography sx={{ fontSize: 12, color: colors.textTertiary, fontFamily: fonts.body }}>
+        For testing use <code>test</code>. In production use your own subreddit.
       </Typography>
     </Box>
   );

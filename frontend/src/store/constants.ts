@@ -20,17 +20,17 @@ export const DEFAULT_POST_OPTIONS = {
     {
       value: "auto" as const,
       label: "Auto hashtags",
-      description: "Content se hashtags auto generate honge",
+      description: "Generated from your content",
     },
     {
       value: "manual" as const,
       label: "Manual hashtags",
-      description: "Sirf aapke diye hue hashtags use honge",
+      description: "Use only your own tags",
     },
     {
       value: "none" as const,
       label: "No hashtags",
-      description: "Post bina hashtags ke jayegi",
+      description: "Post without any hashtags",
     },
   ],
   imageOptional: true,

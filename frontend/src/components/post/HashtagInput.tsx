@@ -1,4 +1,8 @@
+import CloseIcon from "@mui/icons-material/Close";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { useState, type KeyboardEvent } from "react";
+import { useComposeTheme } from "./composeTheme";
 
 type Props = {
   tags: string[];
@@ -6,6 +10,7 @@ type Props = {
 };
 
 export function HashtagInput({ tags, onChange }: Props) {
+  const { colors, fonts } = useComposeTheme();
   const [input, setInput] = useState("");
 
   function addTag(raw: string) {
@@ -26,34 +31,81 @@ export function HashtagInput({ tags, onChange }: Props) {
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex min-h-[44px] flex-wrap items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2">
+    <Box sx={{ mt: 1.5 }}>
+      <Box
+        sx={{
+          width: "100%",
+          border: "1px solid",
+          borderColor: colors.borderStrong,
+          borderRadius: "8px",
+          p: "10px 12px",
+          fontSize: 13.5,
+          fontFamily: fonts.body,
+          bgcolor: colors.surface,
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 0.75,
+          alignItems: "center",
+        }}
+      >
         {tags.map((tag) => (
-          <span
+          <Box
             key={tag}
-            className="inline-flex items-center gap-1 rounded-full bg-brand-600/20 px-2.5 py-1 text-xs font-medium text-brand-100"
+            component="span"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.5,
+              fontFamily: fonts.mono,
+              fontSize: 11.5,
+              color: colors.accent,
+              bgcolor: colors.accentSoft,
+              px: "9px",
+              py: "4px",
+              borderRadius: 999,
+            }}
           >
             #{tag}
-            <button
+            <Box
+              component="button"
               type="button"
               onClick={() => onChange(tags.filter((t) => t !== tag))}
-              className="text-brand-200 hover:text-white"
+              sx={{
+                border: "none",
+                bgcolor: "transparent",
+                cursor: "pointer",
+                p: 0,
+                display: "flex",
+                color: "inherit",
+              }}
               aria-label={`Remove ${tag}`}
             >
-              ×
-            </button>
-          </span>
+              <CloseIcon sx={{ fontSize: 12 }} />
+            </Box>
+          </Box>
         ))}
-        <input
+        <Box
+          component="input"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
           onBlur={() => addTag(input)}
-          placeholder={tags.length ? "Add more..." : "Type hashtag and press Enter"}
-          className="min-w-[120px] flex-1 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+          placeholder={tags.length ? "Add more..." : "#launch #buildinpublic #saas"}
+          sx={{
+            flex: 1,
+            minWidth: 120,
+            border: "none",
+            outline: "none",
+            bgcolor: "transparent",
+            fontSize: 13.5,
+            fontFamily: fonts.body,
+            color: colors.textPrimary,
+          }}
         />
-      </div>
-      <p className="text-xs text-slate-500">Enter ya comma se tag add karo. # optional hai.</p>
-    </div>
+      </Box>
+      <Typography sx={{ fontSize: 11.5, color: colors.textTertiary, mt: 1 }}>
+        Enter ya comma se tag add karo. # optional hai.
+      </Typography>
+    </Box>
   );
 }

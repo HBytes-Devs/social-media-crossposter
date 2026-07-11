@@ -1,20 +1,21 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Collapse from "@mui/material/Collapse";
 import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 import { useEffect, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { PostCard } from "../components/posts/PostCard";
-import { PostsPanelSection } from "../components/posts/PostsPanelSection";
+import { PostsFilterSelects } from "../components/posts/PostsFilterSelects";
+import { PostsPageHeader } from "../components/posts/PostsPageHeader";
+import { PostsPanelEmptyState } from "../components/posts/PostsPanelEmptyState";
 import { PostsPlatformFilter } from "../components/posts/PostsPlatformFilter";
 import { PostsPlatformSection } from "../components/posts/PostsPlatformSection";
 import { PostsTabBar } from "../components/posts/PostsTabBar";
+import { usePostsTheme } from "../components/posts/postsTheme";
 import { PostCardSkeleton } from "../components/ui/Skeleton";
-import { Button } from "../components/ui/Button";
-import { Card } from "../components/ui/Card";
-import { EmptyState, NoResultsState, PageStateLoader } from "../components/ui/PageState";
-import { Select } from "../components/ui/Select";
+import { PageStateLoader } from "../components/ui/PageState";
 import { groupPostsByPlatform } from "../lib/platforms";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { selectToken } from "../store/slices/authSlice";
@@ -70,6 +71,7 @@ const EMPTY_BY_TAB: Record<
 };
 
 export function PostsPage() {
+  const { colors, fonts, containerSx, filterLabelSx } = usePostsTheme();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -155,6 +157,12 @@ export function PostsPage() {
     }
   }
 
+  function clearFilters() {
+    dispatch(clearPostFilters());
+    const path = activeTab === "all" ? "/posts" : `/posts/${activeTab}`;
+    navigate(path, { replace: true });
+  }
+
   const hasActiveFilters = Boolean(filters.platform || filters.language || filters.status);
   const isTabSwitching = refreshing && loadedTab !== activeTab;
   const isContentReady = loadedTab === activeTab && !refreshing;
@@ -188,22 +196,19 @@ export function PostsPage() {
   function renderEmptyState() {
     if (hasActiveFilters) {
       return (
-        <NoResultsState
+        <PostsPanelEmptyState
+          variant="no-results"
           title="No matching posts"
           description="In filters ke sath koi post nahi mili. Filters change karo ya clear karo."
           actionLabel="Clear filters"
-          onAction={() => {
-            dispatch(clearPostFilters());
-            const path = activeTab === "all" ? "/posts" : `/posts/${activeTab}`;
-            navigate(path, { replace: true });
-          }}
+          onAction={clearFilters}
         />
       );
     }
 
     const empty = EMPTY_BY_TAB[activeTab];
     return (
-      <EmptyState
+      <PostsPanelEmptyState
         title={empty.title}
         description={empty.description}
         actionLabel={empty.actionLabel}
@@ -215,7 +220,7 @@ export function PostsPage() {
   function renderPostsList() {
     if (showGrouped) {
       return (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, px: { xs: 2, sm: 3 }, py: 2.5 }}>
           {groupedPosts.map((group) => (
             <PostsPlatformSection
               key={group.key}
@@ -243,31 +248,68 @@ export function PostsPage() {
     }
 
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, px: { xs: 2, sm: 3 }, py: 2.5 }}>
         {posts.map((post) => renderPostCard(post, filters.platform))}
       </Box>
     );
   }
 
+  function renderPanelBody() {
+    if (loading && loadedTab === null) {
+      return (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, px: { xs: 2, sm: 3 }, py: 2.5 }}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <PostCardSkeleton key={i} />
+          ))}
+        </Box>
+      );
+    }
+
+    if (isTabSwitching) {
+      return <PageStateLoader label="Loading posts..." />;
+    }
+
+    if (isContentReady && posts.length === 0) {
+      return renderEmptyState();
+    }
+
+    if (isContentReady) {
+      return (
+        <Box
+          sx={{
+            borderTop: "1px solid",
+            borderColor: colors.line,
+            opacity: isFilterRefreshing ? 0.65 : 1,
+            transition: "opacity 0.2s ease",
+            pointerEvents: isFilterRefreshing ? "none" : "auto",
+            position: "relative",
+          }}
+        >
+          {isFilterRefreshing && (
+            <LinearProgress
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+              }}
+            />
+          )}
+          {renderPostsList()}
+        </Box>
+      );
+    }
+
+    return null;
+  }
+
   return (
-    <Box sx={{ display: "flex", width: "100%", flexDirection: "column", gap: 2 }}>
-      <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 1.5 }}>
-        <div>
-          <Typography variant="h4" fontWeight={800}>
-            Posts
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Published, drafts, trash — sab manage yahan
-          </Typography>
-        </div>
-        <Button variant="secondary" onClick={() => navigate("/compose")}>
-          + New post
-        </Button>
-      </Box>
+    <Box sx={{ display: "flex", width: "100%", flexDirection: "column" }}>
+      <PostsPageHeader onNewPost={() => navigate("/compose")} />
 
       <Collapse in={Boolean(error)}>
         {error && (
-          <Alert severity="error" onClose={() => dispatch(clearPostsError())}>
+          <Alert severity="error" onClose={() => dispatch(clearPostsError())} sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
@@ -275,125 +317,72 @@ export function PostsPage() {
 
       <Collapse in={Boolean(success)}>
         {success && (
-          <Alert severity="success" onClose={() => dispatch(clearPostsSuccess())}>
+          <Alert severity="success" onClose={() => dispatch(clearPostsSuccess())} sx={{ mb: 2 }}>
             {success}
           </Alert>
         )}
       </Collapse>
 
-      <Card padding="none" className="overflow-hidden">
-        <PostsPanelSection first>
-          <PostsTabBar
-            activeTab={activeTab}
-            counts={counts}
-            onChange={handleTabChange}
-            disabled={isTabSwitching}
-          />
-        </PostsPanelSection>
+      <Box sx={containerSx}>
+        <PostsTabBar
+          activeTab={activeTab}
+          counts={counts}
+          onChange={handleTabChange}
+          disabled={isTabSwitching}
+        />
 
-        <PostsPanelSection title="Platform">
-          <PostsPlatformFilter
-            posts={isContentReady ? posts : []}
-            value={filters.platform}
-            onChange={(platform) => updateFilter("platform", platform ?? "")}
-          />
-        </PostsPanelSection>
-
-        {activeTab === "all" && (
-          <PostsPanelSection
-            title="Filters"
-            action={
-              hasActiveFilters ? (
-                <Button
-                  variant="ghost"
-                  className="text-xs"
-                  onClick={() => {
-                    dispatch(clearPostFilters());
-                    const path = activeTab === "all" ? "/posts" : `/posts/${activeTab}`;
-                    navigate(path, { replace: true });
-                  }}
-                >
-                  Clear filters
-                </Button>
-              ) : undefined
-            }
-          >
-            <Box
-              sx={{
-                display: "grid",
-                gap: 1.5,
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "repeat(2, minmax(0, 240px))",
-                },
-              }}
-            >
-              <Select
-                label="Language"
-                value={filters.language ?? ""}
-                onChange={(e) => updateFilter("language", e.target.value)}
-              >
-                <option value="">All languages</option>
-                {languages.map((lang) => (
-                  <option key={lang.code} value={lang.code}>
-                    {lang.label}
-                  </option>
-                ))}
-              </Select>
-
-              <Select
-                label="Status"
-                value={filters.status ?? ""}
-                onChange={(e) => updateFilter("status", e.target.value)}
-              >
-                <option value="">All statuses</option>
-                <option value="DRAFT">Draft</option>
-                <option value="SCHEDULED">Scheduled</option>
-                <option value="PUBLISHED">Published</option>
-                <option value="PARTIAL">Partial</option>
-                <option value="FAILED">Failed</option>
-                <option value="PUBLISHING">Publishing</option>
-              </Select>
-            </Box>
-          </PostsPanelSection>
-        )}
-      </Card>
-
-      <Box sx={{ position: "relative", minHeight: 120 }}>
-        {refreshing && (
-          <LinearProgress
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              borderRadius: 1,
-            }}
-          />
-        )}
-
-        {loading && loadedTab === null ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, pt: 1 }}>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <PostCardSkeleton key={i} />
-            ))}
+        <Box sx={{ px: { xs: 2, sm: 3 }, pt: 2.75, pb: 0.75 }}>
+          <Typography sx={filterLabelSx}>Platform</Typography>
+          <Box sx={{ mb: 2.75 }}>
+            <PostsPlatformFilter
+              posts={isContentReady ? posts : []}
+              value={filters.platform}
+              onChange={(platform) => updateFilter("platform", platform ?? "")}
+            />
           </Box>
-        ) : isTabSwitching ? (
-          <PageStateLoader label="Loading posts..." />
-        ) : isContentReady && posts.length === 0 ? (
-          <Card>{renderEmptyState()}</Card>
-        ) : isContentReady ? (
-          <Box
-            sx={{
-              pt: 1,
-              opacity: isFilterRefreshing ? 0.65 : 1,
-              transition: "opacity 0.2s ease",
-              pointerEvents: isFilterRefreshing ? "none" : "auto",
-            }}
-          >
-            {renderPostsList()}
-          </Box>
-        ) : null}
+
+          {activeTab === "all" && (
+            <>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 1,
+                  mb: 0.25,
+                }}
+              >
+                <Typography sx={{ ...filterLabelSx, mb: 0, mt: 0 }}>Filters</Typography>
+                {hasActiveFilters && (
+                  <Button
+                    onClick={clearFilters}
+                    sx={{
+                      textTransform: "none",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: colors.accent,
+                      fontFamily: fonts.body,
+                      minWidth: 0,
+                      p: 0,
+                      "&:hover": { bgcolor: "transparent", textDecoration: "underline" },
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                )}
+              </Box>
+              <PostsFilterSelects
+                language={filters.language ?? ""}
+                status={filters.status ?? ""}
+                languages={languages}
+                onLanguageChange={(value) => updateFilter("language", value)}
+                onStatusChange={(value) => updateFilter("status", value)}
+              />
+            </>
+          )}
+        </Box>
+
+        {renderPanelBody()}
       </Box>
     </Box>
   );

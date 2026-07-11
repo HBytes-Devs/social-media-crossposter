@@ -169,7 +169,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               to={to}
               selected={isActive}
               onClick={onNavigate}
-              sx={{ borderRadius: 2, mb: 0.5, transition: "all 0.2s ease" }}
+              sx={{ borderRadius: 2, mb: 1, transition: "all 0.2s ease" }}
             >
               <ListItemIcon sx={{ minWidth: 36 }}>
                 <Box
@@ -264,6 +264,8 @@ export function Layout() {
             <Typography variant="h6" fontWeight={800} sx={{ ml: 1, flex: 1 }}>
               SMC
             </Typography>
+            <ThemeToggle size="small" />
+            <Box sx={{ width: 8 }} />
             <VersionBadge compact />
           </Toolbar>
         </AppBar>

@@ -6,6 +6,7 @@ import {
 } from "../../lib/linkedin-image";
 import type { HashtagMode, MediaItem, PostOptions, SocialAccount } from "../../types";
 import { DEFAULT_POST_OPTIONS } from "../constants";
+import { fetchAccounts } from "./accountsSlice";
 import { fromLocalDatetimeValue, defaultScheduleDatetime } from "../../lib/datetime";
 import { getComposerDraft, resetComposerDraft } from "../../lib/composerDraft";
 import type { RootState } from "../types";
@@ -68,19 +69,28 @@ export const fetchComposerData = createAsyncThunk(
     if (!token) return rejectWithValue("Not authenticated");
 
     try {
-      const [optsRes, accRes, mediaRes] = await Promise.all([
+      const [optsSettled, accSettled, mediaSettled] = await Promise.allSettled([
         api.getPostOptions(token),
         api.listAccounts(token),
         api.listMedia(token),
       ]);
 
+      if (accSettled.status === "rejected") {
+        throw accSettled.reason;
+      }
+
       return {
-        options: optsRes.data,
-        accounts: accRes.data.accounts,
-        media: mediaRes.data.media,
+        options:
+          optsSettled.status === "fulfilled"
+            ? optsSettled.value.data
+            : DEFAULT_POST_OPTIONS,
+        accounts: accSettled.value.data.accounts,
+        media: mediaSettled.status === "fulfilled" ? mediaSettled.value.data.media : [],
       };
-    } catch {
-      return rejectWithValue("Failed to load composer data");
+    } catch (err) {
+      return rejectWithValue(
+        err instanceof Error ? err.message : "Failed to load composer data",
+      );
     }
   },
 );
@@ -317,17 +327,34 @@ const composerSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchComposerData.pending, (state) => {
+        state.error = null;
+      })
       .addCase(fetchComposerData.fulfilled, (state, action) => {
         state.options = action.payload.options;
         state.accounts = action.payload.accounts;
         state.mediaLibrary = dedupeMediaLibrary(action.payload.media);
         state.initialized = true;
 
-        if (
-          action.payload.accounts.length === 1 &&
-          state.selectedAccounts.length === 0
-        ) {
-          state.selectedAccounts = [action.payload.accounts[0].id];
+        if (state.selectedAccounts.length === 0 && action.payload.accounts.length > 0) {
+          const preferred =
+            action.payload.accounts.find((a) => a.platform === "LINKEDIN") ??
+            action.payload.accounts[0]!;
+          state.selectedAccounts = [preferred.id];
+        }
+      })
+      .addCase(fetchComposerData.rejected, (state, action) => {
+        state.initialized = true;
+        state.error = (action.payload as string) ?? "Failed to load composer data";
+      })
+      .addCase(fetchAccounts.fulfilled, (state, action) => {
+        if (state.accounts.length === 0 && action.payload.length > 0) {
+          state.accounts = action.payload;
+          if (state.selectedAccounts.length === 0) {
+            const preferred =
+              action.payload.find((a) => a.platform === "LINKEDIN") ?? action.payload[0]!;
+            state.selectedAccounts = [preferred.id];
+          }
         }
       })
       .addCase(fetchPreview.pending, (state) => {

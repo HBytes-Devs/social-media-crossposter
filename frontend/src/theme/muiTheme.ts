@@ -1,50 +1,49 @@
 import { createTheme, type PaletteMode } from "@mui/material/styles";
+import type { AppTokens } from "./appTokens";
 
-const brand = {
-  main: "#2563eb",
-  light: "#3b82f6",
-  dark: "#1d4ed8",
-  contrastText: "#ffffff",
-};
-
-export function createAppTheme(mode: PaletteMode) {
+export function createAppTheme(mode: PaletteMode, tokens: AppTokens) {
   const isDark = mode === "dark";
 
   return createTheme({
     palette: {
       mode,
-      primary: brand,
+      primary: {
+        main: tokens.accent,
+        light: tokens.accent2,
+        dark: isDark ? "#4338ca" : "#1d4ed8",
+        contrastText: "#ffffff",
+      },
       secondary: {
         main: isDark ? "#64748b" : "#475569",
       },
       error: {
-        main: "#dc2626",
+        main: tokens.danger,
       },
       success: {
-        main: isDark ? "#22c55e" : "#16a34a",
+        main: tokens.success,
       },
       warning: {
-        main: isDark ? "#f59e0b" : "#d97706",
+        main: tokens.warn,
       },
       action: {
         hover: isDark ? "rgba(148, 163, 184, 0.08)" : "rgba(15, 23, 42, 0.04)",
         selected: isDark ? "rgba(148, 163, 184, 0.16)" : "rgba(15, 23, 42, 0.08)",
       },
       background: {
-        default: isDark ? "#020617" : "#f8fafc",
-        paper: isDark ? "#0f172a" : "#ffffff",
+        default: tokens.pageBg,
+        paper: tokens.surface,
       },
       text: {
-        primary: isDark ? "#f1f5f9" : "#0f172a",
-        secondary: isDark ? "#94a3b8" : "#64748b",
+        primary: tokens.textPrimary,
+        secondary: tokens.textSecondary,
       },
-      divider: isDark ? "rgba(148, 163, 184, 0.16)" : "rgba(15, 23, 42, 0.12)",
+      divider: tokens.border,
     },
     shape: {
       borderRadius: 12,
     },
     typography: {
-      fontFamily: '"Segoe UI", system-ui, -apple-system, sans-serif',
+      fontFamily: tokens.fonts.body,
       button: {
         textTransform: "none",
         fontWeight: 600,
@@ -63,6 +62,8 @@ export function createAppTheme(mode: PaletteMode) {
         styleOverrides: {
           body: {
             scrollbarColor: isDark ? "#334155 #0f172a" : "#cbd5e1 #f8fafc",
+            backgroundColor: tokens.pageBg,
+            color: tokens.textPrimary,
           },
         },
       },
@@ -91,7 +92,7 @@ export function createAppTheme(mode: PaletteMode) {
         },
         styleOverrides: {
           root: {
-            border: `1px solid ${isDark ? "rgba(148, 163, 184, 0.16)" : "rgba(15, 23, 42, 0.1)"}`,
+            border: `1px solid ${tokens.border}`,
           },
         },
       },
@@ -130,6 +131,18 @@ export function createAppTheme(mode: PaletteMode) {
         styleOverrides: {
           root: {
             borderRadius: 12,
+          },
+        },
+      },
+      MuiListItemButton: {
+        styleOverrides: {
+          root: {
+            "&.Mui-selected": {
+              backgroundColor: tokens.accentSoft,
+              "&:hover": {
+                backgroundColor: tokens.accentSoft,
+              },
+            },
           },
         },
       },

@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PlatformGrid } from "../components/accounts/PlatformCard";
+import { platformFonts } from "../components/accounts/platformConnectionTheme";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -65,13 +66,38 @@ export function AccountsPage() {
   const redditConfigured = platforms.find((p) => p.id === "REDDIT")?.configured;
 
   return (
-    <Box sx={{ display: "flex", width: "100%", flexDirection: "column", gap: 2 }}>
-      <Box>
-        <Typography variant="h4" fontWeight={800}>
-          Connected Accounts
+    <Box sx={{ display: "flex", width: "100%", flexDirection: "column", gap: 3 }}>
+      <Box sx={{ width: "100%" }}>
+        <Typography
+          sx={{
+            fontFamily: platformFonts.mono,
+            fontSize: 11,
+            letterSpacing: "1.5px",
+            color: "text.secondary",
+            mb: 1.25,
+            textTransform: "uppercase",
+            lineHeight: 1,
+          }}
+        >
+          Accounts
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          LinkedIn + Reddit (Phase 3) — OAuth se connect karo, phir Compose se cross-post
+        <Typography
+          sx={{
+            fontFamily: platformFonts.heading,
+            fontSize: 20,
+            fontWeight: 600,
+            lineHeight: 1.2,
+          }}
+        >
+          Connected platforms
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 0.75, lineHeight: 1.5 }}
+        >
+          {configuredCount} configured · {platforms.length} total — OAuth se connect karo, phir
+          Compose se cross-post
         </Typography>
       </Box>
 
@@ -85,6 +111,20 @@ export function AccountsPage() {
       )}
 
       {error && <Alert severity="error">{error}</Alert>}
+
+      {loading || platformsLoading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
+          <CircularProgress size={28} />
+        </Box>
+      ) : (
+        <PlatformGrid
+          platforms={platforms}
+          accounts={accounts}
+          connectingPlatform={connecting}
+          onConnect={(slug) => dispatch(connectPlatform(slug))}
+          onDisconnect={(id) => dispatch(disconnectAccount(id))}
+        />
+      )}
 
       <Card
         title="How to connect?"
@@ -126,22 +166,6 @@ export function AccountsPage() {
             Refresh list
           </Button>
         </Box>
-      </Card>
-
-      <Card title="Platforms" description={`${configuredCount} configured · ${platforms.length} total`}>
-        {loading || platformsLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-            <CircularProgress size={28} />
-          </Box>
-        ) : (
-          <PlatformGrid
-            platforms={platforms}
-            accounts={accounts}
-            connectingPlatform={connecting}
-            onConnect={(slug) => dispatch(connectPlatform(slug))}
-            onDisconnect={(id) => dispatch(disconnectAccount(id))}
-          />
-        )}
       </Card>
     </Box>
   );

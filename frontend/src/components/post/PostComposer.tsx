@@ -1,7 +1,6 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { ComposerFormSkeleton, LinkedInPreviewSkeleton } from "../ui/Skeleton";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
@@ -9,16 +8,27 @@ import {
   fetchComposerData,
   selectComposer,
 } from "../../store/slices/composerSlice";
+import { selectToken } from "../../store/slices/authSlice";
+import { fetchAccounts } from "../../store/slices/accountsSlice";
 import { ComposerFormPanel } from "./ComposerFormPanel";
-import { ComposerPreviewPanel } from "./ComposerPreviewPanel";
+import { ComposerLivePreview } from "./ComposerLivePreview";
+import { ComposerPageHeader } from "./ComposerPageHeader";
+import { useComposeTheme } from "./composeTheme";
 
 export function PostComposer() {
+  const { colors } = useComposeTheme();
   const dispatch = useAppDispatch();
-  const { error, success, initialized } = useAppSelector(selectComposer);
+  const token = useAppSelector(selectToken);
+  const { error, success, initialized, accounts } = useAppSelector(selectComposer);
+  const loadedForToken = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!token) return;
+    if (loadedForToken.current === token && initialized && accounts.length > 0) return;
+    loadedForToken.current = token;
     dispatch(fetchComposerData());
-  }, [dispatch]);
+    dispatch(fetchAccounts());
+  }, [dispatch, token, initialized, accounts.length]);
 
   useEffect(() => {
     if (!success && !error) return;
@@ -26,21 +36,27 @@ export function PostComposer() {
     return () => clearTimeout(timer);
   }, [success, error, dispatch]);
 
+  const shellSx = {
+    width: "100%",
+    mx: { xs: -2, sm: -3, lg: -4 },
+    mt: { xs: -2, sm: -3, lg: -4 },
+    mb: { xs: -2, sm: -3, lg: -4 },
+    px: { xs: 2, sm: 3, lg: 4 },
+    py: { xs: 2.5, sm: 3.5 },
+    bgcolor: colors.bg,
+    minHeight: "100%",
+  };
+
   if (!initialized) {
     return (
-      <Box sx={{ mx: "auto", maxWidth: 1152 }}>
-        <Typography variant="h4" fontWeight={800}>
-          New Post
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Loading composer…
-        </Typography>
+      <Box sx={shellSx}>
+        <ComposerPageHeader />
         <Box
           sx={{
-            mt: 3,
             display: "grid",
-            gap: 3,
-            gridTemplateColumns: { xs: "1fr", lg: "3fr 2fr" },
+            gap: "22px",
+            gridTemplateColumns: { xs: "1fr", md: "1fr minmax(320px, 400px)" },
+            alignItems: "start",
           }}
         >
           <ComposerFormSkeleton />
@@ -51,35 +67,30 @@ export function PostComposer() {
   }
 
   return (
-    <Box sx={{ mx: "auto", maxWidth: 1152 }}>
-      <Typography variant="h4" fontWeight={800}>
-        New Post
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-        Hashtags, language aur images — sab control yahan se
-      </Typography>
+    <Box sx={shellSx}>
+      <ComposerPageHeader />
 
       {error && (
-        <Alert severity="error" sx={{ mt: 2 }} onClose={() => dispatch(clearComposerMessages())}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => dispatch(clearComposerMessages())}>
           {error}
         </Alert>
       )}
       {success && (
-        <Alert severity="success" sx={{ mt: 2 }} onClose={() => dispatch(clearComposerMessages())}>
+        <Alert severity="success" sx={{ mb: 2 }} onClose={() => dispatch(clearComposerMessages())}>
           {success}
         </Alert>
       )}
 
       <Box
         sx={{
-          mt: 3,
           display: "grid",
-          gap: 3,
-          gridTemplateColumns: { xs: "1fr", lg: "3fr 2fr" },
+          gap: "22px",
+          gridTemplateColumns: { xs: "1fr", md: "1fr minmax(320px, 400px)" },
+          alignItems: "start",
         }}
       >
         <ComposerFormPanel />
-        <ComposerPreviewPanel />
+        <ComposerLivePreview />
       </Box>
     </Box>
   );

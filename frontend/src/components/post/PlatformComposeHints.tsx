@@ -51,7 +51,7 @@ export function PlatformComposeHints({ selectedPlatforms, contentLength, imageCo
 
   return (
     <Alert severity={severity} sx={{ py: 0.75 }}>
-      <Stack direction="row" flexWrap="wrap" gap={0.75} alignItems="center">
+      <Stack direction="row" sx={{ flexWrap: "wrap", gap: 0.75, alignItems: "center" }}>
         {selectedPlatforms.map((p) => (
           <Chip key={p} label={p} size="small" variant="outlined" />
         ))}

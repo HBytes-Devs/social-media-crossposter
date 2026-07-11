@@ -1,9 +1,7 @@
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
 import type { PostTab } from "../../store/slices/postsSlice";
+import { usePostsTheme } from "./postsTheme";
 
 const TABS: Array<{ id: PostTab; label: string; description: string }> = [
   { id: "all", label: "All", description: "Saari active posts" },
@@ -21,65 +19,94 @@ type Props = {
 };
 
 export function PostsTabBar({ activeTab, counts, onChange, disabled }: Props) {
+  const { colors, fonts } = usePostsTheme();
+
   return (
-    <Tabs
-      value={activeTab}
-      onChange={(_, value) => onChange(value as PostTab)}
-      variant="scrollable"
-      scrollButtons="auto"
-      allowScrollButtonsMobile
+    <Box
       sx={{
-        minHeight: 68,
-        "& .MuiTabs-indicator": {
-          height: 3,
-          borderRadius: "3px 3px 0 0",
-          transition: "left 0.25s ease, width 0.25s ease",
-        },
-        "& .MuiTab-root": {
-          alignItems: "flex-start",
-          textTransform: "none",
-          minHeight: 68,
-          px: 2,
-          py: 1.5,
-        },
+        display: "flex",
+        gap: "2px",
+        px: { xs: 1, sm: 2.5 },
+        pt: 0.75,
+        borderBottom: "1px solid",
+        borderColor: colors.line,
+        overflowX: "auto",
       }}
     >
-      {TABS.map((tab) => (
-        <Tab
-          key={tab.id}
-          value={tab.id}
-          disabled={disabled}
-          disableRipple
-          label={
-            <Box sx={{ width: "100%", textAlign: "left" }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography variant="body2" fontWeight={700} lineHeight={1.2}>
-                  {tab.label}
-                </Typography>
-                <Chip
-                  label={counts[tab.id]}
-                  size="small"
-                  sx={{
-                    height: 20,
-                    minWidth: 28,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    "& .MuiChip-label": { px: 0.75 },
-                  }}
-                />
-              </Box>
+      {TABS.map((tab) => {
+        const active = activeTab === tab.id;
+
+        return (
+          <Box
+            key={tab.id}
+            component="button"
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(tab.id)}
+            sx={{
+              border: "none",
+              background: "transparent",
+              cursor: disabled ? "not-allowed" : "pointer",
+              textAlign: "left",
+              px: { xs: 1.5, sm: 2.25 },
+              py: "14px",
+              pb: "16px",
+              borderBottom: "2px solid",
+              borderBottomColor: active ? colors.accent : "transparent",
+              opacity: disabled ? 0.6 : 1,
+              transition: "border-color 0.15s ease",
+              flexShrink: 0,
+              "&:hover .tab-name": {
+                color: colors.text,
+              },
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ mt: 0.5, display: "block", lineHeight: 1.3 }}
+                className="tab-name"
+                sx={{
+                  fontSize: 13.5,
+                  fontWeight: 600,
+                  color: active ? colors.text : colors.textSoft,
+                  fontFamily: fonts.body,
+                  lineHeight: 1.2,
+                  transition: "color 0.15s ease",
+                }}
               >
-                {tab.description}
+                {tab.label}
               </Typography>
+              <Box
+                component="span"
+                sx={{
+                  fontFamily: fonts.mono,
+                  fontSize: 10.5,
+                  fontWeight: 600,
+                  bgcolor: active ? colors.accentSoft : colors.chipBg,
+                  color: active ? colors.accentTag : colors.muted,
+                  px: "7px",
+                  py: "1.5px",
+                  borderRadius: 999,
+                  lineHeight: 1.4,
+                }}
+              >
+                {counts[tab.id]}
+              </Box>
             </Box>
-          }
-        />
-      ))}
-    </Tabs>
+            <Typography
+              sx={{
+                fontSize: 11,
+                color: colors.muted,
+                mt: 0.375,
+                fontFamily: fonts.body,
+                lineHeight: 1.3,
+              }}
+            >
+              {tab.description}
+            </Typography>
+          </Box>
+        );
+      })}
+    </Box>
   );
 }
 
