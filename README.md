@@ -1,5 +1,13 @@
 # Social Media Crossposter (SMC)
 
+**Maintained by [HBytes Devs](https://github.com/HBytes-Devs)** — compose once, publish to LinkedIn, Reddit, and more.
+
+| | |
+|---|---|
+| **Repo** | [HBytes-Devs/social-media-crossposter](https://github.com/HBytes-Devs/social-media-crossposter) |
+| **Discussions** | [Q&A, ideas, announcements](https://github.com/HBytes-Devs/social-media-crossposter/discussions) |
+| **Contributing** | [CONTRIBUTING.md](CONTRIBUTING.md) |
+
 Ek hi jagah se tech content **LinkedIn, Reddit**, aur (roadmap par) Facebook, Instagram, X par publish karo — text + images ke saath.
 
 ## Status

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Team discussion (Q&A, ideas)
+    url: https://github.com/HBytes-Devs/social-media-crossposter/discussions
+    about: Prefer Discussions for questions, feature ideas, and planning — keeps Issues focused on actionable work.
+  - name: Security report
+    url: https://github.com/HBytes-Devs/social-media-crossposter/security/advisories/new
+    about: Report a security vulnerability privately (do not open a public issue).
