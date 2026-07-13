@@ -1,6 +1,6 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { ComposerFormSkeleton, LinkedInPreviewSkeleton } from "../ui/Skeleton";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
@@ -9,7 +9,7 @@ import {
   selectComposer,
 } from "../../store/slices/composerSlice";
 import { selectToken } from "../../store/slices/authSlice";
-import { fetchAccounts } from "../../store/slices/accountsSlice";
+import { selectAccounts, fetchAccounts } from "../../store/slices/accountsSlice";
 import { ComposerFormPanel } from "./ComposerFormPanel";
 import { ComposerLivePreview } from "./ComposerLivePreview";
 import { ComposerPageHeader } from "./ComposerPageHeader";
@@ -20,15 +20,29 @@ export function PostComposer() {
   const dispatch = useAppDispatch();
   const token = useAppSelector(selectToken);
   const { error, success, initialized, accounts } = useAppSelector(selectComposer);
-  const loadedForToken = useRef<string | null>(null);
+  const { items: accountsFromSlice, loading: accountsLoading } = useAppSelector(selectAccounts);
 
   useEffect(() => {
     if (!token) return;
-    if (loadedForToken.current === token && initialized && accounts.length > 0) return;
-    loadedForToken.current = token;
     dispatch(fetchComposerData());
     dispatch(fetchAccounts());
-  }, [dispatch, token, initialized, accounts.length]);
+  }, [dispatch, token]);
+
+  useEffect(() => {
+    if (!token || !initialized) return;
+    const total = accounts.length > 0 ? accounts.length : accountsFromSlice.length;
+    if (total === 0 && !accountsLoading) {
+      dispatch(fetchAccounts());
+      dispatch(fetchComposerData());
+    }
+  }, [
+    dispatch,
+    token,
+    initialized,
+    accounts.length,
+    accountsFromSlice.length,
+    accountsLoading,
+  ]);
 
   useEffect(() => {
     if (!success && !error) return;

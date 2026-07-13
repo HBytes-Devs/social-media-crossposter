@@ -1,5 +1,3 @@
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Link from "@mui/material/Link";
@@ -10,6 +8,10 @@ import type { ReactNode } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { platformLabel } from "../../lib/platforms";
 import type { DashboardData } from "../../types";
+import {
+  PublishedEmptyIcon3D,
+  ScheduleEmptyIcon3D,
+} from "../ui/icons3d/DashboardIcons3D";
 import { dashboardFonts, useDashboardTheme } from "./dashboardTheme";
 
 type Post = DashboardData["upcoming"][number];
@@ -160,29 +162,17 @@ export function DashboardActivityPanel({
         </Stack>
       ) : (
         <>
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-start", py: 1 }}>
-            <Box
-              sx={{
-                width: 46,
-                height: 46,
-                borderRadius: "12px",
-                bgcolor: colors.surface2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: colors.muted,
-                mb: 1.75,
-              }}
-            >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2.5, py: 1 }}>
+            <Box sx={{ flexShrink: 0, filter: "drop-shadow(0 8px 16px rgba(15,23,42,0.1))" }}>
               {emptyIcon}
             </Box>
             <Typography
               sx={{
                 fontSize: 13,
                 color: colors.inkSoft,
-                mb: 2.25,
-                lineHeight: 1.5,
+                lineHeight: 1.55,
                 fontFamily: dashboardFonts.body,
+                flex: 1,
               }}
             >
               {emptyText}
@@ -196,9 +186,9 @@ export function DashboardActivityPanel({
 }
 
 export function ScheduleEmptyIcon() {
-  return <CalendarMonthOutlinedIcon sx={{ fontSize: 21 }} />;
+  return <ScheduleEmptyIcon3D size={68} />;
 }
 
 export function PublishedEmptyIcon() {
-  return <CheckCircleOutlinedIcon sx={{ fontSize: 21 }} />;
+  return <PublishedEmptyIcon3D size={68} />;
 }

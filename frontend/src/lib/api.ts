@@ -297,6 +297,9 @@ export const api = {
       success: boolean;
       data: {
         configured: boolean;
+        imageGeneration: boolean;
+        imageProvider: "minimax" | "openai" | null;
+        imageKeyName: string | null;
         provider: string;
         model: string;
         keyName: string | null;
@@ -422,6 +425,49 @@ export const api = {
     return request<{ success: boolean; data: { content: string; changed: boolean } }>(
       "/ai/correct",
       { method: "POST", body: JSON.stringify(payload) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async generatePostImage(
+    token: string,
+    payload: { content: string; language?: string; platform?: string },
+  ) {
+    return request<{
+      success: boolean;
+      data: { media: import("../types").MediaItem; prompt: string };
+    }>("/ai/generate-image", { method: "POST", body: JSON.stringify(payload) }, token).then(
+      (res) => res.data,
+    );
+  },
+
+  async getBillingPlans() {
+    return request<{
+      success: boolean;
+      data: { plans: import("../types").PlanDefinition[]; billingConfigured: boolean };
+    }>("/billing/plans").then((res) => res.data);
+  },
+
+  async getBillingStatus(token: string) {
+    return request<{ success: boolean; data: import("../types").BillingStatus }>(
+      "/billing/status",
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async createCheckoutSession(token: string, tier: "MEDIUM" | "PREMIUM") {
+    return request<{ success: boolean; data: { url: string } }>(
+      "/billing/checkout",
+      { method: "POST", body: JSON.stringify({ tier }) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async createBillingPortalSession(token: string) {
+    return request<{ success: boolean; data: { url: string } }>(
+      "/billing/portal",
+      { method: "POST" },
       token,
     ).then((res) => res.data);
   },

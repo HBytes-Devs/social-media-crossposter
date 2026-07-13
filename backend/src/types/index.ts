@@ -11,6 +11,20 @@ export type AuthUser = {
   name: string | null;
   avatarUrl: string | null;
   createdAt: string;
+  subscription: {
+    tier: string;
+    status: string;
+    currentPeriodEnd: string | null;
+    plan: {
+      id: string;
+      name: string;
+      description: string;
+      priceUsd: number;
+      priceLabel: string;
+      interval: string;
+      features: string[];
+    };
+  };
 };
 
 export type AuthResponse = {

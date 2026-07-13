@@ -3,9 +3,16 @@ import { env } from "../config/env.js";
 import { AppError } from "../middleware/error.middleware.js";
 import { logger } from "../utils/logger.js";
 import type { ResolvedAiCredential } from "./ai-credentials.service.js";
-import { resolveAiCredential } from "./ai-credentials.service.js";
+import { resolveAiCredential, resolveMiniMaxImageCredential, resolveOpenAiImageCredential } from "./ai-credentials.service.js";
 import type { ChatMessage } from "./minimax.service.js";
-import { isMiniMaxConfigured, stripThinkingBlocks } from "./minimax.service.js";
+import { isMiniMaxConfigured, miniMaxGenerateImage, stripThinkingBlocks } from "./minimax.service.js";
+
+export type ImageGenProvider = "minimax" | "openai";
+
+export type ResolvedImageCredential = {
+  provider: ImageGenProvider;
+  credential: ResolvedAiCredential;
+};
 
 export type AiChatOptions = {
   temperature?: number;
@@ -144,6 +151,121 @@ async function anthropicChat(
   }
 
   return content;
+}
+
+function getEnvOpenAiImageCredential(): ResolvedAiCredential | null {
+  const apiKey = env.OPENAI_API_KEY?.trim();
+  if (!apiKey) return null;
+
+  return {
+    id: "env-openai-image",
+    name: "Server OpenAI",
+    provider: "OPENAI",
+    apiKey,
+    baseUrl: "https://api.openai.com/v1",
+    model: env.OPENAI_IMAGE_MODEL,
+  };
+}
+
+export async function resolveUserImageCredential(
+  userId: string,
+): Promise<ResolvedImageCredential | null> {
+  const miniMaxUser = await resolveMiniMaxImageCredential(userId);
+  if (miniMaxUser) {
+    return { provider: "minimax", credential: miniMaxUser };
+  }
+
+  const miniMaxEnv = getEnvFallbackCredential();
+  if (miniMaxEnv) {
+    return { provider: "minimax", credential: miniMaxEnv };
+  }
+
+  const openAiUser = await resolveOpenAiImageCredential(userId);
+  if (openAiUser) {
+    return { provider: "openai", credential: openAiUser };
+  }
+
+  const openAiEnv = getEnvOpenAiImageCredential();
+  if (openAiEnv) {
+    return { provider: "openai", credential: openAiEnv };
+  }
+
+  return null;
+}
+
+/** @deprecated Use resolveUserImageCredential */
+export async function resolveUserOpenAiImageCredential(
+  userId: string,
+): Promise<ResolvedAiCredential | null> {
+  const resolved = await resolveUserImageCredential(userId);
+  return resolved?.credential ?? null;
+}
+
+export async function canGenerateImagesForUser(userId: string): Promise<boolean> {
+  return Boolean(await resolveUserImageCredential(userId));
+}
+
+export async function userAiGenerateImage(userId: string, prompt: string): Promise<Buffer> {
+  const resolved = await resolveUserImageCredential(userId);
+  if (!resolved) {
+    throw new AppError(
+      503,
+      "Image generation ke liye Settings mein MiniMax ya OpenAI API key add karo, ya server par MINIMAX_API_KEY set karo.",
+    );
+  }
+
+  if (resolved.provider === "minimax") {
+    return miniMaxGenerateImage(
+      resolved.credential.apiKey,
+      prompt,
+      resolved.credential.baseUrl ?? undefined,
+    );
+  }
+
+  return openAiGenerateImage(resolved.credential, prompt, "1792x1024");
+}
+
+export async function openAiGenerateImage(
+  credential: ResolvedAiCredential,
+  prompt: string,
+  size: "1792x1024" | "1024x1024" = "1792x1024",
+): Promise<Buffer> {
+  const baseUrl = (credential.baseUrl ?? "https://api.openai.com/v1").replace(/\/$/, "");
+  const model = env.OPENAI_IMAGE_MODEL;
+
+  const response = await fetch(`${baseUrl}/images/generations`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${credential.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model,
+      prompt,
+      n: 1,
+      size,
+      response_format: "b64_json",
+      quality: "standard",
+    }),
+  });
+
+  const data = (await response.json().catch(() => ({}))) as {
+    data?: Array<{ b64_json?: string }>;
+    error?: { message?: string };
+  };
+
+  if (!response.ok) {
+    const message = data.error?.message ?? `Image API error (${response.status})`;
+    logger.error("OpenAI image error", { status: response.status, message });
+    throw new AppError(502, message);
+  }
+
+  const b64 = data.data?.[0]?.b64_json;
+  if (!b64) {
+    throw new AppError(502, "Image API returned no image data");
+  }
+
+  return Buffer.from(b64, "base64");
 }
 
 export async function userAiChat(

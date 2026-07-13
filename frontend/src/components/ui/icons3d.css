@@ -1,0 +1,25 @@
+.smc-icon-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease;
+}
+
+.smc-icon-pedestal {
+  background: linear-gradient(180deg, #ffffff 0%, #eef1f8 100%);
+  box-shadow:
+    0 10px 24px -12px rgba(15, 23, 42, 0.2),
+    inset 0 2px 6px rgba(255, 255, 255, 0.95),
+    inset 0 -2px 4px rgba(15, 23, 42, 0.04);
+}
+
+.smc-sidebar-icon-3d .smc-sidebar-icon-3d__badge {
+  transform: perspective(320px) rotateX(10deg) rotateY(-10deg);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.smc-sidebar-icon-3d--active .smc-sidebar-icon-3d__badge {
+  transform: perspective(320px) rotateX(6deg) rotateY(-6deg) scale(1.06);
+}
+
+.smc-sidebar-icon-3d:hover .smc-sidebar-icon-3d__badge {
+  transform: perspective(320px) rotateX(4deg) rotateY(-4deg) scale(1.04);
+}

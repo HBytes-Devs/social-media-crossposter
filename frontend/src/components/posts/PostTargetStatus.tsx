@@ -25,9 +25,9 @@ export function PostTargetStatus({ targets }: Props) {
   return (
     <Stack
       direction="row"
-      flexWrap="wrap"
       gap={1}
       sx={{
+        flexWrap: "wrap",
         px: { xs: 2, sm: 2.5 },
         pb: 1.5,
         pt: 0,
@@ -39,9 +39,9 @@ export function PostTargetStatus({ targets }: Props) {
         <Stack
           key={target.id}
           direction="row"
-          alignItems="center"
           gap={0.75}
           sx={{
+            alignItems: "center",
             px: 1,
             py: 0.5,
             borderRadius: 1.5,

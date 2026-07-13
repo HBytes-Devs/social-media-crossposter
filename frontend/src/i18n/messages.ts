@@ -30,6 +30,23 @@ type MessageKey =
   | "auth.language"
   | "auth.login.title"
   | "auth.login.subtitle"
+  | "auth.login.subtitlePrefix"
+  | "auth.login.subtitleSuffix"
+  | "auth.emailPlaceholder"
+  | "auth.passwordPlaceholder"
+  | "auth.namePlaceholder"
+  | "auth.resetCodePlaceholder"
+  | "auth.createAccount"
+  | "auth.register.subtitlePrefix"
+  | "auth.brand.eyebrow"
+  | "auth.brand.headlineLine1"
+  | "auth.brand.headlineLine2"
+  | "auth.brand.subcopy"
+  | "auth.brand.statusPrefix"
+  | "auth.brand.statusHighlight"
+  | "auth.brand.statusSuffix"
+  | "auth.brand.quote"
+  | "auth.brand.quoteAuthor"
   | "auth.register.title"
   | "auth.register.subtitle"
   | "auth.forgot.title"
@@ -44,7 +61,8 @@ type MessageKey =
   | "auth.error.passwordMismatch"
   | "auth.success.passwordUpdated"
   | "auth.recaptcha.loadError"
-  | "auth.recaptcha.notice";
+  | "auth.recaptcha.notice"
+  | "auth.rememberMe";
 
 export type Messages = Record<MessageKey, string>;
 
@@ -53,7 +71,7 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.email": "Email",
     "auth.password": "Password",
     "auth.nameOptional": "Name (optional)",
-    "auth.login": "Login",
+    "auth.login": "Sign in",
     "auth.register": "Register",
     "auth.forgotPassword": "Forgot password?",
     "auth.sendResetCode": "Send reset code",
@@ -64,12 +82,31 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.backToLogin": "Back to login",
     "auth.enterResetCode": "Enter reset code",
     "auth.resendCode": "Resend code",
-    "auth.noAccount": "No account?",
+    "auth.noAccount": "Don't have an account?",
     "auth.haveAccount": "Already have an account?",
     "auth.codeNotReceived": "Didn't get the code?",
     "auth.language": "Language",
     "auth.login.title": "Welcome back",
     "auth.login.subtitle": "Sign in to SMC",
+    "auth.login.subtitlePrefix": "Sign in to",
+    "auth.login.subtitleSuffix": "to continue",
+    "auth.emailPlaceholder": "you@company.com",
+    "auth.passwordPlaceholder": "Enter your password",
+    "auth.namePlaceholder": "Your name",
+    "auth.resetCodePlaceholder": "123456",
+    "auth.createAccount": "Create one",
+    "auth.register.subtitlePrefix": "Get started with",
+    "auth.brand.eyebrow": "Social Media Crossposter",
+    "auth.brand.headlineLine1": "Publish everywhere,",
+    "auth.brand.headlineLine2": "from one place.",
+    "auth.brand.subcopy":
+      "Schedule posts, manage accounts, and track performance across LinkedIn and more — without switching tabs.",
+    "auth.brand.statusPrefix": "Platforms",
+    "auth.brand.statusHighlight": "ready",
+    "auth.brand.statusSuffix": " · Connect & post in minutes",
+    "auth.brand.quote":
+      "We cut our posting time in half. Scheduling and analytics in one dashboard was exactly what our team needed.",
+    "auth.brand.quoteAuthor": "Marketing Lead, B2B SaaS company",
     "auth.register.title": "Create account",
     "auth.register.subtitle": "Register for SMC",
     "auth.forgot.title": "Forgot password",
@@ -86,6 +123,7 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.success.passwordUpdated": "Password updated. Please log in.",
     "auth.recaptcha.loadError": "reCAPTCHA failed to load. Check your site key or try again.",
     "auth.recaptcha.notice": "Protected by reCAPTCHA — Google Privacy & Terms",
+    "auth.rememberMe": "Remember email & password",
   },
   "roman-ur": {
     "auth.email": "Email",
@@ -108,6 +146,25 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.language": "Zubaan",
     "auth.login.title": "Welcome back",
     "auth.login.subtitle": "SMC mein login karo",
+    "auth.login.subtitlePrefix": "Sign in to",
+    "auth.login.subtitleSuffix": "to continue",
+    "auth.emailPlaceholder": "you@company.com",
+    "auth.passwordPlaceholder": "Apna password daalo",
+    "auth.namePlaceholder": "Apna naam",
+    "auth.resetCodePlaceholder": "123456",
+    "auth.createAccount": "Account banayein",
+    "auth.register.subtitlePrefix": "Shuru karo",
+    "auth.brand.eyebrow": "Social Media Crossposter",
+    "auth.brand.headlineLine1": "Har jagah publish karo,",
+    "auth.brand.headlineLine2": "ek hi jagah se.",
+    "auth.brand.subcopy":
+      "Posts schedule karo, accounts manage karo, aur LinkedIn waghera par performance track karo — bina tabs badle.",
+    "auth.brand.statusPrefix": "Platforms",
+    "auth.brand.statusHighlight": "ready",
+    "auth.brand.statusSuffix": " · Minutes mein connect karo",
+    "auth.brand.quote":
+      "Hamara posting time aadha ho gaya. Ek dashboard mein scheduling aur analytics bilkul wahi tha jo team ko chahiye tha.",
+    "auth.brand.quoteAuthor": "Marketing Lead, B2B SaaS company",
     "auth.register.title": "Account banayein",
     "auth.register.subtitle": "SMC ke liye register karo",
     "auth.forgot.title": "Password bhool gaye",
@@ -124,6 +181,7 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.success.passwordUpdated": "Password update ho gaya. Ab login karo.",
     "auth.recaptcha.loadError": "reCAPTCHA load nahi hua. Site key check karo ya dubara try karo.",
     "auth.recaptcha.notice": "reCAPTCHA se protected — Google Privacy & Terms",
+    "auth.rememberMe": "Email aur password yaad rakho",
   },
   ur: {
     "auth.email": "ای میل",
@@ -146,6 +204,25 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.language": "زبان",
     "auth.login.title": "خوش آمدید",
     "auth.login.subtitle": "SMC میں لاگ اِن کریں",
+    "auth.login.subtitlePrefix": "سائن اِن کریں",
+    "auth.login.subtitleSuffix": "جاری رکھنے کے لیے",
+    "auth.emailPlaceholder": "you@company.com",
+    "auth.passwordPlaceholder": "اپنا پاس ورڈ درج کریں",
+    "auth.namePlaceholder": "آپ کا نام",
+    "auth.resetCodePlaceholder": "123456",
+    "auth.createAccount": "اکاؤنٹ بنائیں",
+    "auth.register.subtitlePrefix": "شروع کریں",
+    "auth.brand.eyebrow": "سوشل میڈیا کراس پوسٹر",
+    "auth.brand.headlineLine1": "ہر جگہ شائع کریں،",
+    "auth.brand.headlineLine2": "ایک ہی جگہ سے۔",
+    "auth.brand.subcopy":
+      "پوسٹس شیڈول کریں، اکاؤنٹس منظم کریں، اور LinkedIn وغیرہ پر کارکردگی ٹریک کریں — ٹیبز بدلے بغیر۔",
+    "auth.brand.statusPrefix": "پلیٹ فارمز",
+    "auth.brand.statusHighlight": "تیار",
+    "auth.brand.statusSuffix": " · منٹوں میں کنیکٹ کریں",
+    "auth.brand.quote":
+      "ہمارا پوسٹنگ وقت آدھا ہو گیا۔ ایک ڈیش بورڈ میں شیڈولنگ اور تجزیات بالکل وہی تھی جو ٹیم کو چاہیے تھی۔",
+    "auth.brand.quoteAuthor": "مارکیٹنگ لیڈ، B2B SaaS کمپنی",
     "auth.register.title": "اکاؤنٹ بنائیں",
     "auth.register.subtitle": "SMC کے لیے رجسٹر کریں",
     "auth.forgot.title": "پاس ورڈ بھول گئے",
@@ -162,6 +239,7 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.success.passwordUpdated": "پاس ورڈ اپ ڈیٹ ہو گیا۔ اب لاگ اِن کریں۔",
     "auth.recaptcha.loadError": "reCAPTCHA لوڈ نہیں ہوا۔ سائٹ کی چیک کریں یا دوبارہ کوشش کریں۔",
     "auth.recaptcha.notice": "reCAPTCHA سے محفوظ — Google Privacy & Terms",
+    "auth.rememberMe": "ای میل اور پاس ورڈ یاد رکھیں",
   },
   hi: {
     "auth.email": "ईमेल",
@@ -184,6 +262,25 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.language": "भाषा",
     "auth.login.title": "वापसी पर स्वागत है",
     "auth.login.subtitle": "SMC में लॉगिन करें",
+    "auth.login.subtitlePrefix": "साइन इन करें",
+    "auth.login.subtitleSuffix": "जारी रखने के लिए",
+    "auth.emailPlaceholder": "you@company.com",
+    "auth.passwordPlaceholder": "अपना पासवर्ड दर्ज करें",
+    "auth.namePlaceholder": "आपका नाम",
+    "auth.resetCodePlaceholder": "123456",
+    "auth.createAccount": "खाता बनाएं",
+    "auth.register.subtitlePrefix": "शुरू करें",
+    "auth.brand.eyebrow": "सोशल मीडिया क्रॉसपोस्टर",
+    "auth.brand.headlineLine1": "हर जगह प्रकाशित करें,",
+    "auth.brand.headlineLine2": "एक ही जगह से।",
+    "auth.brand.subcopy":
+      "पोस्ट शेड्यूल करें, अकाउंट प्रबंधित करें, और LinkedIn आदि पर प्रदर्शन ट्रैक करें — टैब बदले बिना।",
+    "auth.brand.statusPrefix": "प्लेटफ़ॉर्म",
+    "auth.brand.statusHighlight": "तैयार",
+    "auth.brand.statusSuffix": " · मिनटों में कनेक्ट करें",
+    "auth.brand.quote":
+      "हमारा पोस्टिंग समय आधा हो गया। एक डैशबोर्ड में शेड्यूलिंग और एनालिटिक्स वही था जो टीम को चाहिए था।",
+    "auth.brand.quoteAuthor": "मार्केटिंग लीड, B2B SaaS कंपनी",
     "auth.register.title": "खाता बनाएं",
     "auth.register.subtitle": "SMC के लिए रजिस्टर करें",
     "auth.forgot.title": "पासवर्ड भूल गए",
@@ -200,6 +297,7 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.success.passwordUpdated": "पासवर्ड अपडेट हो गया। कृपया लॉगिन करें।",
     "auth.recaptcha.loadError": "reCAPTCHA लोड नहीं हुआ। साइट की जांच करें या फिर कोशिश करें।",
     "auth.recaptcha.notice": "reCAPTCHA द्वारा सुरक्षित — Google Privacy & Terms",
+    "auth.rememberMe": "ईमेल और पासवर्ड याद रखें",
   },
 };
 

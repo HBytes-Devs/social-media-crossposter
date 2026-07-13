@@ -3,6 +3,7 @@ import type { Platform } from "@prisma/client";
 import { authenticate, type AuthRequest } from "../middleware/auth.middleware.js";
 import { AppError } from "../middleware/error.middleware.js";
 import * as accountsService from "../services/accounts.service.js";
+import * as planService from "../services/plan.service.js";
 import { env } from "../config/env.js";
 
 const router = Router();
@@ -120,10 +121,11 @@ router.get("/", authenticate, async (req: AuthRequest, res) => {
 });
 
 // Get connect URL as JSON (Postman / frontend)
-router.get("/:platform/connect-url", authenticate, (req: AuthRequest, res) => {
+router.get("/:platform/connect-url", authenticate, async (req: AuthRequest, res) => {
   if (!req.userId) throw new AppError(401, "Authentication required");
 
   const platform = parsePlatform(String(req.params.platform));
+  await planService.assertCanConnectPlatform(req.userId, platform);
   const authUrl = accountsService.getConnectUrl(platform, req.userId);
 
   res.json({
@@ -139,10 +141,11 @@ router.get("/:platform/connect-url", authenticate, (req: AuthRequest, res) => {
 });
 
 // Start OAuth — redirects to platform
-router.get("/:platform/connect", authenticate, (req: AuthRequest, res) => {
+router.get("/:platform/connect", authenticate, async (req: AuthRequest, res) => {
   if (!req.userId) throw new AppError(401, "Authentication required");
 
   const platform = parsePlatform(String(req.params.platform));
+  await planService.assertCanConnectPlatform(req.userId, platform);
   const authUrl = accountsService.getConnectUrl(platform, req.userId);
 
   res.redirect(authUrl);

@@ -73,6 +73,67 @@ export async function miniMaxChat(
   return content;
 }
 
+type MiniMaxImageResponse = {
+  data?: { image_base64?: string[]; image_urls?: string[] };
+  base_resp?: { status_code?: number; status_msg?: string };
+  error?: { message?: string };
+};
+
+export async function miniMaxGenerateImage(
+  apiKey: string,
+  prompt: string,
+  baseUrl?: string,
+): Promise<Buffer> {
+  const root = (baseUrl ?? env.MINIMAX_BASE_URL).replace(/\/$/, "");
+  const url = `${root}/image_generation`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: env.MINIMAX_IMAGE_MODEL,
+      prompt: prompt.slice(0, 1500),
+      aspect_ratio: "16:9",
+      response_format: "base64",
+      n: 1,
+      prompt_optimizer: true,
+    }),
+  });
+
+  const data = (await response.json().catch(() => ({}))) as MiniMaxImageResponse;
+
+  if (!response.ok) {
+    const message = data.error?.message ?? data.base_resp?.status_msg ?? `MiniMax image error (${response.status})`;
+    logger.error("MiniMax image HTTP error", { status: response.status, message });
+    throw new AppError(502, message);
+  }
+
+  if (data.base_resp?.status_code !== undefined && data.base_resp.status_code !== 0) {
+    const message = data.base_resp.status_msg ?? "MiniMax image generation failed";
+    logger.error("MiniMax image API error", { code: data.base_resp.status_code, message });
+    throw new AppError(502, message);
+  }
+
+  const b64 = data.data?.image_base64?.[0];
+  if (b64) {
+    return Buffer.from(b64, "base64");
+  }
+
+  const imageUrl = data.data?.image_urls?.[0];
+  if (imageUrl) {
+    const imgRes = await fetch(imageUrl);
+    if (!imgRes.ok) {
+      throw new AppError(502, "Failed to download generated image from MiniMax");
+    }
+    return Buffer.from(await imgRes.arrayBuffer());
+  }
+
+  throw new AppError(502, "MiniMax returned no image data");
+}
+
 export function parseJsonArray(text: string): string[] {
   const trimmed = text.trim();
   const jsonMatch = trimmed.match(/\[[\s\S]*\]/);

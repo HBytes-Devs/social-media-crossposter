@@ -1,3 +1,4 @@
+import Alert from "@mui/material/Alert";
 import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
 import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -8,9 +9,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
+import { PlatformIcon3D } from "../ui/icons3d/DashboardIcons3D";
 import type { PlatformStatus, SocialAccount } from "../../types";
 import { formatTokenExpiryLabel } from "../../lib/accountTokenHealth";
-import { PlatformBrandIcon } from "./PlatformIcons";
 import { usePlatformTheme, type mapPlatformColors } from "./platformConnectionTheme";
 
 type CardState = "warn" | "ok" | "default";
@@ -116,28 +117,10 @@ function StatusBadge({
   );
 }
 
-function PlatformAvatar({ platform }: { platform: PlatformStatus }) {
-  const { colors, avatarSx } = usePlatformTheme();
-  const avatarStyle =
-    avatarSx[platform.id as keyof typeof avatarSx] ?? {
-      bgcolor: colors.offDot,
-    };
-
+function PlatformAvatar({ platform, connected }: { platform: PlatformStatus; connected?: boolean }) {
   return (
-    <Box
-      sx={{
-        width: 44,
-        height: 44,
-        borderRadius: "12px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
-        color: "#fff",
-        ...avatarStyle,
-      }}
-    >
-      <PlatformBrandIcon platformId={platform.id} sx={{ fontSize: 20 }} />
+    <Box sx={{ flexShrink: 0, filter: "drop-shadow(0 6px 12px rgba(15,23,42,0.12))" }}>
+      <PlatformIcon3D platform={platform.id} size={44} active={connected ?? platform.configured} />
     </Box>
   );
 }
@@ -283,7 +266,7 @@ export function PlatformCard({
           flex: 1,
         }}
       >
-        <PlatformAvatar platform={platform} />
+        <PlatformAvatar platform={platform} connected={isConnected} />
         <Box
           sx={{
             minWidth: 0,
@@ -327,6 +310,12 @@ export function PlatformCard({
           >
             {platform.description}
           </Typography>
+
+          {tokenExpired && (
+            <Alert severity="error" sx={{ mt: 1.25, py: 0.25 }}>
+              Connection fail ho gayi — token expire ho gaya. Reconnect karo taake posts publish hon.
+            </Alert>
+          )}
 
           {hint && (
             <Box

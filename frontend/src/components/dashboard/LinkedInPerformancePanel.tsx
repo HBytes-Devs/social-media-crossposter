@@ -1,4 +1,3 @@
-import BoltOutlinedIcon from "@mui/icons-material/BoltOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Link from "@mui/material/Link";
@@ -7,90 +6,15 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { PLATFORM_ORDER, PLATFORM_META } from "../../lib/platforms";
 import type { LinkedInAnalyticsSummary } from "../../types";
 import { LinkedInStatsGrid } from "../analytics/LinkedInStatsGrid";
+import { BoltIcon3D, PlatformPedestal3D } from "../ui/icons3d/DashboardIcons3D";
 import { dashboardFonts, useDashboardTheme } from "./dashboardTheme";
-
 type Props = {
   analytics: LinkedInAnalyticsSummary | null;
   connectedPlatforms: Record<string, number>;
+  analyticsLocked?: boolean;
 };
 
-function PlatformNode({
-  platform,
-  active,
-}: {
-  platform: string;
-  active: boolean;
-}) {
-  const { colors } = useDashboardTheme();
-  const meta = PLATFORM_META[platform];
-  if (!meta) return null;
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 1,
-        flexShrink: 0,
-        width: 92,
-      }}
-    >
-      <Box
-        sx={{
-          width: 44,
-          height: 44,
-          borderRadius: "50%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: platform === "REDDIT" ? 11 : 14,
-          fontWeight: 700,
-          fontFamily: dashboardFonts.heading,
-          position: "relative",
-          zIndex: 2,
-          bgcolor: active ? meta.color : colors.nodeDim,
-          color: active ? "#fff" : colors.nodeDimText,
-          ...(active
-            ? {
-                boxShadow: "0 0 0 5px #EEEEFD, 0 8px 18px -6px rgba(91,95,239,0.5)",
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  inset: -8,
-                  borderRadius: "50%",
-                  border: "1.5px solid",
-                  borderColor: colors.accent,
-                  animation: "smc-pulse-ring 2.4s ease-out infinite",
-                },
-                "@keyframes smc-pulse-ring": {
-                  "0%": { transform: "scale(0.85)", opacity: 0.7 },
-                  "80%": { transform: "scale(1.35)", opacity: 0 },
-                  "100%": { opacity: 0 },
-                },
-              }
-            : {}),
-        }}
-      >
-        {meta.icon}
-      </Box>
-      <Typography
-        sx={{
-          fontSize: 10.5,
-          color: colors.inkSoft,
-          fontWeight: 500,
-          fontFamily: dashboardFonts.body,
-          textAlign: "center",
-        }}
-      >
-        {meta.label}
-      </Typography>
-    </Box>
-  );
-}
-
-function Connector() {
-  return (
+function Connector() {  return (
     <Box
       sx={{
         flex: 1,
@@ -104,12 +28,20 @@ function Connector() {
   );
 }
 
-export function LinkedInPerformancePanel({ analytics, connectedPlatforms }: Props) {
+export function LinkedInPerformancePanel({
+  analytics,
+  connectedPlatforms,
+  analyticsLocked = false,
+}: Props) {
   const navigate = useNavigate();
   const { colors } = useDashboardTheme();
   const hasAnalytics =
-    analytics && analytics.postsWithStats > 0 && !analytics.error;
+    !analyticsLocked &&
+    analytics &&
+    analytics.postsWithStats > 0 &&
+    !analytics.error;
   const needsConnect =
+    !analyticsLocked &&
     !hasAnalytics &&
     (!analytics ||
       Boolean(analytics.error) ||
@@ -194,15 +126,15 @@ export function LinkedInPerformancePanel({ analytics, connectedPlatforms }: Prop
               flex: index < PLATFORM_ORDER.length - 1 ? 1 : undefined,
             }}
           >
-            <PlatformNode
+            <PlatformPedestal3D
               platform={platform}
               active={
                 platform === "LINKEDIN"
                   ? (connectedPlatforms.LINKEDIN ?? 0) > 0 || Boolean(hasAnalytics)
                   : (connectedPlatforms[platform] ?? 0) > 0
               }
-            />
-            {index < PLATFORM_ORDER.length - 1 && <Connector />}
+              label={PLATFORM_META[platform]?.label ?? platform}
+            />            {index < PLATFORM_ORDER.length - 1 && <Connector />}
           </Box>
         ))}
       </Box>
@@ -257,6 +189,56 @@ export function LinkedInPerformancePanel({ analytics, connectedPlatforms }: Prop
         </Box>
       )}
 
+      {analyticsLocked && (
+        <Box
+          sx={{
+            mt: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 2,
+            background: "linear-gradient(90deg, #EEEEFD, #F7F5FE)",
+            border: "1px solid",
+            borderColor: colors.accentBorder,
+            borderRadius: "12px",
+            p: "14px 18px",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <BoltIcon3D size={38} />            <Typography
+              sx={{
+                fontSize: 13,
+                fontWeight: 500,
+                color: "#3C3E63",
+                fontFamily: dashboardFonts.body,
+              }}
+            >
+              LinkedIn analytics Medium ya Premium plan par available hai
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            onClick={() => navigate("/settings")}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: 12.5,
+              px: 1.75,
+              py: 1,
+              borderRadius: "10px",
+              background: `linear-gradient(135deg, ${colors.accent}, ${colors.accent2})`,
+              boxShadow: "none",
+              "&:hover": {
+                boxShadow: "0 10px 24px -8px rgba(91,95,239,0.55)",
+              },
+            }}
+          >
+            Upgrade plan
+          </Button>
+        </Box>
+      )}
+
       {needsConnect && (
         <Box
           sx={{
@@ -274,8 +256,7 @@ export function LinkedInPerformancePanel({ analytics, connectedPlatforms }: Prop
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <BoltOutlinedIcon sx={{ color: colors.accent, fontSize: 18 }} />
-            <Typography
+            <BoltIcon3D size={38} />            <Typography
               sx={{
                 fontSize: 13,
                 fontWeight: 500,

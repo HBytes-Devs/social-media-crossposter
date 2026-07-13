@@ -1,11 +1,16 @@
+import ExploreOutlinedIcon from "@mui/icons-material/ExploreOutlined";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { PRODUCT_VERSION } from "../../lib/productVersion";
+import { useAppDispatch } from "../../store/hooks";
+import { replayTour } from "../../store/slices/onboardingSlice";
 import { SettingsPanel } from "./SettingsPanel";
 import { useSettingsTheme } from "./settingsTheme";
 
 export function AboutPanel() {
   const { colors, fonts } = useSettingsTheme();
+  const dispatch = useAppDispatch();
 
   return (
     <SettingsPanel title="About SMC" subtitle="Product version & release channel">
@@ -130,6 +135,31 @@ export function AboutPanel() {
           {PRODUCT_VERSION.status}
         </Box>
       </Box>
+
+      <Button
+        size="small"
+        startIcon={<ExploreOutlinedIcon sx={{ fontSize: 16 }} />}
+        onClick={() => dispatch(replayTour())}
+        sx={{
+          mt: 2,
+          textTransform: "none",
+          fontWeight: 600,
+          fontSize: 12.5,
+          fontFamily: fonts.body,
+          borderRadius: "10px",
+          color: colors.accent,
+          border: "1px solid",
+          borderColor: colors.accentBorder,
+          px: 1.5,
+          py: 0.75,
+          "&:hover": {
+            bgcolor: colors.accentSoft,
+            borderColor: colors.accent,
+          },
+        }}
+      >
+        Replay product tour
+      </Button>
     </SettingsPanel>
   );
 }

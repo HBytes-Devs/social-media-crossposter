@@ -213,3 +213,62 @@ export async function resolveAiCredential(userId: string): Promise<ResolvedAiCre
     model: row.model ?? defaults.model ?? null,
   };
 }
+
+function isOpenAiCompatibleBaseUrl(baseUrl: string | null | undefined): boolean {
+  if (!baseUrl) return true;
+  return /openai\.com/i.test(baseUrl);
+}
+
+/** Credential for DALL-E / images/generations (OpenAI or compatible). */
+export async function resolveOpenAiImageCredential(
+  userId: string,
+): Promise<ResolvedAiCredential | null> {
+  const rows = await prisma.userAiCredential.findMany({
+    where: { userId },
+    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+  });
+
+  const openAiRow =
+    rows.find((r) => r.provider === "OPENAI") ??
+    rows.find(
+      (r) =>
+        r.provider === "CUSTOM" && isOpenAiCompatibleBaseUrl(r.baseUrl),
+    );
+
+  if (openAiRow) {
+    const defaults = getProviderDefaults(openAiRow.provider);
+    return {
+      id: openAiRow.id,
+      name: openAiRow.name,
+      provider: openAiRow.provider,
+      apiKey: decrypt(openAiRow.apiKeyEnc),
+      baseUrl: openAiRow.baseUrl ?? defaults.baseUrl ?? "https://api.openai.com/v1",
+      model: openAiRow.model ?? defaults.model ?? null,
+    };
+  }
+
+  return null;
+}
+
+/** User's MiniMax credential for image generation (image-01). */
+export async function resolveMiniMaxImageCredential(
+  userId: string,
+): Promise<ResolvedAiCredential | null> {
+  const row = await prisma.userAiCredential.findFirst({
+    where: { userId, provider: "MINIMAX" },
+    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+  });
+
+  if (!row) return null;
+
+  const defaults = getProviderDefaults("MINIMAX");
+
+  return {
+    id: row.id,
+    name: row.name,
+    provider: row.provider,
+    apiKey: decrypt(row.apiKeyEnc),
+    baseUrl: row.baseUrl ?? defaults.baseUrl ?? null,
+    model: row.model ?? defaults.model ?? null,
+  };
+}

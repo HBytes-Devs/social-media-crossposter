@@ -27,3 +27,9 @@ export const correctTextSchema = z.object({
   content: z.string().min(1).max(10000),
   language: z.string().optional(),
 });
+
+export const generateImageSchema = z.object({
+  content: z.string().min(20).max(10000),
+  language: z.string().optional(),
+  platform: z.string().optional(),
+});

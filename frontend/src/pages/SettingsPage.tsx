@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import { AboutPanel } from "../components/settings/AboutPanel";
 import { AiKeysPanel } from "../components/settings/AiKeysPanel";
+import { BillingPanel } from "../components/settings/BillingPanel";
 import { ProfilePanel } from "../components/settings/ProfilePanel";
 import { SettingsPageHeader } from "../components/settings/SettingsPageHeader";
 import { useAppSelector } from "../store/hooks";
@@ -13,7 +14,7 @@ export function SettingsPage() {
     <Box sx={{ display: "flex", width: "100%", flexDirection: "column" }}>
       <SettingsPageHeader
         title="Settings"
-        subtitle="AI models, API keys, aur app preferences"
+        subtitle="Plans, AI keys, aur app preferences"
       />
 
       <AboutPanel />
@@ -21,6 +22,7 @@ export function SettingsPage() {
       {token ? (
         <>
           <ProfilePanel token={token} />
+          <BillingPanel />
           <AiKeysPanel token={token} />
         </>
       ) : null}

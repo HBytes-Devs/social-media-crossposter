@@ -23,6 +23,52 @@ export type AuthUser = {
   name: string | null;
   avatarUrl: string | null;
   createdAt: string;
+  subscription: SubscriptionInfo;
+};
+
+export type SubscriptionTier = "FREE" | "MEDIUM" | "PREMIUM";
+
+export type SubscriptionInfo = {
+  tier: SubscriptionTier;
+  status: string;
+  currentPeriodEnd: string | null;
+  premierMember?: boolean;
+  plan: {
+    id: SubscriptionTier;
+    name: string;
+    description: string;
+    priceUsd: number;
+    priceLabel: string;
+    interval: string;
+    features: string[];
+  };
+};
+
+export type PlanDefinition = {
+  id: SubscriptionTier;
+  name: string;
+  description: string;
+  priceUsd: number;
+  priceLabel: string;
+  interval: "month" | "free";
+  features: string[];
+  limits: {
+    maxAccounts: number | null;
+    maxPostsPerMonth: number | null;
+    maxScheduleDaysAhead: number | null;
+    allowedPlatforms: string[] | "all";
+    analytics: boolean;
+    aiAssist: boolean;
+  };
+};
+
+export type BillingStatus = {
+  subscription: SubscriptionInfo;
+  usage: {
+    accountsConnected: number;
+    postsThisMonth: number;
+  };
+  billingConfigured: boolean;
 };
 
 export type SocialAccount = {

@@ -233,6 +233,28 @@ export async function uploadImage(
   return toMediaItem(media);
 }
 
+export async function uploadImageBuffer(
+  userId: string,
+  buffer: Buffer,
+  fileName: string,
+  mimeType: string,
+): Promise<MediaItem> {
+  const file = {
+    fieldname: "images",
+    originalname: fileName,
+    encoding: "7bit",
+    mimetype: mimeType,
+    size: buffer.length,
+    buffer,
+    stream: undefined,
+    destination: "",
+    filename: fileName,
+    path: "",
+  } as unknown as Express.Multer.File;
+
+  return uploadImage(userId, file);
+}
+
 export async function uploadImages(
   userId: string,
   files: Express.Multer.File[],

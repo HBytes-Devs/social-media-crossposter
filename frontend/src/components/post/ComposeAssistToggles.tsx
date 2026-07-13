@@ -17,7 +17,7 @@ type Props = {
   onAutoCorrectChange: (value: boolean) => void;
 };
 
-function ComposeSwitch({
+export function ComposeSwitch({
   checked,
   onChange,
 }: {

@@ -1,0 +1,218 @@
+/* Welcome modal */
+@keyframes smc-welcome-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes smc-welcome-card-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.88) translateY(24px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.02) translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes smc-welcome-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(3deg);
+  }
+}
+
+@keyframes smc-welcome-orbit {
+  from {
+    transform: rotate(0deg) translateX(52px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(52px) rotate(-360deg);
+  }
+}
+
+@keyframes smc-welcome-shimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+@keyframes smc-welcome-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes smc-welcome-pulse-ring {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes smc-welcome-confetti {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-80px) scale(0.4);
+    opacity: 0;
+  }
+}
+
+.smc-welcome-backdrop {
+  animation: smc-welcome-backdrop-in 0.45s ease forwards;
+}
+
+.smc-welcome-card {
+  animation: smc-welcome-card-in 0.65s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
+}
+
+.smc-welcome-text-1 {
+  animation: smc-welcome-text-in 0.5s ease 0.15s both;
+}
+
+.smc-welcome-text-2 {
+  animation: smc-welcome-text-in 0.5s ease 0.28s both;
+}
+
+.smc-welcome-text-3 {
+  animation: smc-welcome-text-in 0.5s ease 0.4s both;
+}
+
+.smc-welcome-actions {
+  animation: smc-welcome-text-in 0.5s ease 0.52s both;
+}
+
+@keyframes smc-welcome-float-3d {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--smc-float-tilt, -8deg));
+  }
+  50% {
+    transform: translateY(-14px) rotate(calc(var(--smc-float-tilt, -8deg) + 4deg));
+  }
+}
+
+@keyframes smc-welcome-hero-tilt {
+  0%,
+  100% {
+    transform: rotateX(10deg) rotateY(-8deg) translateY(0);
+  }
+  50% {
+    transform: rotateX(14deg) rotateY(8deg) translateY(-6px);
+  }
+}
+
+.smc-welcome-float-3d {
+  animation: smc-welcome-float-3d 3.6s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+.smc-welcome-hero-tilt {
+  animation: smc-welcome-hero-tilt 4s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+.smc-icon-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease;
+}
+
+.smc-welcome-float-icon {
+  animation: smc-welcome-float 3.2s ease-in-out infinite;
+}
+
+.smc-welcome-orbit-dot {
+  animation: smc-welcome-orbit 4.5s linear infinite;
+}
+
+.smc-welcome-shimmer-title {
+  background: linear-gradient(
+    90deg,
+    #5b5fef 0%,
+    #8b5cf6 25%,
+    #06b6d4 50%,
+    #8b5cf6 75%,
+    #5b5fef 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: smc-welcome-shimmer 4s linear infinite;
+}
+
+.smc-welcome-pulse-ring {
+  animation: smc-welcome-pulse-ring 2s ease-out infinite;
+}
+
+.smc-welcome-confetti-dot {
+  animation: smc-welcome-confetti 2.4s ease-out infinite;
+}
+
+/* Product tour */
+@keyframes smc-tour-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.smc-tour-tooltip {
+  animation: smc-tour-pop 0.35s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+}
+
+@keyframes smc-tour-spotlight-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 9999px rgba(8, 10, 28, 0.72),
+      0 0 0 0 rgba(91, 95, 239, 0.5);
+  }
+  50% {
+    box-shadow:
+      0 0 0 9999px rgba(8, 10, 28, 0.72),
+      0 0 0 6px rgba(91, 95, 239, 0.35);
+  }
+}
+
+.smc-tour-spotlight {
+  animation: smc-tour-spotlight-pulse 2.2s ease-in-out infinite;
+  transition:
+    top 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    left 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}

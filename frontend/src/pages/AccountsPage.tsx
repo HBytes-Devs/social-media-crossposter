@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PlatformGrid } from "../components/accounts/PlatformCard";
 import { platformFonts } from "../components/accounts/platformConnectionTheme";
+import { formatOAuthError } from "../lib/accountTokenHealth";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -51,7 +52,7 @@ export function AccountsPage() {
       dispatch(fetchAccounts());
       setSearchParams({}, { replace: true });
     } else if (oauthError) {
-      setOauthMessage(`Connection failed: ${oauthError}`);
+      setOauthMessage(formatOAuthError(oauthError));
       dispatch(clearAccountsError());
       setSearchParams({}, { replace: true });
     }
@@ -103,7 +104,7 @@ export function AccountsPage() {
 
       {oauthMessage && (
         <Alert
-          severity={oauthMessage.startsWith("Connection failed") ? "error" : "success"}
+          severity={oauthMessage.includes("fail") || oauthMessage.includes("cancel") ? "error" : "success"}
           onClose={() => setOauthMessage(null)}
         >
           {oauthMessage}

@@ -7,6 +7,7 @@ import postsRoutes from "./posts.routes.js";
 import aiRoutes from "./ai.routes.js";
 import dashboardRoutes from "./dashboard.routes.js";
 import settingsRoutes from "./settings.routes.js";
+import billingRoutes from "./billing.routes.js";
 import versionRoutes from "./version.routes.js";
 import { getProductVersion } from "../lib/product-version.js";
 
@@ -20,6 +21,7 @@ router.use("/posts", postsRoutes);
 router.use("/ai", aiRoutes);
 router.use("/dashboard", dashboardRoutes);
 router.use("/settings", settingsRoutes);
+router.use("/billing", billingRoutes);
 router.use("/version", versionRoutes);
 
 router.get("/", (_req, res) => {

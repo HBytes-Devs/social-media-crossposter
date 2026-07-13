@@ -15,6 +15,7 @@ import { archivePostImages, moveImagesToTrash } from "./s3-archive.service.js";
 import type { CreatePostInput, PreviewPostInput, UpdatePostInput } from "../validators/post.validator.js";
 import { fromHashtagModeEnum, toHashtagModeEnum } from "../validators/post.validator.js";
 import type { PostPublic, PostTargetPublic } from "../types/index.js";
+import * as planService from "./plan.service.js";
 
 export type PostListTab = "all" | "published" | "drafts" | "scheduled" | "trashed";
 
@@ -219,6 +220,12 @@ export async function previewPostContent(userId: string, input: PreviewPostInput
 }
 
 export async function createPost(userId: string, input: CreatePostInput): Promise<PostPublic> {
+  await planService.assertCanCreatePost(userId);
+
+  if (input.scheduledFor) {
+    await planService.assertCanSchedule(userId, input.scheduledFor);
+  }
+
   const accounts = await validateTargets(userId, input.targets);
 
   const accountMap = new Map(accounts.map((a) => [a.id, a]));
@@ -318,6 +325,10 @@ export async function updatePost(
   }
 
   assertEditable(existing);
+
+  if (input.scheduledFor) {
+    await planService.assertCanSchedule(userId, input.scheduledFor);
+  }
 
   if (input.targets) {
     await validateTargets(userId, input.targets);

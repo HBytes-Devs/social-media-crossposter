@@ -1,11 +1,13 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import type { SubscriptionStatus, SubscriptionTier } from "@prisma/client";
 import { prisma } from "../config/database.js";
 import { env } from "../config/env.js";
 import { AppError } from "../middleware/error.middleware.js";
 import type { RegisterInput, LoginInput, UpdateProfileInput } from "../validators/auth.validator.js";
 import type { AuthUser, AuthResponse } from "../types/index.js";
 import { verifyRecaptcha } from "./recaptcha.service.js";
+import { subscriptionFromUser } from "./plan.service.js";
 
 const SALT_ROUNDS = 12;
 
@@ -15,6 +17,9 @@ function sanitizeUser(user: {
   name: string | null;
   avatarUrl: string | null;
   createdAt: Date;
+  subscriptionTier: SubscriptionTier;
+  subscriptionStatus: SubscriptionStatus;
+  currentPeriodEnd: Date | null;
 }): AuthUser {
   return {
     id: user.id,
@@ -22,6 +27,13 @@ function sanitizeUser(user: {
     name: user.name,
     avatarUrl: user.avatarUrl,
     createdAt: user.createdAt.toISOString(),
+    subscription: subscriptionFromUser({
+      email: user.email,
+      name: user.name,
+      subscriptionTier: user.subscriptionTier,
+      subscriptionStatus: user.subscriptionStatus,
+      currentPeriodEnd: user.currentPeriodEnd,
+    }),
   };
 }
 

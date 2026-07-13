@@ -1,0 +1,66 @@
+/* Auth split layout — login mockup */
+
+@keyframes smc-auth-mesh-drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(-2%, 2%) scale(1.05);
+  }
+}
+
+@keyframes smc-auth-float {
+  0%,
+  100% {
+    transform: perspective(600px) rotateX(12deg) rotateY(-14deg) rotate(-4deg) translateY(0);
+  }
+  50% {
+    transform: perspective(600px) rotateX(12deg) rotateY(-14deg) rotate(-4deg) translateY(-10px);
+  }
+}
+
+@keyframes smc-auth-float-mini {
+  0%,
+  100% {
+    transform: perspective(400px) rotateX(10deg) rotateY(-10deg) rotate(6deg) translateY(0);
+  }
+  50% {
+    transform: perspective(400px) rotateX(10deg) rotateY(-10deg) rotate(6deg) translateY(-8px);
+  }
+}
+
+@keyframes smc-auth-pulse-dot {
+  0% {
+    box-shadow: 0 0 0 0 rgba(34, 192, 138, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(34, 192, 138, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 192, 138, 0);
+  }
+}
+
+.smc-auth-float-main {
+  animation: smc-auth-float 6s ease-in-out infinite;
+}
+
+.smc-auth-float-mini {
+  animation: smc-auth-float-mini 6s ease-in-out infinite 0.4s;
+}
+
+.smc-auth-mesh {
+  animation: smc-auth-mesh-drift 18s ease-in-out infinite alternate;
+}
+
+.smc-auth-pulse-dot {
+  animation: smc-auth-pulse-dot 2.2s infinite;
+}
+
+.smc-auth-icon-badge {
+  transform: perspective(200px) rotateX(6deg) rotateY(-6deg);
+}
+
+.smc-auth-logo-mark {
+  transform: perspective(300px) rotateX(10deg) rotateY(-10deg);
+}

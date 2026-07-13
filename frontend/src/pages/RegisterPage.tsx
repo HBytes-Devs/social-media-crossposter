@@ -1,14 +1,19 @@
+import Box from "@mui/material/Box";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import Link from "@mui/material/Link";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import { AuthShell } from "../components/ui/AuthShell";
-import { Button } from "../components/ui/Button";
-import { Input } from "../components/ui/Input";
+import { AuthCtaButton, AuthSplitShell } from "../components/auth/AuthSplitShell";
+import { AuthFieldInput } from "../components/auth/AuthFieldInput";
 import { useUiLanguage } from "../i18n/UiLanguageProvider";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { registerUser, selectAuth } from "../store/slices/authSlice";
+
+const authLinkSx = {
+  color: "#4B5FFF",
+  fontWeight: 500,
+  "&:hover": { textDecoration: "underline" },
+} as const;
 
 export function RegisterPage() {
   const { t } = useUiLanguage();
@@ -33,53 +38,66 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthShell
+    <AuthSplitShell
       title={t("auth.register.title")}
-      subtitle={t("auth.register.subtitle")}
+      subtitle={
+        <>
+          {t("auth.register.subtitlePrefix")}{" "}
+          <Box component="b" sx={{ fontWeight: 500, color: "text.primary" }}>
+            SMC
+          </Box>
+        </>
+      }
       footer={
-        <Typography variant="body2" color="text.secondary" textAlign="center">
+        <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
           {t("auth.haveAccount")}{" "}
-          <Link component={RouterLink} to="/login" underline="hover">
+          <Link component={RouterLink} to="/login" underline="none" sx={authLinkSx}>
             {t("auth.login")}
           </Link>
         </Typography>
       }
     >
-      <Stack component="form" spacing={2.5} onSubmit={handleSubmit}>
-        <Input
+      <Box component="form" onSubmit={handleSubmit}>
+        <AuthFieldInput
           label={t("auth.nameOptional")}
+          variant="name"
+          type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          placeholder={t("auth.namePlaceholder")}
+          requiredMark={false}
           autoComplete="name"
         />
-        <Input
+        <AuthFieldInput
           label={t("auth.email")}
+          variant="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          placeholder={t("auth.emailPlaceholder")}
           required
           autoComplete="email"
         />
-        <Input
+        <AuthFieldInput
           label={t("auth.password")}
+          variant="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          placeholder={t("auth.passwordPlaceholder")}
           required
           minLength={8}
           autoComplete="new-password"
         />
 
         {error && (
-          <Typography variant="body2" color="error">
+          <Typography variant="body2" color="error" sx={{ mb: 1.5 }}>
             {error}
           </Typography>
         )}
 
-        <Button type="submit" className="w-full" loading={authLoading}>
-          {t("auth.register")}
-        </Button>
-      </Stack>
-    </AuthShell>
+        <AuthCtaButton loading={authLoading}>{t("auth.register")}</AuthCtaButton>
+      </Box>
+    </AuthSplitShell>
   );
 }

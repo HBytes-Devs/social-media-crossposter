@@ -13,6 +13,7 @@ import {
   PublishedEmptyIcon,
   ScheduleEmptyIcon,
 } from "../components/dashboard/DashboardActivityPanel";
+import { SendIcon3D } from "../components/ui/icons3d/DashboardIcons3D";
 import { DashboardStatCard } from "../components/dashboard/DashboardStatCard";
 import { dashboardFonts, useDashboardTheme } from "../components/dashboard/dashboardTheme";
 import { LinkedInPerformancePanel } from "../components/dashboard/LinkedInPerformancePanel";
@@ -20,28 +21,32 @@ import { PageHeaderButton } from "../components/ui/PageHeaderButton";
 import { PageStateLoader } from "../components/ui/PageState";
 import { api } from "../lib/api";
 import { useAppSelector } from "../store/hooks";
-import { selectToken } from "../store/slices/authSlice";
+import { selectAuth, selectToken } from "../store/slices/authSlice";
 import type { DashboardData } from "../types";
 
 export function DashboardPage() {
   const navigate = useNavigate();
   const token = useAppSelector(selectToken);
+  const { user, loading: authLoading } = useAppSelector(selectAuth);
   const { colors } = useDashboardTheme();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const canViewAnalytics =
+    user?.subscription?.tier === "MEDIUM" || user?.subscription?.tier === "PREMIUM";
+
   useEffect(() => {
-    if (!token) return;
+    if (!token || authLoading) return;
     setLoading(true);
     api
-      .getDashboard(token, { analytics: true })
+      .getDashboard(token, { analytics: canViewAnalytics })
       .then(setData)
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load dashboard"))
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [token, authLoading, canViewAnalytics]);
 
-  if (loading) {
+  if (loading || authLoading) {
     return <PageStateLoader label="Loading dashboard..." />;
   }
 
@@ -185,6 +190,7 @@ export function DashboardPage() {
       <LinkedInPerformancePanel
         analytics={data.linkedInAnalytics}
         connectedPlatforms={data.accounts.byPlatform}
+        analyticsLocked={!canViewAnalytics}
       />
 
       {/* Two columns */}
@@ -221,9 +227,14 @@ export function DashboardPage() {
                 border: "1px dashed #CFCFF5",
                 bgcolor: colors.accentSoft,
                 color: colors.accent,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 1.25,
                 "&:hover": { bgcolor: "#E4E3FD" },
               }}
             >
+              <SendIcon3D size={26} />
               Schedule a post
             </Button>
           }

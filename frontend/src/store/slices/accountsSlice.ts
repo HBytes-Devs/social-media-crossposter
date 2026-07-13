@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { api } from "../../lib/api";
 import type { PlatformStatus, SocialAccount } from "../../types";
 import type { RootState } from "../types";
-import { selectToken } from "./authSlice";
+import { logout, selectToken } from "./authSlice";
 
 type AccountsState = {
   items: SocialAccount[];
@@ -65,7 +65,12 @@ export const connectPlatform = createAsyncThunk(
     try {
       const res = await api.getConnectUrl(token, slug);
       const url = res.data.browserUrl ?? res.data.authUrl;
-      window.open(url, "_blank", "noopener,noreferrer");
+      const popup = window.open(url, "_blank", "noopener,noreferrer");
+      if (!popup) {
+        return rejectWithValue(
+          "Popup block ho gaya — browser mein popups allow karo, phir dubara Connect dabao.",
+        );
+      }
       return slug.toUpperCase();
     } catch (err) {
       return rejectWithValue(
@@ -140,6 +145,11 @@ const accountsSlice = createSlice({
       })
       .addCase(disconnectAccount.rejected, (state, action) => {
         state.error = (action.payload as string) ?? "Disconnect failed";
+      })
+      .addCase(logout, (state) => {
+        state.items = [];
+        state.error = null;
+        state.connecting = null;
       });
   },
 });

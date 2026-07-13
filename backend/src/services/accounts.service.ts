@@ -9,6 +9,7 @@ import {
   type PlatformStatus,
 } from "../platforms/platform.config.js";
 import { encrypt, decrypt, generateStateToken, verifyStateToken } from "./encryption.service.js";
+import * as planService from "./plan.service.js";
 
 export type SocialAccountPublic = {
   id: string;
@@ -82,6 +83,8 @@ export async function handleOAuthCallback(
   const { userId, extra } = verifyStateToken(state);
   const adapter = getPlatformAdapter(platform);
   const tokenResult = await adapter.handleCallback(code, extra);
+
+  await planService.assertCanConnectExistingAccount(userId, platform, tokenResult.accountId);
 
   const account = await prisma.socialAccount.upsert({
     where: {

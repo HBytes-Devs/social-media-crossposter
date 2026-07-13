@@ -1,8 +1,16 @@
 import { env } from "../config/env.js";
 import { SUPPORTED_LANGUAGES } from "./hashtags.service.js";
-import { resolveUserAiCredential, userAiChat } from "./ai-provider.service.js";
-import { isAiConfiguredForUser } from "./ai-provider.service.js";
+import {
+  canGenerateImagesForUser,
+  isAiConfiguredForUser,
+  resolveUserAiCredential,
+  resolveUserImageCredential,
+  userAiChat,
+  userAiGenerateImage,
+} from "./ai-provider.service.js";
 import { parseJsonArray } from "./minimax.service.js";
+import * as mediaService from "./media.service.js";
+import { AppError } from "../middleware/error.middleware.js";
 
 const LANGUAGE_LABELS = Object.fromEntries(
   SUPPORTED_LANGUAGES.map((lang) => [lang.code, lang.label]),
@@ -16,15 +24,71 @@ function languageLabel(code?: string): string {
 export async function getAiStatus(userId: string) {
   const configured = await isAiConfiguredForUser(userId);
   const credential = configured ? await resolveUserAiCredential(userId) : null;
+  const imageGeneration = await canGenerateImagesForUser(userId);
+  const imageResolved = imageGeneration ? await resolveUserImageCredential(userId) : null;
+
+  const features = ["improve", "hashtags", "localize", "suggest", "correct"] as string[];
+  if (imageGeneration) features.push("generate-image");
 
   return {
     configured,
+    imageGeneration,
+    imageProvider: imageResolved?.provider ?? null,
+    imageKeyName: imageResolved?.credential.name ?? null,
     provider: credential?.provider.toLowerCase() ?? "none",
     model: credential?.model ?? env.MINIMAX_MODEL,
     keyName: credential?.name ?? null,
     source: credential?.id === "env-minimax" ? "server" : credential ? "user" : "none",
-    features: ["improve", "hashtags", "localize", "suggest", "correct"] as const,
+    features,
   };
+}
+
+export async function generatePostImage(
+  userId: string,
+  input: {
+    content: string;
+    language?: string;
+    platform?: string;
+  },
+): Promise<{ media: Awaited<ReturnType<typeof mediaService.uploadImageBuffer>>; prompt: string }> {
+  if (!(await canGenerateImagesForUser(userId))) {
+    throw new AppError(
+      503,
+      "Image generation ke liye Settings mein MiniMax API key add karo, ya server par MINIMAX_API_KEY set karo.",
+    );
+  }
+
+  const lang = languageLabel(input.language);
+  const platform = input.platform ?? "LinkedIn";
+
+  const prompt = await userAiChat(
+    userId,
+    [
+      {
+        role: "system",
+        content: [
+          "You write concise prompts for AI image generation for social media posts.",
+          `Platform: ${platform}. Language context: ${lang}.`,
+          "Create ONE English image prompt (max 900 chars) that visually represents the post.",
+          "Style: professional, clean, modern, suitable for LinkedIn/social feed.",
+          "No text overlays, no logos, no watermarks, no faces unless essential.",
+          "Return ONLY the prompt — no quotes, no markdown.",
+        ].join(" "),
+      },
+      { role: "user", content: input.content },
+    ],
+    { temperature: 0.75, maxTokens: 500 },
+  );
+
+  const imageBuffer = await userAiGenerateImage(userId, prompt);
+  const media = await mediaService.uploadImageBuffer(
+    userId,
+    imageBuffer,
+    `ai-post-${Date.now()}.png`,
+    "image/png",
+  );
+
+  return { media, prompt };
 }
 
 export async function improvePostContent(

@@ -1,13 +1,18 @@
+import Box from "@mui/material/Box";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
-import Link from "@mui/material/Link";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import { AuthShell } from "../components/ui/AuthShell";
-import { Button } from "../components/ui/Button";
-import { Input } from "../components/ui/Input";
+import { AuthCtaButton, AuthSplitShell } from "../components/auth/AuthSplitShell";
+import { AuthFieldInput } from "../components/auth/AuthFieldInput";
 import { useUiLanguage } from "../i18n/UiLanguageProvider";
 import { api } from "../lib/api";
+
+const authLinkSx = {
+  color: "#4B5FFF",
+  fontWeight: 500,
+  "&:hover": { textDecoration: "underline" },
+} as const;
 
 export function ResetPasswordPage() {
   const { t } = useUiLanguage();
@@ -45,72 +50,79 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <AuthShell
+    <AuthSplitShell
       title={t("auth.reset.title")}
       subtitle={t("auth.reset.subtitle")}
+      footerDivider={false}
       footer={
-        <Typography variant="body2" color="text.secondary" textAlign="center">
+        <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
           {t("auth.codeNotReceived")}{" "}
-          <Link component={RouterLink} to="/forgot-password" underline="hover">
+          <Link component={RouterLink} to="/forgot-password" underline="none" sx={authLinkSx}>
             {t("auth.resendCode")}
           </Link>
           {" · "}
-          <Link component={RouterLink} to="/login" underline="hover">
+          <Link component={RouterLink} to="/login" underline="none" sx={authLinkSx}>
             {t("auth.login")}
           </Link>
         </Typography>
       }
     >
-      <Stack component="form" spacing={2.5} onSubmit={handleSubmit}>
-        <Input
+      <Box component="form" onSubmit={handleSubmit}>
+        <AuthFieldInput
           label={t("auth.email")}
+          variant="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          placeholder={t("auth.emailPlaceholder")}
           required
           autoComplete="email"
         />
-        <Input
+        <AuthFieldInput
           label={t("auth.resetCode")}
+          variant="code"
           type="text"
           inputMode="numeric"
           pattern="\d{6}"
           maxLength={6}
           value={code}
           onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          placeholder={t("auth.resetCodePlaceholder")}
           required
           autoComplete="one-time-code"
-          placeholder="123456"
         />
-        <Input
+        <AuthFieldInput
           label={t("auth.newPassword")}
+          variant="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          placeholder={t("auth.passwordPlaceholder")}
           required
           minLength={8}
           autoComplete="new-password"
         />
-        <Input
+        <AuthFieldInput
           label={t("auth.confirmPassword")}
+          variant="password"
           type="password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder={t("auth.passwordPlaceholder")}
           required
           minLength={8}
           autoComplete="new-password"
+          id="auth-confirm-password"
         />
 
         {error && (
-          <Typography variant="body2" color="error">
+          <Typography variant="body2" color="error" sx={{ mb: 1.5 }}>
             {error}
           </Typography>
         )}
 
-        <Button type="submit" className="w-full" loading={loading}>
-          {t("auth.updatePassword")}
-        </Button>
-      </Stack>
-    </AuthShell>
+        <AuthCtaButton loading={loading}>{t("auth.updatePassword")}</AuthCtaButton>
+      </Box>
+    </AuthSplitShell>
   );
 }

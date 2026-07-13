@@ -8,18 +8,24 @@ datasource db {
 }
 
 model User {
-  id                 String              @id @default(cuid())
-  email              String              @unique
-  password           String
-  name               String?
-  avatarUrl          String?
-  accounts           SocialAccount[]
-  posts              Post[]
-  media              Media[]
-  passwordResetCodes PasswordResetCode[]
-  aiCredentials      UserAiCredential[]
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
+  id                   String              @id @default(cuid())
+  email                String              @unique
+  password             String
+  name                 String?
+  avatarUrl            String?
+  subscriptionTier     SubscriptionTier    @default(FREE)
+  subscriptionStatus   SubscriptionStatus  @default(ACTIVE)
+  stripeCustomerId     String?             @unique
+  stripeSubscriptionId String?             @unique
+  stripePriceId        String?
+  currentPeriodEnd     DateTime?
+  accounts             SocialAccount[]
+  posts                Post[]
+  media                Media[]
+  passwordResetCodes   PasswordResetCode[]
+  aiCredentials        UserAiCredential[]
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
 }
 
 model UserAiCredential {
@@ -187,4 +193,18 @@ enum AiProvider {
   OPENAI
   ANTHROPIC
   CUSTOM
+}
+
+enum SubscriptionTier {
+  FREE
+  MEDIUM
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+  INCOMPLETE
 }

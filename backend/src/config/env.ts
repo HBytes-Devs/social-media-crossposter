@@ -47,7 +47,20 @@ const envSchema = z.object({
   MINIMAX_API_KEY: z.string().optional(),
   MINIMAX_BASE_URL: z.string().url().default("https://api.minimax.io/v1"),
   MINIMAX_MODEL: z.string().default("MiniMax-M2.5"),
+  MINIMAX_IMAGE_MODEL: z.string().default("image-01"),
+  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_IMAGE_MODEL: z.string().default("dall-e-3"),
   SCHEDULER_POLL_INTERVAL_MS: z.coerce.number().int().min(10_000).default(60_000),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_PRICE_MEDIUM: z.string().optional(),
+  STRIPE_PRICE_PREMIUM: z.string().optional(),
+  STRIPE_SUCCESS_URL: z.string().url().optional(),
+  STRIPE_CANCEL_URL: z.string().url().optional(),
+  /** Comma-separated emails with complimentary Premium (founders / premier members) */
+  PREMIER_MEMBER_EMAILS: z.string().optional(),
+  /** Comma-separated handles matched against user name or email local-part */
+  PREMIER_MEMBER_HANDLES: z.string().optional(),
 });
 
 function loadEnv() {
@@ -66,6 +79,14 @@ function loadEnv() {
   if (data.AWS_SECRET_ACCESS_KEY) data.AWS_SECRET_ACCESS_KEY = data.AWS_SECRET_ACCESS_KEY.trim();
   if (data.AWS_S3_BUCKET) data.AWS_S3_BUCKET = data.AWS_S3_BUCKET.trim();
   if (data.MINIMAX_API_KEY) data.MINIMAX_API_KEY = data.MINIMAX_API_KEY.trim();
+  if (data.OPENAI_API_KEY) data.OPENAI_API_KEY = data.OPENAI_API_KEY.trim();
+
+  if (!data.STRIPE_SUCCESS_URL) {
+    data.STRIPE_SUCCESS_URL = `${data.FRONTEND_URL}/settings?billing=success`;
+  }
+  if (!data.STRIPE_CANCEL_URL) {
+    data.STRIPE_CANCEL_URL = `${data.FRONTEND_URL}/settings?billing=canceled`;
+  }
 
   return data;
 }
