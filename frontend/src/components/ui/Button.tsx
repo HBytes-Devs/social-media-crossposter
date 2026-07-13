@@ -1,19 +1,22 @@
-import MuiButton from "@mui/material/Button";
+import MuiButton, { type ButtonProps as MuiButtonProps } from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color"> & {
   variant?: "primary" | "secondary" | "ghost" | "danger";
   loading?: boolean;
   children: ReactNode;
 };
 
 const variantMap = {
-  primary: { mui: "contained" as const, color: "primary" as const },
-  secondary: { mui: "outlined" as const, color: "inherit" as const },
-  ghost: { mui: "text" as const, color: "inherit" as const },
-  danger: { mui: "contained" as const, color: "error" as const },
-};
+  primary: { mui: "contained", color: "primary" },
+  secondary: { mui: "outlined", color: "inherit" },
+  ghost: { mui: "text", color: "inherit" },
+  danger: { mui: "contained", color: "error" },
+} as const satisfies Record<
+  NonNullable<ButtonProps["variant"]>,
+  { mui: NonNullable<MuiButtonProps["variant"]>; color: NonNullable<MuiButtonProps["color"]> }
+>;
 
 export function Button({
   variant = "primary",

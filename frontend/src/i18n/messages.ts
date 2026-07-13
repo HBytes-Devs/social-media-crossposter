@@ -9,7 +9,7 @@ export const UI_LOCALES: Array<{ code: UiLocale; label: string }> = [
 
 export const UI_LOCALE_STORAGE_KEY = "smc_ui_locale";
 
-type MessageKey =
+export type MessageKey =
   | "auth.email"
   | "auth.password"
   | "auth.nameOptional"

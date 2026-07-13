@@ -28,9 +28,10 @@ export function platformLabel(platform: string): string {
 
 export function getPostPlatforms(post: { targets: { platform: string }[] }): string[] {
   const platforms = [...new Set(post.targets.map((t) => t.platform))];
-  return PLATFORM_ORDER.filter((p) => platforms.includes(p)).concat(
-    platforms.filter((p) => !PLATFORM_ORDER.includes(p as PlatformId)),
+  const extra = platforms.filter(
+    (p): p is PlatformId => !PLATFORM_ORDER.includes(p as PlatformId),
   );
+  return PLATFORM_ORDER.filter((p) => platforms.includes(p)).concat(extra);
 }
 
 export function getPostGroupKey(post: { targets: { platform: string }[] }): string {
