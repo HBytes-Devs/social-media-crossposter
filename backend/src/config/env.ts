@@ -24,6 +24,7 @@ const envSchema = z.object({
   META_APP_ID: z.string().optional(),
   META_APP_SECRET: z.string().optional(),
   META_REDIRECT_URI: z.string().optional(),
+  META_CONFIG_ID: z.string().optional(),
   META_INSTAGRAM_REDIRECT_URI: z.string().optional(),
   TWITTER_CLIENT_ID: z.string().optional(),
   TWITTER_CLIENT_SECRET: z.string().optional(),

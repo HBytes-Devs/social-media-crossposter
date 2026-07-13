@@ -9,6 +9,7 @@ import dashboardRoutes from "./dashboard.routes.js";
 import settingsRoutes from "./settings.routes.js";
 import billingRoutes from "./billing.routes.js";
 import versionRoutes from "./version.routes.js";
+import metaRoutes from "./meta.routes.js";
 import { getProductVersion } from "../lib/product-version.js";
 
 const router = Router();
@@ -23,6 +24,7 @@ router.use("/dashboard", dashboardRoutes);
 router.use("/settings", settingsRoutes);
 router.use("/billing", billingRoutes);
 router.use("/version", versionRoutes);
+router.use("/meta", metaRoutes);
 
 router.get("/", (_req, res) => {
   const product = getProductVersion();

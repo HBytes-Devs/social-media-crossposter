@@ -40,9 +40,15 @@ export class FacebookAdapter implements PlatformAdapter {
       client_id: env.META_APP_ID!,
       redirect_uri: env.META_REDIRECT_URI!,
       state,
-      scope: SCOPES.join(","),
       response_type: "code",
     });
+
+    // Facebook Login for Business apps use config_id instead of scope.
+    if (env.META_CONFIG_ID) {
+      params.set("config_id", env.META_CONFIG_ID);
+    } else {
+      params.set("scope", SCOPES.join(","));
+    }
 
     return `https://www.facebook.com/${META_GRAPH_VERSION}/dialog/oauth?${params.toString()}`;
   }
