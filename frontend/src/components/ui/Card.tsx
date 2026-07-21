@@ -2,6 +2,7 @@ import MuiCard from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
+import { glassPanelSx } from "../../theme/glassSurface";
 
 export function Card({
   title,
@@ -20,7 +21,7 @@ export function Card({
   const contentSx = padding === "none" ? { p: 0, "&:last-child": { pb: 0 } } : undefined;
 
   return (
-    <MuiCard className={className} sx={{ overflow: "hidden" }}>
+    <MuiCard className={className} sx={{ overflow: "hidden", ...glassPanelSx }}>
       <CardContent sx={contentSx}>
         {hasHeader && (
           <header className="mb-4">

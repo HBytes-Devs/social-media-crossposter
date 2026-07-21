@@ -24,8 +24,135 @@ model User {
   media                Media[]
   passwordResetCodes   PasswordResetCode[]
   aiCredentials        UserAiCredential[]
+  googleAdsAccounts    GoogleAdsAccount[]
+  linkedInAdsAccounts  LinkedInAdsAccount[]
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+}
+
+model GoogleAdsAccount {
+  id               String   @id @default(cuid())
+  userId           String
+  customerId       String
+  customerName     String?
+  loginCustomerId  String?
+  accessToken      String
+  refreshToken     String?
+  expiresAt        DateTime?
+  scopes           String[]
+  metadata         Json?
+  isActive         Boolean  @default(true)
+  lastSyncedAt     DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user             User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountMetrics   GoogleAdsAccountMetric[]
+  campaignMetrics  GoogleAdsCampaignMetric[]
+
+  @@unique([userId, customerId])
+  @@index([userId])
+}
+
+model GoogleAdsAccountMetric {
+  id                 String   @id @default(cuid())
+  googleAdsAccountId String
+  date               DateTime @db.Date
+  impressions        Int      @default(0)
+  clicks             Int      @default(0)
+  costMicros         BigInt   @default(0)
+  conversions        Float    @default(0)
+  ctr                Float    @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  account GoogleAdsAccount @relation(fields: [googleAdsAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([googleAdsAccountId, date])
+  @@index([googleAdsAccountId, date])
+}
+
+model GoogleAdsCampaignMetric {
+  id                 String   @id @default(cuid())
+  googleAdsAccountId String
+  campaignId         String
+  campaignName       String?
+  date               DateTime @db.Date
+  impressions        Int      @default(0)
+  clicks             Int      @default(0)
+  costMicros         BigInt   @default(0)
+  conversions        Float    @default(0)
+  ctr                Float    @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  account GoogleAdsAccount @relation(fields: [googleAdsAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([googleAdsAccountId, campaignId, date])
+  @@index([googleAdsAccountId, date])
+  @@index([googleAdsAccountId, campaignId])
+}
+
+model LinkedInAdsAccount {
+  id            String   @id @default(cuid())
+  userId        String
+  adAccountId   String
+  adAccountName String?
+  accessToken   String
+  refreshToken  String?
+  expiresAt     DateTime?
+  scopes        String[]
+  metadata      Json?
+  isActive      Boolean  @default(true)
+  lastSyncedAt  DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user            User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountMetrics  LinkedInAdsAccountMetric[]
+  campaignMetrics LinkedInAdsCampaignMetric[]
+
+  @@unique([userId, adAccountId])
+  @@index([userId])
+}
+
+model LinkedInAdsAccountMetric {
+  id                  String   @id @default(cuid())
+  linkedInAdsAccountId String
+  date                DateTime @db.Date
+  impressions         Int      @default(0)
+  clicks              Int      @default(0)
+  costMicros          BigInt   @default(0)
+  conversions         Float    @default(0)
+  ctr                 Float    @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  account LinkedInAdsAccount @relation(fields: [linkedInAdsAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([linkedInAdsAccountId, date])
+  @@index([linkedInAdsAccountId, date])
+}
+
+model LinkedInAdsCampaignMetric {
+  id                   String   @id @default(cuid())
+  linkedInAdsAccountId String
+  campaignId           String
+  campaignName         String?
+  date                 DateTime @db.Date
+  impressions          Int      @default(0)
+  clicks               Int      @default(0)
+  costMicros           BigInt   @default(0)
+  conversions          Float    @default(0)
+  ctr                  Float    @default(0)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  account LinkedInAdsAccount @relation(fields: [linkedInAdsAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([linkedInAdsAccountId, campaignId, date])
+  @@index([linkedInAdsAccountId, date])
+  @@index([linkedInAdsAccountId, campaignId])
 }
 
 model UserAiCredential {

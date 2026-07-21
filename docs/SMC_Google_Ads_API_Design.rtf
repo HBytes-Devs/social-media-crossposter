@@ -1,0 +1,47 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Arial;}}
+\f0\fs22
+\b Social Media Crossposter (SMC) — Google Ads API Tool Design\b0\par
+\par
+\b Company:\b0 HawkBytes\par
+\b Product:\b0 Social Media Crossposter (SMC)\par
+\b Website:\b0 https://hawkbytes.com/\par
+\b Contact:\b0 haseebcodejourney@gmail.com\par
+\par
+\b 1. Purpose\b0\par
+SMC is a self-hosted marketing dashboard. The Google Ads integration provides OAuth connect and read-only analytics for account and campaign metrics (impressions, clicks, cost, conversions, CTR) inside the SMC UI.\par
+\par
+\b 2. Users\b0\par
+Internal HawkBytes team (employees) during development and client reporting. External end-customers may be added later after Standard access if needed; this Basic Access application is for internal use first.\par
+\par
+\b 3. Architecture (high level)\b0\par
+- Frontend: React dashboard at /google-ads and Dashboard Google Ads panel\par
+- Backend: Node/Express API under /api/v1/google-ads/*\par
+- Auth: OAuth 2.0 (Google) with scope https://www.googleapis.com/auth/adwords\par
+- Storage: Encrypted refresh tokens; cached daily account/campaign metrics in PostgreSQL\par
+- API usage: ListAccessibleCustomers + GoogleAdsService.Search (GAQL) for metrics\par
+\par
+\b 4. Google Ads API capabilities used\b0\par
+- Account Management (link accessible customers)\par
+- Reporting (read-only metrics sync)\par
+No campaign creation, bidding changes, or keyword mutation in the initial release.\par
+\par
+\b 5. OAuth / security\b0\par
+- Web application OAuth client in Google Cloud\par
+- Redirect URI points to SMC backend callback\par
+- Developer token from Google Ads Manager (MCC) API Center\par
+- Tokens encrypted at rest; access limited to authenticated SMC users on Medium/Premium plans\par
+\par
+\b 6. Data flow\b0\par
+1. User clicks Connect Google Ads in SMC\par
+2. Google OAuth consent\par
+3. Backend stores linked customer ID + encrypted tokens\par
+4. Sync pulls date-range metrics via API and stores them for charts/tables\par
+\par
+\b 7. Cloud / MCC identifiers\b0\par
+- Google Cloud project number: 917514380205\par
+- Manager account (MCC) ID: 717-742-3743\par
+\par
+\b 8. Compliance note\b0\par
+Read-only reporting only at Basic Access stage. We will follow Google Ads API Terms and rate limits.\par
+}

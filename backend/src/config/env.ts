@@ -58,10 +58,21 @@ const envSchema = z.object({
   STRIPE_PRICE_PREMIUM: z.string().optional(),
   STRIPE_SUCCESS_URL: z.string().url().optional(),
   STRIPE_CANCEL_URL: z.string().url().optional(),
+  GOOGLE_ADS_CLIENT_ID: z.string().optional(),
+  GOOGLE_ADS_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_ADS_DEVELOPER_TOKEN: z.string().optional(),
+  GOOGLE_ADS_REDIRECT_URI: z.string().optional(),
+  /** Optional override; falls back to LINKEDIN_CLIENT_ID */
+  LINKEDIN_ADS_CLIENT_ID: z.string().optional(),
+  /** Optional override; falls back to LINKEDIN_CLIENT_SECRET */
+  LINKEDIN_ADS_CLIENT_SECRET: z.string().optional(),
+  LINKEDIN_ADS_REDIRECT_URI: z.string().optional(),
   /** Comma-separated emails with complimentary Premium (founders / premier members) */
   PREMIER_MEMBER_EMAILS: z.string().optional(),
   /** Comma-separated handles matched against user name or email local-part */
   PREMIER_MEMBER_HANDLES: z.string().optional(),
+  /** Sentry DSN — leave empty to disable error tracking */
+  SENTRY_DSN: z.string().url().optional(),
 });
 
 function loadEnv() {

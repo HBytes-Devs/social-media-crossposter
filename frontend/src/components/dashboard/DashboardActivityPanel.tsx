@@ -1,7 +1,6 @@
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Link from "@mui/material/Link";
-import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
@@ -12,6 +11,7 @@ import {
   PublishedEmptyIcon3D,
   ScheduleEmptyIcon3D,
 } from "../ui/icons3d/DashboardIcons3D";
+import { glassPanelSx } from "../../theme/glassSurface";
 import { dashboardFonts, useDashboardTheme } from "./dashboardTheme";
 
 type Post = DashboardData["upcoming"][number];
@@ -28,38 +28,90 @@ function PostRow({
   accent: string;
 }) {
   return (
-    <Paper
-      variant="outlined"
+    <Box
       onClick={onClick}
       sx={{
-        p: 2,
-        borderRadius: 2,
+        p: 1.75,
+        borderRadius: "12px",
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "rgba(255,255,255,0.03)",
         cursor: onClick ? "pointer" : "default",
-        transition: "border-color 0.15s ease",
-        "&:hover": onClick ? { borderColor: accent } : undefined,
+        minWidth: 0,
+        overflow: "hidden",
+        transition: "border-color 0.15s ease, background 0.15s ease",
+        "&:hover": onClick
+          ? {
+              borderColor: accent,
+              bgcolor: "rgba(255,255,255,0.05)",
+            }
+          : undefined,
       }}
     >
-      <Stack direction="row" justifyContent="space-between" gap={1} alignItems="flex-start">
-        <Box sx={{ minWidth: 0 }}>
-          <Typography variant="body2" fontWeight={600} noWrap fontFamily={dashboardFonts.body}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        gap={1.25}
+        alignItems="flex-start"
+        sx={{ minWidth: 0 }}
+      >
+        <Box sx={{ minWidth: 0, flex: 1, overflow: "hidden" }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 600,
+              fontFamily: dashboardFonts.body,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              wordBreak: "break-word",
+            }}
+          >
             {post.finalContent || post.content || "(image post)"}
           </Typography>
           <Typography
             variant="caption"
             color="text.secondary"
-            sx={{ display: "block", mt: 0.5, fontFamily: dashboardFonts.body }}
+            sx={{
+              display: "block",
+              mt: 0.5,
+              fontFamily: dashboardFonts.body,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
           >
             {meta}
           </Typography>
-          <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mt: 1 }}>
-            {post.targets.map((t) => (
-              <Chip key={t.id} label={platformLabel(t.platform)} size="small" variant="outlined" />
-            ))}
-          </Stack>
+          {post.targets.length > 0 && (
+            <Stack
+              direction="row"
+              flexWrap="wrap"
+              gap={0.5}
+              sx={{ mt: 1, maxWidth: "100%" }}
+            >
+              {post.targets.map((t) => (
+                <Chip
+                  key={t.id}
+                  label={platformLabel(t.platform)}
+                  size="small"
+                  variant="outlined"
+                  sx={{ maxWidth: "100%", "& .MuiChip-label": { overflow: "hidden", textOverflow: "ellipsis" } }}
+                />
+              ))}
+            </Stack>
+          )}
         </Box>
-        <Chip label={post.status} size="small" variant="outlined" />
+        <Chip
+          label={post.status}
+          size="small"
+          variant="outlined"
+          sx={{ flexShrink: 0, maxWidth: 96 }}
+        />
       </Stack>
-    </Paper>
+    </Box>
   );
 }
 
@@ -92,11 +144,17 @@ export function DashboardActivityPanel({
   return (
     <Box
       sx={{
-        bgcolor: "background.paper",
+        ...glassPanelSx,
         border: "1px solid",
         borderColor: "divider",
         borderRadius: "16px",
-        p: "24px 26px",
+        p: { xs: 2, sm: "22px 24px" },
+        minWidth: 0,
+        maxWidth: "100%",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
       }}
     >
       <Box
@@ -104,16 +162,20 @@ export function DashboardActivityPanel({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-start",
-          gap: 1,
+          gap: 1.5,
           mb: 0.5,
+          minWidth: 0,
         }}
       >
-        <Box>
+        <Box sx={{ minWidth: 0, flex: 1 }}>
           <Typography
             sx={{
               fontFamily: dashboardFonts.heading,
               fontSize: 15.5,
               fontWeight: 600,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
             {title}
@@ -123,7 +185,7 @@ export function DashboardActivityPanel({
               fontSize: 12,
               color: colors.muted,
               mt: 0.4,
-              mb: 2.75,
+              mb: 2.25,
               fontFamily: dashboardFonts.body,
             }}
           >
@@ -141,6 +203,8 @@ export function DashboardActivityPanel({
               color: colors.accent,
               fontFamily: dashboardFonts.body,
               flexShrink: 0,
+              whiteSpace: "nowrap",
+              pt: 0.25,
             }}
           >
             View all →
@@ -149,7 +213,17 @@ export function DashboardActivityPanel({
       </Box>
 
       {hasPosts && postMeta ? (
-        <Stack spacing={1.5}>
+        <Stack
+          spacing={1.25}
+          sx={{
+            minWidth: 0,
+            maxHeight: { xs: 320, lg: 360 },
+            overflowY: "auto",
+            overflowX: "hidden",
+            pr: 0.25,
+            mr: -0.25,
+          }}
+        >
           {posts.map((post) => (
             <PostRow
               key={post.id}
@@ -162,7 +236,15 @@ export function DashboardActivityPanel({
         </Stack>
       ) : (
         <>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2.5, py: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              py: 1,
+              minWidth: 0,
+            }}
+          >
             <Box sx={{ flexShrink: 0, filter: "drop-shadow(0 8px 16px rgba(15,23,42,0.1))" }}>
               {emptyIcon}
             </Box>
@@ -173,6 +255,7 @@ export function DashboardActivityPanel({
                 lineHeight: 1.55,
                 fontFamily: dashboardFonts.body,
                 flex: 1,
+                minWidth: 0,
               }}
             >
               {emptyText}

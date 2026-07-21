@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { logger } from "../utils/logger.js";
+import { captureException } from "../config/sentry.js";
 
 export class AppError extends Error {
   constructor(
@@ -37,6 +38,7 @@ export function errorHandler(
   }
 
   logger.error("Unhandled error", err);
+  captureException(err);
 
   res.status(500).json({
     success: false,

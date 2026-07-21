@@ -1,7 +1,8 @@
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { AuthBootstrap } from "./components/AuthBootstrap";
+import { ImmersiveAuthLayout } from "./components/auth/ImmersiveAuthLayout";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AccountsPage } from "./pages/AccountsPage";
@@ -9,6 +10,10 @@ import { SettingsPage } from "./pages/SettingsPage";
 import { CalendarPage } from "./pages/CalendarPage";
 import { ComposePage } from "./pages/ComposePage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { GoogleAdsPage } from "./pages/GoogleAdsPage";
+import { LinkedInAdsPage } from "./pages/LinkedInAdsPage";
+import { LinkedInMarketingPage } from "./pages/LinkedInMarketingPage";
+import { InstagramAnalyticsPage } from "./pages/InstagramAnalyticsPage";
 import { LoginPage } from "./pages/LoginPage";
 import { PostsPage } from "./pages/PostsPage";
 import { ComingSoonPage } from "./pages/ComingSoonPage";
@@ -19,7 +24,7 @@ import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { useAppSelector } from "./store/hooks";
 import { selectAuth } from "./store/slices/authSlice";
 
-function PublicOnly({ children }: { children: React.ReactNode }) {
+function PublicOnly() {
   const { token, loading } = useAppSelector(selectAuth);
 
   if (loading) {
@@ -31,7 +36,7 @@ function PublicOnly({ children }: { children: React.ReactNode }) {
   }
 
   if (token) return <Navigate to="/" replace />;
-  return <>{children}</>;
+  return <Outlet />;
 }
 
 function routerBasename(): string | undefined {
@@ -44,38 +49,14 @@ export default function App() {
     <BrowserRouter basename={routerBasename()}>
       <AuthBootstrap>
         <Routes>
-          <Route
-            path="/login"
-            element={
-              <PublicOnly>
-                <LoginPage />
-              </PublicOnly>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <PublicOnly>
-                <RegisterPage />
-              </PublicOnly>
-            }
-          />
-          <Route
-            path="/forgot-password"
-            element={
-              <PublicOnly>
-                <ForgotPasswordPage />
-              </PublicOnly>
-            }
-          />
-          <Route
-            path="/reset-password"
-            element={
-              <PublicOnly>
-                <ResetPasswordPage />
-              </PublicOnly>
-            }
-          />
+          <Route element={<PublicOnly />}>
+            <Route element={<ImmersiveAuthLayout />}>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
+            </Route>
+          </Route>
 
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
@@ -87,6 +68,10 @@ export default function App() {
               <Route path="coming-soon" element={<ComingSoonPage />} />
               <Route path="working-on-it" element={<WorkingOnItPage />} />
               <Route path="accounts" element={<AccountsPage />} />
+              <Route path="google-ads" element={<GoogleAdsPage />} />
+              <Route path="linkedin-ads" element={<LinkedInAdsPage />} />
+              <Route path="linkedin-marketing" element={<LinkedInMarketingPage />} />
+              <Route path="instagram" element={<InstagramAnalyticsPage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
           </Route>

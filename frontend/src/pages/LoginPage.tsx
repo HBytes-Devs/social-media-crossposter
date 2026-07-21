@@ -5,7 +5,7 @@ import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
-import { AuthCtaButton, AuthSplitShell } from "../components/auth/AuthSplitShell";
+import { ImmersiveAuthCta, ImmersiveAuthShell } from "../components/auth/ImmersiveAuthShell";
 import { AuthFieldInput } from "../components/auth/AuthFieldInput";
 import { RecaptchaNotice, useRecaptcha } from "../hooks/useRecaptcha";
 import { useUiLanguage } from "../i18n/UiLanguageProvider";
@@ -82,25 +82,29 @@ export function LoginPage() {
   }
 
   return (
-    <AuthSplitShell
+    <ImmersiveAuthShell
       title={t("auth.login.title")}
       subtitle={
         <>
           {t("auth.login.subtitlePrefix")}{" "}
-          <Box component="b" sx={{ fontWeight: 500, color: "text.primary" }}>
+          <Box component="b" sx={{ fontWeight: 600, color: "rgba(245,246,248,0.95)" }}>
             SMC
           </Box>{" "}
           {t("auth.login.subtitleSuffix")}
         </>
       }
       footer={
-        <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
+        <Typography sx={{ textAlign: "center", fontSize: 14, color: "rgba(200,210,215,0.7)" }}>
           {t("auth.noAccount")}{" "}
           <Link
             component={RouterLink}
             to="/register"
             underline="none"
-            sx={{ color: "#4B5FFF", fontWeight: 500, "&:hover": { textDecoration: "underline" } }}
+            sx={{
+              color: "#9fd4cf !important",
+              fontWeight: 600,
+              "&:hover": { textDecoration: "underline" },
+            }}
           >
             {t("auth.createAccount")}
           </Link>
@@ -147,12 +151,11 @@ export function LoginPage() {
                 size="small"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                inputProps={{ "aria-label": t("auth.rememberMe") }}
-                sx={{ color: "#4B5FFF", "&.Mui-checked": { color: "#4B5FFF" } }}
+                slotProps={{ input: { "aria-label": t("auth.rememberMe") } }}
               />
             }
             label={
-              <Typography sx={{ fontSize: 13.5, color: "text.secondary" }}>
+              <Typography sx={{ fontSize: 13.5, color: "rgba(200,210,215,0.75)" }}>
                 {t("auth.rememberMe")}
               </Typography>
             }
@@ -164,7 +167,7 @@ export function LoginPage() {
             underline="none"
             sx={{
               fontSize: 13.5,
-              color: "#4B5FFF",
+              color: "#9fd4cf !important",
               fontWeight: 500,
               "&:hover": { textDecoration: "underline" },
             }}
@@ -174,26 +177,26 @@ export function LoginPage() {
         </Box>
 
         {loadError && (
-          <Typography variant="caption" color="warning.main" sx={{ display: "block", mb: 1.5 }}>
+          <Typography variant="caption" sx={{ display: "block", mb: 1.5, color: "#e8b86d" }}>
             {t("auth.recaptcha.loadError")}
           </Typography>
         )}
 
         {info && (
-          <Typography variant="body2" color="success.main" sx={{ mb: 1.5 }}>
+          <Typography variant="body2" sx={{ mb: 1.5, color: "#7ec8c4" }}>
             {info}
           </Typography>
         )}
         {error && (
-          <Typography variant="body2" color="error" sx={{ mb: 1.5 }}>
+          <Typography variant="body2" sx={{ mb: 1.5, color: "#f0a0a0" }}>
             {error}
           </Typography>
         )}
 
-        <AuthCtaButton loading={authLoading}>{t("auth.login")}</AuthCtaButton>
+        <ImmersiveAuthCta loading={authLoading}>{t("auth.login")}</ImmersiveAuthCta>
 
         <RecaptchaNotice enabled={recaptchaEnabled} />
       </Box>
-    </AuthSplitShell>
+    </ImmersiveAuthShell>
   );
 }

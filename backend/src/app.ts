@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import { setupExpressErrorHandler } from "@sentry/node";
 import { env } from "./config/env.js";
 import routes from "./routes/index.js";
 import { errorHandler } from "./middleware/error.middleware.js";
@@ -36,6 +37,13 @@ export function createApp() {
   app.use("/api/v1", routes);
 
   app.use(notFoundHandler);
+
+  // Sentry error handler — must come BEFORE custom errorHandler
+  // Only active when SENTRY_DSN is set
+  if (process.env.SENTRY_DSN) {
+    setupExpressErrorHandler(app);
+  }
+
   app.use(errorHandler);
 
   return app;

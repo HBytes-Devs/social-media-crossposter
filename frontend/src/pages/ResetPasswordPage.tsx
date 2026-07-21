@@ -3,14 +3,14 @@ import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
-import { AuthCtaButton, AuthSplitShell } from "../components/auth/AuthSplitShell";
+import { ImmersiveAuthCta, ImmersiveAuthShell } from "../components/auth/ImmersiveAuthShell";
 import { AuthFieldInput } from "../components/auth/AuthFieldInput";
 import { useUiLanguage } from "../i18n/UiLanguageProvider";
 import { api } from "../lib/api";
 
 const authLinkSx = {
-  color: "#4B5FFF",
-  fontWeight: 500,
+  color: "#9fd4cf !important",
+  fontWeight: 600,
   "&:hover": { textDecoration: "underline" },
 } as const;
 
@@ -50,12 +50,11 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <AuthSplitShell
+    <ImmersiveAuthShell
       title={t("auth.reset.title")}
       subtitle={t("auth.reset.subtitle")}
-      footerDivider={false}
       footer={
-        <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
+        <Typography sx={{ textAlign: "center", fontSize: 14, color: "rgba(200,210,215,0.7)" }}>
           {t("auth.codeNotReceived")}{" "}
           <Link component={RouterLink} to="/forgot-password" underline="none" sx={authLinkSx}>
             {t("auth.resendCode")}
@@ -116,13 +115,13 @@ export function ResetPasswordPage() {
         />
 
         {error && (
-          <Typography variant="body2" color="error" sx={{ mb: 1.5 }}>
+          <Typography variant="body2" sx={{ mb: 1.5, color: "#f0a0a0" }}>
             {error}
           </Typography>
         )}
 
-        <AuthCtaButton loading={loading}>{t("auth.updatePassword")}</AuthCtaButton>
+        <ImmersiveAuthCta loading={loading}>{t("auth.updatePassword")}</ImmersiveAuthCta>
       </Box>
-    </AuthSplitShell>
+    </ImmersiveAuthShell>
   );
 }

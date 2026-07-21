@@ -18,7 +18,7 @@ router.get("/", async (_req, res) => {
 
   const product = getProductVersion();
 
-  const health: HealthStatus = {
+  const health: HealthStatus & { sentry: string } = {
     status: database === "connected" ? "ok" : "degraded",
     timestamp: new Date().toISOString(),
     uptime: Math.floor((Date.now() - startTime) / 1000),
@@ -29,6 +29,7 @@ router.get("/", async (_req, res) => {
     fullVersion: product.fullVersion,
     apiVersion: product.apiVersion,
     product: product.product,
+    sentry: process.env.SENTRY_DSN ? "enabled" : "disabled",
   };
 
   // 503 in production when DB is down — load balancers treat as unhealthy.

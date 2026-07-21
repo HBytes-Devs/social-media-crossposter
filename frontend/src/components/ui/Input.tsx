@@ -27,14 +27,16 @@ export function Input({ label, error, className = "", id, ...props }: InputProps
       autoComplete={props.autoComplete}
       required={props.required}
       disabled={props.disabled}
-      inputProps={{
-        min: props.min,
-        max: props.max,
-        step: props.step,
-        minLength: props.minLength,
-        maxLength: props.maxLength,
-        pattern: props.pattern,
-        inputMode: props.inputMode,
+      slotProps={{
+        htmlInput: {
+          min: props.min,
+          max: props.max,
+          step: props.step,
+          minLength: props.minLength,
+          maxLength: props.maxLength,
+          pattern: props.pattern,
+          inputMode: props.inputMode,
+        },
       }}
       sx={{ my: 0 }}
     />

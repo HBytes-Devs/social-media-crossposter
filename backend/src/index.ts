@@ -1,3 +1,7 @@
+// Sentry must be initialized before everything else
+import { initSentry } from "./config/sentry.js";
+initSentry();
+
 import { createApp } from "./app.js";
 import { env } from "./config/env.js";
 import { connectDatabase, disconnectDatabase } from "./config/database.js";

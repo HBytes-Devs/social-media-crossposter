@@ -1,0 +1,113 @@
+/* Lusion-style immersive auth */
+
+@keyframes smc-lusion-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.smc-lusion-fade-in {
+  animation: smc-lusion-fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Soft opacity-only swap when auth form route changes (no WebGL remount) */
+@keyframes smc-lusion-card-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.smc-lusion-card-swap {
+  animation: smc-lusion-card-fade 0.28s ease both;
+}
+
+.smc-lusion-delay-1 {
+  animation-delay: 0.12s;
+}
+
+.smc-lusion-delay-2 {
+  animation-delay: 0.28s;
+}
+
+.smc-lusion-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+.smc-lusion-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(ellipse at center, transparent 35%, rgba(5, 7, 12, 0.72) 100%);
+}
+
+/* Dark glass form fields (native AuthFieldInput) */
+.smc-lusion-form label {
+  color: rgba(220, 228, 230, 0.88) !important;
+}
+
+.smc-lusion-form label sup {
+  color: #00ddff !important;
+}
+
+.smc-lusion-form input {
+  color: #f0f3f5 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.smc-lusion-form input::placeholder {
+  color: rgba(170, 185, 190, 0.45) !important;
+}
+
+.smc-lusion-form input:focus {
+  border-color: rgba(0, 221, 255, 0.75) !important;
+  background: rgba(0, 40, 70, 0.45) !important;
+  box-shadow: 0 0 0 3px rgba(0, 221, 255, 0.18) !important;
+}
+
+.smc-lusion-form .MuiCheckbox-root {
+  color: rgba(0, 221, 255, 0.55) !important;
+}
+
+.smc-lusion-form .MuiCheckbox-root.Mui-checked {
+  color: #00ddff !important;
+}
+
+.smc-lusion-card a {
+  color: #66e5ff !important;
+}
+
+.smc-lusion-canvas canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  cursor: grab;
+}
+
+.smc-lusion-canvas canvas:active {
+  cursor: grabbing;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smc-lusion-fade-in,
+  .smc-lusion-card-swap {
+    animation: none;
+  }
+}

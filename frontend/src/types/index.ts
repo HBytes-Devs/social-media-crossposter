@@ -234,6 +234,92 @@ export type LinkedInAnalyticsSummary = {
   error?: string;
 };
 
+export type GoogleAdsDatePreset = "LAST_7_DAYS" | "LAST_30_DAYS" | "LAST_90_DAYS" | "CUSTOM";
+
+export type GoogleAdsMetricTotals = {
+  impressions: number;
+  clicks: number;
+  costMicros: string;
+  cost: number;
+  conversions: number;
+  ctr: number;
+};
+
+export type GoogleAdsDailyMetric = GoogleAdsMetricTotals & {
+  date: string;
+};
+
+export type GoogleAdsCampaignSummary = GoogleAdsMetricTotals & {
+  campaignId: string;
+  campaignName: string;
+};
+
+export type GoogleAdsAccountPublic = {
+  id: string;
+  customerId: string;
+  customerName: string | null;
+  loginCustomerId: string | null;
+  isActive: boolean;
+  lastSyncedAt: string | null;
+  createdAt: string;
+};
+
+export type GoogleAdsAnalyticsSummary = {
+  account: GoogleAdsAccountPublic | null;
+  datePreset: GoogleAdsDatePreset;
+  from: string;
+  to: string;
+  totals: GoogleAdsMetricTotals;
+  daily: GoogleAdsDailyMetric[];
+  topCampaigns: GoogleAdsCampaignSummary[];
+  lastSyncedAt: string | null;
+  error?: string;
+};
+
+export type GoogleAdsStatus = {
+  configured: boolean;
+  connected: boolean;
+  developerTokenSet: boolean;
+  redirectUri: string | null;
+  connectHint?: string;
+};
+
+export type LinkedInAdsDatePreset = GoogleAdsDatePreset;
+
+export type LinkedInAdsMetricTotals = GoogleAdsMetricTotals;
+
+export type LinkedInAdsDailyMetric = GoogleAdsDailyMetric;
+
+export type LinkedInAdsCampaignSummary = GoogleAdsCampaignSummary;
+
+export type LinkedInAdsAccountPublic = {
+  id: string;
+  adAccountId: string;
+  adAccountName: string | null;
+  isActive: boolean;
+  lastSyncedAt: string | null;
+  createdAt: string;
+};
+
+export type LinkedInAdsAnalyticsSummary = {
+  account: LinkedInAdsAccountPublic | null;
+  datePreset: LinkedInAdsDatePreset;
+  from: string;
+  to: string;
+  totals: LinkedInAdsMetricTotals;
+  daily: LinkedInAdsDailyMetric[];
+  topCampaigns: LinkedInAdsCampaignSummary[];
+  lastSyncedAt: string | null;
+  error?: string;
+};
+
+export type LinkedInAdsStatus = {
+  configured: boolean;
+  connected: boolean;
+  redirectUri: string | null;
+  connectHint?: string;
+};
+
 export type CalendarPostItem = {
   id: string;
   contentPreview: string;
@@ -260,4 +346,6 @@ export type DashboardData = {
   upcoming: Post[];
   recent: Post[];
   linkedInAnalytics: LinkedInAnalyticsSummary | null;
+  googleAdsAnalytics: GoogleAdsAnalyticsSummary | null;
+  linkedInAdsAnalytics: LinkedInAdsAnalyticsSummary | null;
 };

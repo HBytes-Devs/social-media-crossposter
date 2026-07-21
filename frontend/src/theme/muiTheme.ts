@@ -1,8 +1,10 @@
 import { createTheme, type PaletteMode } from "@mui/material/styles";
 import type { AppTokens } from "./appTokens";
+import { glassPaperOverrides } from "./glassSurface";
 
 export function createAppTheme(mode: PaletteMode, tokens: AppTokens) {
   const isDark = mode === "dark";
+  const glass = glassPaperOverrides(isDark);
 
   return createTheme({
     palette: {
@@ -82,7 +84,7 @@ export function createAppTheme(mode: PaletteMode, tokens: AppTokens) {
       MuiPaper: {
         styleOverrides: {
           root: {
-            backgroundImage: "none",
+            ...glass,
           },
         },
       },
@@ -93,6 +95,7 @@ export function createAppTheme(mode: PaletteMode, tokens: AppTokens) {
         styleOverrides: {
           root: {
             border: `1px solid ${tokens.border}`,
+            ...glass,
           },
         },
       },

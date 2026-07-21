@@ -3,15 +3,15 @@ import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import { AuthCtaButton, AuthSplitShell } from "../components/auth/AuthSplitShell";
+import { ImmersiveAuthCta, ImmersiveAuthShell } from "../components/auth/ImmersiveAuthShell";
 import { AuthFieldInput } from "../components/auth/AuthFieldInput";
 import { useUiLanguage } from "../i18n/UiLanguageProvider";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { registerUser, selectAuth } from "../store/slices/authSlice";
 
 const authLinkSx = {
-  color: "#4B5FFF",
-  fontWeight: 500,
+  color: "#9fd4cf !important",
+  fontWeight: 600,
   "&:hover": { textDecoration: "underline" },
 } as const;
 
@@ -38,18 +38,18 @@ export function RegisterPage() {
   }
 
   return (
-    <AuthSplitShell
+    <ImmersiveAuthShell
       title={t("auth.register.title")}
       subtitle={
         <>
           {t("auth.register.subtitlePrefix")}{" "}
-          <Box component="b" sx={{ fontWeight: 500, color: "text.primary" }}>
+          <Box component="b" sx={{ fontWeight: 600, color: "rgba(245,246,248,0.95)" }}>
             SMC
           </Box>
         </>
       }
       footer={
-        <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
+        <Typography sx={{ textAlign: "center", fontSize: 14, color: "rgba(200,210,215,0.7)" }}>
           {t("auth.haveAccount")}{" "}
           <Link component={RouterLink} to="/login" underline="none" sx={authLinkSx}>
             {t("auth.login")}
@@ -91,13 +91,13 @@ export function RegisterPage() {
         />
 
         {error && (
-          <Typography variant="body2" color="error" sx={{ mb: 1.5 }}>
+          <Typography variant="body2" sx={{ mb: 1.5, color: "#f0a0a0" }}>
             {error}
           </Typography>
         )}
 
-        <AuthCtaButton loading={authLoading}>{t("auth.register")}</AuthCtaButton>
+        <ImmersiveAuthCta loading={authLoading}>{t("auth.register")}</ImmersiveAuthCta>
       </Box>
-    </AuthSplitShell>
+    </ImmersiveAuthShell>
   );
 }

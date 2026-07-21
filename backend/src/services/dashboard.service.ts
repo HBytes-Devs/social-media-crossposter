@@ -1,5 +1,7 @@
 import { prisma } from "../config/database.js";
 import * as analyticsService from "./analytics.service.js";
+import * as googleAdsService from "./google-ads.service.js";
+import * as linkedInAdsService from "./linkedin-ads.service.js";
 import { getPostCounts, toPostPublic } from "./posts.service.js";
 
 type DashboardOptions = {
@@ -14,8 +16,16 @@ export async function getDashboard(userId: string, options: DashboardOptions = {
     targets: { include: { socialAccount: { select: { accountName: true } } } },
   } as const;
 
-  const [counts, scheduledNext7Days, accounts, upcomingRaw, recentRaw, linkedInAnalytics] =
-    await Promise.all([
+  const [
+    counts,
+    scheduledNext7Days,
+    accounts,
+    upcomingRaw,
+    recentRaw,
+    linkedInAnalytics,
+    googleAdsAnalytics,
+    linkedInAdsAnalytics,
+  ] = await Promise.all([
       getPostCounts(userId),
       prisma.post.count({
         where: {
@@ -54,6 +64,12 @@ export async function getDashboard(userId: string, options: DashboardOptions = {
       options.includeAnalytics
         ? analyticsService.getLinkedInAnalyticsSummary(userId)
         : Promise.resolve(null),
+      options.includeAnalytics
+        ? googleAdsService.getAnalyticsSummary(userId, { preset: "LAST_30_DAYS" })
+        : Promise.resolve(null),
+      options.includeAnalytics
+        ? linkedInAdsService.getAnalyticsSummary(userId, { preset: "LAST_30_DAYS" })
+        : Promise.resolve(null),
     ]);
 
   const accountsByPlatform = accounts.reduce<Record<string, number>>((acc, account) => {
@@ -79,5 +95,7 @@ export async function getDashboard(userId: string, options: DashboardOptions = {
     upcoming: upcomingRaw.map(toPostPublic),
     recent: recentRaw.map(toPostPublic),
     linkedInAnalytics,
+    googleAdsAnalytics,
+    linkedInAdsAnalytics,
   };
 }

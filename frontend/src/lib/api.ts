@@ -471,6 +471,130 @@ export const api = {
       token,
     ).then((res) => res.data);
   },
+
+  async getGoogleAdsStatus(token: string) {
+    return request<{ success: boolean; data: import("../types").GoogleAdsStatus }>(
+      "/google-ads/status",
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async getGoogleAdsConnectUrl(token: string) {
+    return request<{ success: boolean; data: { authUrl: string } }>(
+      "/google-ads/connect-url",
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async getGoogleAdsAnalytics(
+    token: string,
+    params?: {
+      preset?: import("../types").GoogleAdsDatePreset;
+      from?: string;
+      to?: string;
+      sync?: boolean;
+    },
+  ) {
+    const search = new URLSearchParams();
+    if (params?.preset) search.set("preset", params.preset);
+    if (params?.from) search.set("from", params.from);
+    if (params?.to) search.set("to", params.to);
+    if (params?.sync) search.set("sync", "true");
+    const query = search.toString() ? `?${search.toString()}` : "";
+
+    return request<{ success: boolean; data: import("../types").GoogleAdsAnalyticsSummary }>(
+      `/google-ads/analytics${query}`,
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async syncGoogleAds(
+    token: string,
+    payload?: {
+      preset?: import("../types").GoogleAdsDatePreset;
+      from?: string;
+      to?: string;
+    },
+  ) {
+    return request<{ success: boolean; data: import("../types").GoogleAdsAnalyticsSummary }>(
+      "/google-ads/sync",
+      { method: "POST", body: JSON.stringify(payload ?? {}) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async disconnectGoogleAdsAccount(token: string, accountId: string) {
+    return request<{ success: boolean; message: string }>(
+      `/google-ads/accounts/${accountId}`,
+      { method: "DELETE" },
+      token,
+    );
+  },
+
+  async getLinkedInAdsStatus(token: string) {
+    return request<{ success: boolean; data: import("../types").LinkedInAdsStatus }>(
+      "/linkedin-ads/status",
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async getLinkedInAdsConnectUrl(token: string) {
+    return request<{ success: boolean; data: { authUrl: string } }>(
+      "/linkedin-ads/connect-url",
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async getLinkedInAdsAnalytics(
+    token: string,
+    params?: {
+      preset?: import("../types").LinkedInAdsDatePreset;
+      from?: string;
+      to?: string;
+      sync?: boolean;
+    },
+  ) {
+    const search = new URLSearchParams();
+    if (params?.preset) search.set("preset", params.preset);
+    if (params?.from) search.set("from", params.from);
+    if (params?.to) search.set("to", params.to);
+    if (params?.sync) search.set("sync", "true");
+    const query = search.toString() ? `?${search.toString()}` : "";
+
+    return request<{ success: boolean; data: import("../types").LinkedInAdsAnalyticsSummary }>(
+      `/linkedin-ads/analytics${query}`,
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async syncLinkedInAds(
+    token: string,
+    payload?: {
+      preset?: import("../types").LinkedInAdsDatePreset;
+      from?: string;
+      to?: string;
+    },
+  ) {
+    return request<{ success: boolean; data: import("../types").LinkedInAdsAnalyticsSummary }>(
+      "/linkedin-ads/sync",
+      { method: "POST", body: JSON.stringify(payload ?? {}) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async disconnectLinkedInAdsAccount(token: string, accountId: string) {
+    return request<{ success: boolean; message: string }>(
+      `/linkedin-ads/accounts/${accountId}`,
+      { method: "DELETE" },
+      token,
+    );
+  },
 };
 
 export { ApiError };

@@ -3,15 +3,15 @@ import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import { AuthCtaButton, AuthSplitShell } from "../components/auth/AuthSplitShell";
+import { ImmersiveAuthCta, ImmersiveAuthShell } from "../components/auth/ImmersiveAuthShell";
 import { AuthFieldInput } from "../components/auth/AuthFieldInput";
 import { RecaptchaNotice, useRecaptcha } from "../hooks/useRecaptcha";
 import { useUiLanguage } from "../i18n/UiLanguageProvider";
 import { api } from "../lib/api";
 
 const authLinkSx = {
-  color: "#4B5FFF",
-  fontWeight: 500,
+  color: "#9fd4cf !important",
+  fontWeight: 600,
   "&:hover": { textDecoration: "underline" },
 } as const;
 
@@ -49,12 +49,11 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <AuthSplitShell
+    <ImmersiveAuthShell
       title={t("auth.forgot.title")}
       subtitle={t("auth.forgot.subtitle")}
-      footerDivider={false}
       footer={
-        <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
+        <Typography sx={{ textAlign: "center", fontSize: 14, color: "rgba(200,210,215,0.7)" }}>
           <Link component={RouterLink} to="/login" underline="none" sx={authLinkSx}>
             {t("auth.backToLogin")}
           </Link>
@@ -63,12 +62,15 @@ export function ForgotPasswordPage() {
     >
       {success ? (
         <Box>
-          <Typography variant="body2" color="success.main" sx={{ mb: 2.5, lineHeight: 1.6 }}>
+          <Typography variant="body2" sx={{ mb: 2.5, lineHeight: 1.6, color: "#7ec8c4" }}>
             {t("auth.forgot.success")}
           </Typography>
-          <AuthCtaButton type="button" onClick={() => navigate("/reset-password", { state: { email } })}>
+          <ImmersiveAuthCta
+            type="button"
+            onClick={() => navigate("/reset-password", { state: { email } })}
+          >
             {t("auth.enterResetCode")}
-          </AuthCtaButton>
+          </ImmersiveAuthCta>
         </Box>
       ) : (
         <Box component="form" onSubmit={handleSubmit}>
@@ -84,22 +86,22 @@ export function ForgotPasswordPage() {
           />
 
           {loadError && (
-            <Typography variant="caption" color="warning.main" sx={{ display: "block", mb: 1.5 }}>
+            <Typography variant="caption" sx={{ display: "block", mb: 1.5, color: "#e8b86d" }}>
               {t("auth.recaptcha.loadError")}
             </Typography>
           )}
 
           {error && (
-            <Typography variant="body2" color="error" sx={{ mb: 1.5 }}>
+            <Typography variant="body2" sx={{ mb: 1.5, color: "#f0a0a0" }}>
               {error}
             </Typography>
           )}
 
-          <AuthCtaButton loading={loading}>{t("auth.sendResetCode")}</AuthCtaButton>
+          <ImmersiveAuthCta loading={loading}>{t("auth.sendResetCode")}</ImmersiveAuthCta>
 
           <RecaptchaNotice enabled={recaptchaEnabled} />
         </Box>
       )}
-    </AuthSplitShell>
+    </ImmersiveAuthShell>
   );
 }

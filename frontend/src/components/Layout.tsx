@@ -29,6 +29,7 @@ import { SidebarNavIcon3D, type SidebarIconId } from "./ui/icons3d/SidebarIcons3
 import { ThemeToggle } from "./ui/ThemeToggle";
 import { UiLanguageSelect } from "./ui/UiLanguageSelect";
 import { VersionBadge } from "./ui/VersionBadge";
+import { CyberOceanBackground } from "./cyber-ocean/CyberOceanBackground";
 
 const DRAWER_WIDTH = 256;
 
@@ -43,6 +44,10 @@ const navItems: Array<{
   { to: "/compose", label: "Compose", iconId: "compose", end: true, tourId: "nav-compose" },
   { to: "/calendar", label: "Calendar", iconId: "calendar", end: true, tourId: "nav-calendar" },
   { to: "/accounts", label: "Accounts", iconId: "accounts", end: true, tourId: "nav-accounts" },
+  { to: "/google-ads", label: "Google Ads", iconId: "google-ads", end: true, tourId: "nav-google-ads" },
+  { to: "/linkedin-ads", label: "LinkedIn Ads", iconId: "linkedin-ads", end: true, tourId: "nav-linkedin-ads" },
+  { to: "/linkedin-marketing", label: "LinkedIn Marketing", iconId: "linkedin-marketing", end: true, tourId: "nav-linkedin-marketing" },
+  { to: "/instagram", label: "Instagram", iconId: "instagram-analytics", end: true, tourId: "nav-instagram" },
   { to: "/settings", label: "Settings", iconId: "settings", end: true, tourId: "nav-settings" },
 ];
 
@@ -269,6 +274,12 @@ export function Layout() {
         borderRight: 1,
         borderColor: "divider",
         borderRadius: 0,
+        bgcolor: (t) =>
+          t.palette.mode === "dark"
+            ? "rgba(8, 14, 28, 0.72)"
+            : "rgba(255, 255, 255, 0.78)",
+        backdropFilter: "blur(18px) saturate(1.15)",
+        WebkitBackdropFilter: "blur(18px) saturate(1.15)",
       }}
     >
       <SidebarContent onNavigate={closeMobile} />
@@ -276,14 +287,50 @@ export function Layout() {
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", position: "relative", bgcolor: "#010126" }}>
+      {/* Cyber Ocean — no fish on dashboard */}
+      <Box
+        aria-hidden
+        sx={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: "none",
+        }}
+      >
+        <CyberOceanBackground
+          showDolphin={false}
+          interactive={false}
+          pointerEvents="none"
+          seabedParticles={140_000}
+        />
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(ellipse at 30% 20%, transparent 0%, rgba(1,1,38,0.35) 70%, rgba(1,1,38,0.55) 100%)",
+          }}
+        />
+      </Box>
+
       <OnboardingFlow />
       {!isDesktop && (
         <AppBar
           position="fixed"
           color="default"
           elevation={0}
-          sx={{ borderBottom: 1, borderColor: "divider", bgcolor: "background.paper" }}
+          sx={{
+            borderBottom: 1,
+            borderColor: "divider",
+            bgcolor: (t) =>
+              t.palette.mode === "dark"
+                ? "rgba(8, 14, 28, 0.78)"
+                : "rgba(255, 255, 255, 0.82)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            zIndex: (t) => t.zIndex.drawer + 1,
+          }}
         >
           <Toolbar>
             <IconButton edge="start" onClick={() => setMobileOpen(true)} aria-label="Open menu">
@@ -307,6 +354,8 @@ export function Layout() {
             flexShrink: 0,
             display: "flex",
             flexDirection: "column",
+            position: "relative",
+            zIndex: 1,
           }}
         >
           {sidebar}
@@ -321,6 +370,11 @@ export function Layout() {
             "& .MuiDrawer-paper": {
               width: DRAWER_WIDTH,
               boxSizing: "border-box",
+              bgcolor: (t) =>
+                t.palette.mode === "dark"
+                  ? "rgba(8, 14, 28, 0.92)"
+                  : "rgba(255, 255, 255, 0.94)",
+              backdropFilter: "blur(18px)",
             },
           }}
         >
@@ -336,6 +390,9 @@ export function Layout() {
           display: "flex",
           flexDirection: "column",
           pt: { xs: 7, md: 0 },
+          position: "relative",
+          zIndex: 1,
+          bgcolor: "transparent",
         }}
       >
         <TokenExpiryBanner />

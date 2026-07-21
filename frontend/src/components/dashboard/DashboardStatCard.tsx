@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { glassPanelSx } from "../../theme/glassSurface";
 import { StatIcon3D, type Stat3DVariant } from "../ui/icons3d/DashboardIcons3D";
 import { dashboardFonts, useDashboardTheme } from "./dashboardTheme";
 
@@ -27,7 +28,7 @@ export function DashboardStatCard({
     <Box
       onClick={onClick}
       sx={{
-        bgcolor: "background.paper",
+        ...glassPanelSx,
         border: "1px solid",
         borderColor: highlighted ? colors.accentBorder : "divider",
         borderRadius: "16px",

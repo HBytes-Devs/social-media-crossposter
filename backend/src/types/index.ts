@@ -137,6 +137,26 @@ export type LinkedInAnalyticsSummary = {
   error?: string;
 };
 
+export type {
+  GoogleAdsAccountPublic,
+  GoogleAdsAnalyticsSummary,
+  GoogleAdsCampaignSummary,
+  GoogleAdsDailyMetric,
+  GoogleAdsDatePreset,
+  GoogleAdsMetricTotals,
+  GoogleAdsStatus,
+} from "../integrations/google-ads/google-ads.types.js";
+
+export type {
+  LinkedInAdsAccountPublic,
+  LinkedInAdsAnalyticsSummary,
+  LinkedInAdsCampaignSummary,
+  LinkedInAdsDailyMetric,
+  LinkedInAdsDatePreset,
+  LinkedInAdsMetricTotals,
+  LinkedInAdsStatus,
+} from "../integrations/linkedin-ads/linkedin-ads.types.js";
+
 export type PostCounts = {
   all: number;
   drafts: number;
@@ -172,4 +192,6 @@ export type DashboardData = {
   upcoming: PostPublic[];
   recent: PostPublic[];
   linkedInAnalytics: LinkedInAnalyticsSummary | null;
+  googleAdsAnalytics: import("../integrations/google-ads/google-ads.types.js").GoogleAdsAnalyticsSummary | null;
+  linkedInAdsAnalytics: import("../integrations/linkedin-ads/linkedin-ads.types.js").LinkedInAdsAnalyticsSummary | null;
 };

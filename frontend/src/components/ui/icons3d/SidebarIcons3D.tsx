@@ -1,5 +1,9 @@
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
+import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import CampaignOutlinedIcon from "@mui/icons-material/CampaignOutlined";
+import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
+import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
 import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
@@ -17,6 +21,10 @@ export type SidebarIconId =
   | "compose"
   | "calendar"
   | "accounts"
+  | "google-ads"
+  | "linkedin-ads"
+  | "linkedin-marketing"
+  | "instagram-analytics"
   | "settings"
   | "posts-all"
   | "posts-published"
@@ -51,6 +59,26 @@ const ICONS: Record<SidebarIconId, IconConfig> = {
     gradient: ["#6ee7b7", "#34D399", "#059669"],
     shadow: "rgba(16,185,129,0.45)",
     render: (s) => <LinkOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
+  },
+  "google-ads": {
+    gradient: ["#93c5fd", "#4285F4", "#1a73e8"],
+    shadow: "rgba(66,133,244,0.45)",
+    render: (s) => <BarChartOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
+  },
+  "linkedin-ads": {
+    gradient: ["#7dd3fc", "#0A66C2", "#004182"],
+    shadow: "rgba(10,102,194,0.45)",
+    render: (s) => <CampaignOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
+  },
+  "linkedin-marketing": {
+    gradient: ["#a5c8ff", "#0A66C2", "#064984"],
+    shadow: "rgba(10,102,194,0.4)",
+    render: (s) => <TrendingUpOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
+  },
+  "instagram-analytics": {
+    gradient: ["#f9a976", "#e4405f", "#833ab4"],
+    shadow: "rgba(228,64,95,0.45)",
+    render: (s) => <InsightsOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
   },
   settings: {
     gradient: ["#cbd5e1", "#94a3b8", "#64748b"],

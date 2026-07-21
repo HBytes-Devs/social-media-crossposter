@@ -111,7 +111,11 @@ export function RecaptchaNotice({ enabled }: { enabled: boolean }) {
   if (!enabled) return null;
 
   return (
-    <Typography variant="caption" color="text.secondary" textAlign="center" display="block">
+    <Typography
+      variant="caption"
+      color="text.secondary"
+      sx={{ textAlign: "center", display: "block" }}
+    >
       {t("auth.recaptcha.notice")}
     </Typography>
   );

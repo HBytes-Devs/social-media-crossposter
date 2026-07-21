@@ -216,8 +216,7 @@ export function CalendarPage() {
                   key={day}
                   variant="caption"
                   color="text.secondary"
-                  fontWeight={700}
-                  textAlign="center"
+                  sx={{ fontWeight: 700, textAlign: "center" }}
                 >
                   {day}
                 </Typography>

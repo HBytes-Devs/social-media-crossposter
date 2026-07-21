@@ -1,0 +1,6 @@
+BarramundiFish.glb — © 2017, Public Domain (CC0 1.0)
+Source: Khronos glTF Sample Assets
+https://github.com/KhronosGroup/glTF-Sample-Assets
+
+dolphin_anim.glb — "Dolphin" by Alex_Pfe — CC BY 4.0
+https://skfb.ly/oTOws

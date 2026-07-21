@@ -16,6 +16,8 @@ import {
 import { SendIcon3D } from "../components/ui/icons3d/DashboardIcons3D";
 import { DashboardStatCard } from "../components/dashboard/DashboardStatCard";
 import { dashboardFonts, useDashboardTheme } from "../components/dashboard/dashboardTheme";
+import { GoogleAdsPerformancePanel } from "../components/dashboard/GoogleAdsPerformancePanel";
+import { LinkedInAdsPerformancePanel } from "../components/dashboard/LinkedInAdsPerformancePanel";
 import { LinkedInPerformancePanel } from "../components/dashboard/LinkedInPerformancePanel";
 import { PageHeaderButton } from "../components/ui/PageHeaderButton";
 import { PageStateLoader } from "../components/ui/PageState";
@@ -68,6 +70,9 @@ export function DashboardPage() {
         gap: 0,
         fontFamily: dashboardFonts.body,
         width: "100%",
+        minWidth: 0,
+        maxWidth: "100%",
+        overflowX: "hidden",
       }}
     >
       {/* Topbar */}
@@ -97,7 +102,7 @@ export function DashboardPage() {
               fontFamily: dashboardFonts.body,
             }}
           >
-            Overview — accounts, scheduled posts, LinkedIn analytics, aur recent activity
+            Overview — accounts, scheduled posts, analytics, aur recent activity
           </Typography>
         </Box>
 
@@ -193,67 +198,89 @@ export function DashboardPage() {
         analyticsLocked={!canViewAnalytics}
       />
 
-      {/* Two columns */}
+      <GoogleAdsPerformancePanel
+        analytics={data.googleAdsAnalytics}
+        analyticsLocked={!canViewAnalytics}
+      />
+
+      <LinkedInAdsPerformancePanel
+        analytics={data.linkedInAdsAnalytics}
+        analyticsLocked={!canViewAnalytics}
+      />
+
+      {/* Two columns — minmax(0,…) prevents long post text from blowing the grid */}
       <Box
         sx={{
           display: "grid",
           gap: 2.25,
-          gridTemplateColumns: { xs: "1fr", lg: "1.05fr 1fr" },
+          gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "minmax(0, 1fr) minmax(0, 1fr)" },
+          alignItems: "stretch",
+          width: "100%",
+          minWidth: 0,
         }}
       >
-        <DashboardActivityPanel
-          title="Upcoming scheduled"
-          subtitle="Agle 7 din ki posts"
-          viewAllHref="/posts/scheduled"
-          emptyIcon={<ScheduleEmptyIcon />}
-          emptyText="Koi scheduled post nahi. Compose se schedule karo."
-          posts={data.upcoming}
-          postMeta={(post) =>
-            post.scheduledFor
-              ? `Scheduled ${new Date(post.scheduledFor).toLocaleString()}`
-              : "Scheduled"
-          }
-          onPostClick={() => navigate("/posts/scheduled")}
-          actionButton={
-            <Button
-              fullWidth
-              onClick={() => navigate("/compose")}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: 13,
-                borderRadius: "10px",
-                py: 1.4,
-                border: "1px dashed #CFCFF5",
-                bgcolor: colors.accentSoft,
-                color: colors.accent,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 1.25,
-                "&:hover": { bgcolor: "#E4E3FD" },
-              }}
-            >
-              <SendIcon3D size={26} />
-              Schedule a post
-            </Button>
-          }
-        />
+        <Box sx={{ minWidth: 0, maxWidth: "100%" }}>
+          <DashboardActivityPanel
+            title="Upcoming scheduled"
+            subtitle="Agle 7 din ki posts"
+            viewAllHref="/posts/scheduled"
+            emptyIcon={<ScheduleEmptyIcon />}
+            emptyText="Koi scheduled post nahi. Compose se schedule karo."
+            posts={data.upcoming}
+            postMeta={(post) =>
+              post.scheduledFor
+                ? `Scheduled ${new Date(post.scheduledFor).toLocaleString()}`
+                : "Scheduled"
+            }
+            onPostClick={() => navigate("/posts/scheduled")}
+            actionButton={
+              <Button
+                fullWidth
+                onClick={() => navigate("/compose")}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  borderRadius: "10px",
+                  py: 1.4,
+                  mt: 1.5,
+                  border: "1px dashed",
+                  borderColor: colors.accentBorder,
+                  bgcolor: "rgba(91,95,239,0.12)",
+                  color: colors.accent,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1.25,
+                  "&:hover": {
+                    bgcolor: "rgba(91,95,239,0.2)",
+                    borderColor: colors.accent,
+                  },
+                }}
+              >
+                <SendIcon3D size={26} />
+                Schedule a post
+              </Button>
+            }
+          />
+        </Box>
 
-        <DashboardActivityPanel
-          title="Recently published"
-          subtitle="Latest live posts"
-          viewAllHref="/posts/published"
-          emptyIcon={<PublishedEmptyIcon />}
-          emptyText="Abhi tak koi published post nahi."
-          posts={data.recent}
-          postMeta={(post) =>
-            post.publishedAt
-              ? `Published ${new Date(post.publishedAt).toLocaleString()}`
-              : "Published"
-          }
-          onPostClick={() => navigate("/posts/published")}
-        />
+        <Box sx={{ minWidth: 0, maxWidth: "100%" }}>
+          <DashboardActivityPanel
+            title="Recently published"
+            subtitle="Latest live posts"
+            viewAllHref="/posts/published"
+            emptyIcon={<PublishedEmptyIcon />}
+            emptyText="Abhi tak koi published post nahi."
+            posts={data.recent}
+            postMeta={(post) =>
+              post.publishedAt
+                ? `Published ${new Date(post.publishedAt).toLocaleString()}`
+                : "Published"
+            }
+            onPostClick={() => navigate("/posts/published")}
+          />
+        </Box>
       </Box>
 
       {data.posts.failed > 0 && (

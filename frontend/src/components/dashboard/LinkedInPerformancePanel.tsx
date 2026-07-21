@@ -7,6 +7,7 @@ import { PLATFORM_ORDER, PLATFORM_META } from "../../lib/platforms";
 import type { LinkedInAnalyticsSummary } from "../../types";
 import { LinkedInStatsGrid } from "../analytics/LinkedInStatsGrid";
 import { BoltIcon3D, PlatformPedestal3D } from "../ui/icons3d/DashboardIcons3D";
+import { glassPanelSx } from "../../theme/glassSurface";
 import { dashboardFonts, useDashboardTheme } from "./dashboardTheme";
 type Props = {
   analytics: LinkedInAnalyticsSummary | null;
@@ -50,7 +51,7 @@ export function LinkedInPerformancePanel({
   return (
     <Box
       sx={{
-        bgcolor: "background.paper",
+        ...glassPanelSx,
         border: "1px solid",
         borderColor: "divider",
         borderRadius: "16px",
@@ -198,7 +199,7 @@ export function LinkedInPerformancePanel({
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: 2,
-            background: "linear-gradient(90deg, #EEEEFD, #F7F5FE)",
+            bgcolor: "rgba(91,95,239,0.12)",
             border: "1px solid",
             borderColor: colors.accentBorder,
             borderRadius: "12px",
@@ -206,11 +207,12 @@ export function LinkedInPerformancePanel({
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <BoltIcon3D size={38} />            <Typography
+            <BoltIcon3D size={38} />
+            <Typography
               sx={{
                 fontSize: 13,
                 fontWeight: 500,
-                color: "#3C3E63",
+                color: "text.primary",
                 fontFamily: dashboardFonts.body,
               }}
             >
@@ -248,7 +250,7 @@ export function LinkedInPerformancePanel({
             justifyContent: "space-between",
             flexWrap: "wrap",
             gap: 2,
-            background: "linear-gradient(90deg, #EEEEFD, #F7F5FE)",
+            bgcolor: "rgba(91,95,239,0.12)",
             border: "1px solid",
             borderColor: colors.accentBorder,
             borderRadius: "12px",
@@ -256,11 +258,12 @@ export function LinkedInPerformancePanel({
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <BoltIcon3D size={38} />            <Typography
+            <BoltIcon3D size={38} />
+            <Typography
               sx={{
                 fontSize: 13,
                 fontWeight: 500,
-                color: "#3C3E63",
+                color: "text.primary",
                 fontFamily: dashboardFonts.body,
               }}
             >
