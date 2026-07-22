@@ -13,6 +13,7 @@ import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
 import OpenInNewOutlinedIcon from "@mui/icons-material/OpenInNewOutlined";
 import { useNavigate } from "react-router-dom";
 import { PageHeaderButton } from "../components/ui/PageHeaderButton";
+import { PageHeader } from "../components/ui/PageHeader";
 import { glassPanelSx } from "../theme/glassSurface";
 import { dashboardFonts } from "../components/dashboard/dashboardTheme";
 
@@ -98,16 +99,9 @@ export function InstagramAnalyticsPage() {
 
   return (
     <Box sx={{ fontFamily: dashboardFonts.body, width: "100%", minWidth: 0 }}>
-      {/* Header */}
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        gap={2}
-        sx={{ mb: 3.5 }}
-      >
-        <Box>
-          <Stack direction="row" alignItems="center" gap={1.25} sx={{ mb: 0.75 }}>
+      <PageHeader
+        title={
+          <Stack direction="row" alignItems="center" gap={1.25} flexWrap="wrap">
             <Box
               sx={{
                 width: 32,
@@ -138,20 +132,19 @@ export function InstagramAnalyticsPage() {
               }}
             />
           </Stack>
-          <Typography color="text.secondary" sx={{ fontSize: 13.5 }}>
-            Post reach, impressions, engagement, saves &amp; follower insights
-          </Typography>
-        </Box>
-
-        <Stack direction="row" gap={1.25} flexShrink={0} alignItems="center">
-          <PageHeaderButton variant="outlined" onClick={() => navigate("/accounts")}>
-            Manage accounts
-          </PageHeaderButton>
-          <PageHeaderButton variant="outlined" onClick={() => navigate("/compose")}>
-            Compose post
-          </PageHeaderButton>
-        </Stack>
-      </Stack>
+        }
+        subtitle="Post reach, impressions, engagement, saves & follower insights"
+        actions={
+          <>
+            <PageHeaderButton variant="outlined" onClick={() => navigate("/accounts")}>
+              Manage accounts
+            </PageHeaderButton>
+            <PageHeaderButton variant="outlined" onClick={() => navigate("/compose")}>
+              Compose post
+            </PageHeaderButton>
+          </>
+        }
+      />
 
       {/* Hero banner */}
       <Box

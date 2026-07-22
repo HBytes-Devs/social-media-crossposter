@@ -17,6 +17,7 @@ import { LinkedInAdsChart } from "../components/analytics/LinkedInAdsChart";
 import { LinkedInAdsStatsGrid } from "../components/analytics/LinkedInAdsStatsGrid";
 import { dashboardFonts } from "../components/dashboard/dashboardTheme";
 import { PageHeaderButton } from "../components/ui/PageHeaderButton";
+import { PageHeader } from "../components/ui/PageHeader";
 import { PageStateLoader } from "../components/ui/PageState";
 import { api } from "../lib/api";
 import { useAppSelector } from "../store/hooks";
@@ -156,31 +157,11 @@ export function LinkedInAdsPage() {
 
   return (
     <Box sx={{ fontFamily: dashboardFonts.body, width: "100%" }}>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        gap={2}
-        sx={{ mb: 3.5 }}
-      >
-        <Box>
-          <Typography
-            sx={{
-              fontFamily: dashboardFonts.heading,
-              fontSize: 28,
-              fontWeight: 700,
-              letterSpacing: "-0.4px",
-            }}
-          >
-            LinkedIn Ads
-          </Typography>
-          <Typography color="text.secondary" sx={{ fontSize: 13.5, mt: 0.75 }}>
-            Account &amp; campaign metrics — impressions, clicks, cost, conversions, CTR
-          </Typography>
-        </Box>
-
-        <Stack direction="row" spacing={1.25} flexShrink={0} alignItems="center">
-          {analytics?.account ? (
+      <PageHeader
+        title="LinkedIn Ads"
+        subtitle="Account & campaign metrics — impressions, clicks, cost, conversions, CTR"
+        actions={
+          analytics?.account ? (
             <>
               <PageHeaderButton
                 variant="outlined"
@@ -207,9 +188,9 @@ export function LinkedInAdsPage() {
             >
               {connecting ? "Redirecting..." : "Connect LinkedIn Ads"}
             </PageHeaderButton>
-          ) : null}
-        </Stack>
-      </Stack>
+          ) : null
+        }
+      />
 
       {!canViewAnalytics && (
         <NoticeBanner>

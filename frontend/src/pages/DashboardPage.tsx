@@ -21,6 +21,7 @@ import { LinkedInAdsPerformancePanel } from "../components/dashboard/LinkedInAds
 import { MetaAdsPerformancePanel } from "../components/dashboard/MetaAdsPerformancePanel";
 import { LinkedInPerformancePanel } from "../components/dashboard/LinkedInPerformancePanel";
 import { PageHeaderButton } from "../components/ui/PageHeaderButton";
+import { PageHeader } from "../components/ui/PageHeader";
 import { PageStateLoader } from "../components/ui/PageState";
 import { api } from "../lib/api";
 import { useAppSelector } from "../store/hooks";
@@ -76,59 +77,29 @@ export function DashboardPage() {
         overflowX: "hidden",
       }}
     >
-      {/* Topbar */}
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        gap={2}
-        sx={{ mb: 3.75, width: "100%" }}
-      >
-        <Box>
-          <Typography
-            sx={{
-              fontFamily: dashboardFonts.heading,
-              fontSize: 28,
-              fontWeight: 700,
-              letterSpacing: "-0.4px",
-            }}
-          >
-            Dashboard
-          </Typography>
-          <Typography
-            sx={{
-              color: colors.inkSoft,
-              fontSize: 13.5,
-              mt: 0.75,
-              fontFamily: dashboardFonts.body,
-            }}
-          >
-            Overview — accounts, scheduled posts, analytics, aur recent activity
-          </Typography>
-        </Box>
-
-        <Stack
-          direction="row"
-          spacing={1.25}
-          flexShrink={0}
-          sx={{ ml: { xs: 0, sm: "auto" } }}
-        >
-          <PageHeaderButton
-            variant="outlined"
-            onClick={() => navigate("/calendar")}
-            startIcon={<CalendarMonthOutlinedIcon sx={{ fontSize: 14 }} />}
-          >
-            Calendar
-          </PageHeaderButton>
-          <PageHeaderButton
-            variant="primary"
-            onClick={() => navigate("/compose")}
-            startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
-          >
-            Compose
-          </PageHeaderButton>
-        </Stack>
-      </Stack>
+      <PageHeader
+        mb={3.75}
+        title="Dashboard"
+        subtitle="Overview — accounts, scheduled posts, analytics, aur recent activity"
+        actions={
+          <>
+            <PageHeaderButton
+              variant="outlined"
+              onClick={() => navigate("/calendar")}
+              startIcon={<CalendarMonthOutlinedIcon sx={{ fontSize: 14 }} />}
+            >
+              Calendar
+            </PageHeaderButton>
+            <PageHeaderButton
+              variant="primary"
+              onClick={() => navigate("/compose")}
+              startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
+            >
+              Compose
+            </PageHeaderButton>
+          </>
+        }
+      />
 
       {/* Stats */}
       <Box

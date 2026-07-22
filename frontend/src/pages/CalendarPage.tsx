@@ -23,6 +23,7 @@ import type { CalendarPostItem } from "../types";
 import { useAppSelector } from "../store/hooks";
 import { selectToken } from "../store/slices/authSlice";
 import { PageHeaderButton } from "../components/ui/PageHeaderButton";
+import { PageHeader } from "../components/ui/PageHeader";
 import { Card } from "../components/ui/Card";
 import { PageStateLoader } from "../components/ui/PageState";
 
@@ -138,32 +139,16 @@ export function CalendarPage() {
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        gap={2}
-        sx={{ width: "100%" }}
-      >
-        <Box>
-          <Typography variant="h4" fontWeight={800}>
-            Calendar
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Scheduled aur published posts — month view
-          </Typography>
-        </Box>
-        <Stack
-          direction="row"
-          spacing={1.25}
-          flexShrink={0}
-          sx={{ ml: { xs: 0, sm: "auto" } }}
-        >
+      <PageHeader
+        mb={0}
+        title="Calendar"
+        subtitle="Scheduled aur published posts — month view"
+        actions={
           <PageHeaderButton variant="outlined" onClick={() => navigate("/compose")}>
             + Schedule post
           </PageHeaderButton>
-        </Stack>
-      </Stack>
+        }
+      />
 
       {error && (
         <Alert severity="error" onClose={() => setError(null)}>

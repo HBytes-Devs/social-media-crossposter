@@ -1,6 +1,9 @@
 import MenuIcon from "@mui/icons-material/Menu";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
+import Collapse from "@mui/material/Collapse";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
@@ -13,11 +16,11 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { NavLink, Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { TokenExpiryBanner } from "./accounts/TokenExpiryBanner";
 import { OnboardingFlow } from "./onboarding/OnboardingFlow";
-import { PLATFORM_META, PLATFORM_ORDER, postsPath } from "../lib/platforms";
+import { PLATFORM_META, postsPath } from "../lib/platforms";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { logout, selectAuth } from "../store/slices/authSlice";
 import { selectOnboarding } from "../store/slices/onboardingSlice";
@@ -33,24 +36,16 @@ import { CyberOceanBackground } from "./cyber-ocean/CyberOceanBackground";
 
 const DRAWER_WIDTH = 256;
 
-const navItems: Array<{
-  to: string;
-  label: string;
-  iconId: SidebarIconId;
-  end: boolean;
-  tourId: string;
-}> = [
-  { to: "/", label: "Dashboard", iconId: "dashboard", end: true, tourId: "nav-dashboard" },
-  { to: "/compose", label: "Compose", iconId: "compose", end: true, tourId: "nav-compose" },
-  { to: "/calendar", label: "Calendar", iconId: "calendar", end: true, tourId: "nav-calendar" },
-  { to: "/accounts", label: "Accounts", iconId: "accounts", end: true, tourId: "nav-accounts" },
-  { to: "/google-ads", label: "Google Ads", iconId: "google-ads", end: true, tourId: "nav-google-ads" },
-  { to: "/linkedin-ads", label: "LinkedIn Ads", iconId: "linkedin-ads", end: true, tourId: "nav-linkedin-ads" },
-  { to: "/meta-ads", label: "Meta Ads", iconId: "meta-ads", end: true, tourId: "nav-meta-ads" },
-  { to: "/linkedin-marketing", label: "LinkedIn Marketing", iconId: "linkedin-marketing", end: true, tourId: "nav-linkedin-marketing" },
-  { to: "/instagram", label: "Instagram", iconId: "instagram-analytics", end: true, tourId: "nav-instagram" },
-  { to: "/settings", label: "Settings", iconId: "settings", end: true, tourId: "nav-settings" },
-];
+const POSTING_PATH_PREFIXES = ["/compose", "/calendar", "/posts", "/accounts"] as const;
+const ANALYTICS_PATH_PREFIXES = [
+  "/google-ads",
+  "/linkedin-ads",
+  "/meta-ads",
+  "/linkedin-marketing",
+  "/instagram",
+] as const;
+
+const POSTING_PLATFORMS = ["FACEBOOK", "INSTAGRAM", "LINKEDIN"] as const;
 
 const postSubItems: Array<{
   to: string;
@@ -65,9 +60,208 @@ const postSubItems: Array<{
   { to: "/posts/trashed", label: "Trashed", tab: "trashed", iconId: "posts-trashed" },
 ];
 
+const analyticsSubItems: Array<{
+  to: string;
+  label: string;
+  iconId: SidebarIconId;
+  tourId: string;
+}> = [
+  { to: "/meta-ads", label: "Meta Ads", iconId: "meta-ads", tourId: "nav-meta-ads" },
+  { to: "/google-ads", label: "Google Ads", iconId: "google-ads", tourId: "nav-google-ads" },
+  { to: "/instagram", label: "Instagram", iconId: "instagram-analytics", tourId: "nav-instagram" },
+];
+
+const linkedInAnalyticsItems: Array<{
+  to: string;
+  label: string;
+  tourId: string;
+}> = [
+  { to: "/linkedin-marketing", label: "Marketing", tourId: "nav-linkedin-marketing" },
+  { to: "/linkedin-ads", label: "Ads", tourId: "nav-linkedin-ads" },
+];
+
+function isPostingPath(pathname: string): boolean {
+  return POSTING_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
+function isAnalyticsPath(pathname: string): boolean {
+  return ANALYTICS_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 function getActivePostTab(pathname: string) {
   const segment = pathname.split("/")[2];
   return segment && isPostTab(segment) ? segment : "all";
+}
+
+function NavSubItem({
+  to,
+  end,
+  label,
+  active,
+  onNavigate,
+  tourId,
+  iconId,
+  platform,
+  nested,
+}: {
+  to: string;
+  end?: boolean;
+  label: string;
+  active: boolean;
+  onNavigate?: () => void;
+  tourId?: string;
+  iconId?: SidebarIconId;
+  platform?: (typeof POSTING_PLATFORMS)[number];
+  nested?: boolean;
+}) {
+  return (
+    <ListItemButton
+      component={NavLink}
+      to={to}
+      end={end}
+      selected={active}
+      onClick={onNavigate}
+      data-tour={tourId}
+      sx={{
+        borderRadius: 2,
+        mb: 0.25,
+        ml: nested ? 3 : 1.5,
+        pl: nested ? 2 : 1.5,
+        py: 0.65,
+        minHeight: 38,
+      }}
+    >
+      {iconId || platform ? (
+        <ListItemIcon sx={{ minWidth: 34 }}>
+          {platform ? (
+            <PlatformIcon3D platform={platform} size={22} active={active} />
+          ) : iconId ? (
+            <SidebarNavIcon3D id={iconId} active={active} size={22} />
+          ) : null}
+        </ListItemIcon>
+      ) : null}
+      <ListItemText
+        primary={label}
+        slotProps={{
+          primary: {
+            sx: { fontSize: 13, fontWeight: active ? 600 : 500 },
+          },
+        }}
+      />
+    </ListItemButton>
+  );
+}
+
+function NavNestedGroup({
+  label,
+  iconId,
+  open,
+  onToggle,
+  active,
+  children,
+}: {
+  label: string;
+  iconId: SidebarIconId;
+  open: boolean;
+  onToggle: () => void;
+  active: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <Box sx={{ ml: 1.5, mb: 0.25 }}>
+      <ListItemButton
+        onClick={onToggle}
+        selected={active && !open}
+        sx={{ borderRadius: 2, pl: 1.5, py: 0.65, minHeight: 38 }}
+      >
+        <ListItemIcon sx={{ minWidth: 34 }}>
+          <SidebarNavIcon3D id={iconId} active={active} size={22} />
+        </ListItemIcon>
+        <ListItemText
+          primary={label}
+          slotProps={{
+            primary: {
+              sx: { fontSize: 13, fontWeight: active ? 600 : 500 },
+            },
+          }}
+        />
+        {open ? (
+          <ExpandLess sx={{ fontSize: 18, color: "text.secondary" }} />
+        ) : (
+          <ExpandMore sx={{ fontSize: 18, color: "text.secondary" }} />
+        )}
+      </ListItemButton>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding>
+          {children}
+        </List>
+      </Collapse>
+    </Box>
+  );
+}
+
+function NavSection({
+  label,
+  iconId,
+  open,
+  onToggle,
+  active,
+  children,
+}: {
+  label: string;
+  iconId: SidebarIconId;
+  open: boolean;
+  onToggle: () => void;
+  active: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <Box sx={{ mb: 0.5 }}>
+      <ListItemButton
+        onClick={onToggle}
+        selected={active && !open}
+        sx={{ borderRadius: 2, mb: 0.25 }}
+      >
+        <ListItemIcon sx={{ minWidth: 40 }}>
+          <SidebarNavIcon3D id={iconId} active={active} />
+        </ListItemIcon>
+        <ListItemText
+          primary={label}
+          slotProps={{
+            primary: {
+              sx: { fontSize: 14, fontWeight: active ? 700 : 600 },
+            },
+          }}
+        />
+        {open ? (
+          <ExpandLess sx={{ fontSize: 20, color: "text.secondary" }} />
+        ) : (
+          <ExpandMore sx={{ fontSize: 20, color: "text.secondary" }} />
+        )}
+      </ListItemButton>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        <List component="div" disablePadding sx={{ pb: 0.5 }}>
+          {children}
+        </List>
+      </Collapse>
+    </Box>
+  );
+}
+
+function SectionCaption({ children }: { children: ReactNode }) {
+  return (
+    <Typography
+      variant="caption"
+      color="text.secondary"
+      sx={{ px: 2.5, pt: 1, pb: 0.25, display: "block", fontWeight: 600, letterSpacing: 0.4 }}
+    >
+      {children}
+    </Typography>
+  );
 }
 
 function NavItem({
@@ -121,6 +315,26 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const onPostsSection = location.pathname.startsWith("/posts");
   const activeTab = getActivePostTab(location.pathname);
   const activePlatform = searchParams.get("platform") ?? filters.platform;
+  const onPosting = isPostingPath(location.pathname);
+  const onAnalytics = isAnalyticsPath(location.pathname);
+  const onLinkedInAnalytics =
+    location.pathname === "/linkedin-marketing" || location.pathname === "/linkedin-ads";
+
+  const [postingOpen, setPostingOpen] = useState(onPosting);
+  const [analyticsOpen, setAnalyticsOpen] = useState(onAnalytics);
+  const [linkedInAnalyticsOpen, setLinkedInAnalyticsOpen] = useState(onLinkedInAnalytics);
+
+  useEffect(() => {
+    if (onPosting) setPostingOpen(true);
+  }, [onPosting]);
+
+  useEffect(() => {
+    if (onAnalytics) setAnalyticsOpen(true);
+  }, [onAnalytics]);
+
+  useEffect(() => {
+    if (onLinkedInAnalytics) setLinkedInAnalyticsOpen(true);
+  }, [onLinkedInAnalytics]);
 
   return (
     <>
@@ -142,75 +356,143 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       </Box>
 
       <List sx={{ flex: 1, overflowY: "auto", px: 1.5, py: 2 }}>
-        {navItems.map((item) => (
-          <NavItem
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            label={item.label}
-            iconId={item.iconId}
-            tourId={item.tourId}
-            onNavigate={onNavigate}
-            active={
-              item.end ? location.pathname === item.to : location.pathname.startsWith(item.to)
-            }
-          />
-        ))}
+        <NavItem
+          to="/"
+          end
+          label="Dashboard"
+          iconId="dashboard"
+          tourId="nav-dashboard"
+          onNavigate={onNavigate}
+          active={location.pathname === "/"}
+        />
 
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ px: 1.5, pt: 2, pb: 0.5, display: "block", fontWeight: 700, letterSpacing: 0.6 }}
+        <NavSection
+          label="Posting"
+          iconId="posting"
+          open={postingOpen}
+          onToggle={() => setPostingOpen((value) => !value)}
+          active={onPosting}
         >
-          POSTS
-        </Typography>
-        {postSubItems.map((item) => (
-          <NavItem
-            key={item.to}
-            to={item.to}
-            end={item.tab === "all"}
-            label={item.label}
-            iconId={item.iconId}
+          <NavSubItem
+            to="/compose"
+            end
+            label="All in one"
+            iconId="compose"
+            tourId="nav-compose"
             onNavigate={onNavigate}
-            active={location.pathname === item.to && !activePlatform}
+            active={location.pathname === "/compose"}
           />
-        ))}
+          <NavSubItem
+            to="/calendar"
+            end
+            label="Calendar"
+            iconId="calendar"
+            tourId="nav-calendar"
+            onNavigate={onNavigate}
+            active={location.pathname === "/calendar"}
+          />
 
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          sx={{ px: 1.5, pt: 2, pb: 0.5, display: "block", fontWeight: 700, letterSpacing: 0.6 }}
-        >
-          PLATFORMS
-        </Typography>
-        {PLATFORM_ORDER.map((platform) => {
-          const meta = PLATFORM_META[platform];
-          const to = postsPath(activeTab, platform);
-          const isActive = onPostsSection && activePlatform === platform;
+          <SectionCaption>Posts</SectionCaption>
+          {postSubItems.map((item) => (
+            <NavSubItem
+              key={item.to}
+              to={item.to}
+              end={item.tab === "all"}
+              label={item.label}
+              iconId={item.iconId}
+              onNavigate={onNavigate}
+              active={location.pathname === item.to && !activePlatform}
+            />
+          ))}
 
-          return (
-            <ListItemButton
-              key={platform}
-              component={NavLink}
-              to={to}
-              selected={isActive}
-              onClick={onNavigate}
-              sx={{ borderRadius: 2, mb: 1, transition: "all 0.2s ease" }}
-            >
-              <ListItemIcon sx={{ minWidth: 40 }}>
-                <PlatformIcon3D platform={platform} size={28} active={isActive} />
-              </ListItemIcon>
-              <ListItemText
-                primary={meta.label}
-                slotProps={{
-                  primary: {
-                    sx: { fontSize: 14, fontWeight: isActive ? 600 : 500 },
-                  },
-                }}
+          <SectionCaption>By platform</SectionCaption>
+          {POSTING_PLATFORMS.map((platform) => {
+            const meta = PLATFORM_META[platform];
+            const to = postsPath(activeTab, platform);
+            return (
+              <NavSubItem
+                key={platform}
+                to={to}
+                label={meta.label}
+                platform={platform}
+                onNavigate={onNavigate}
+                active={onPostsSection && activePlatform === platform}
               />
-            </ListItemButton>
-          );
-        })}
+            );
+          })}
+
+          <NavSubItem
+            to="/accounts"
+            end
+            label="Connected accounts"
+            iconId="accounts"
+            tourId="nav-accounts"
+            onNavigate={onNavigate}
+            active={location.pathname === "/accounts"}
+          />
+        </NavSection>
+
+        <NavSection
+          label="Analytics"
+          iconId="analytics"
+          open={analyticsOpen}
+          onToggle={() => setAnalyticsOpen((value) => !value)}
+          active={onAnalytics}
+        >
+          <NavSubItem
+            to="/meta-ads"
+            end
+            label="Meta Ads"
+            iconId="meta-ads"
+            tourId="nav-meta-ads"
+            onNavigate={onNavigate}
+            active={location.pathname === "/meta-ads"}
+          />
+
+          <NavNestedGroup
+            label="LinkedIn"
+            iconId="linkedin-marketing"
+            open={linkedInAnalyticsOpen}
+            onToggle={() => setLinkedInAnalyticsOpen((value) => !value)}
+            active={onLinkedInAnalytics}
+          >
+            {linkedInAnalyticsItems.map((item) => (
+              <NavSubItem
+                key={item.to}
+                to={item.to}
+                end
+                label={item.label}
+                tourId={item.tourId}
+                nested
+                onNavigate={onNavigate}
+                active={location.pathname === item.to}
+              />
+            ))}
+          </NavNestedGroup>
+
+          {analyticsSubItems.slice(1).map((item) => (
+            <NavSubItem
+              key={item.to}
+              to={item.to}
+              end
+              label={item.label}
+              iconId={item.iconId}
+              tourId={item.tourId}
+              onNavigate={onNavigate}
+              active={location.pathname === item.to}
+            />
+          ))}
+        </NavSection>
+
+        <NavItem
+          to="/settings"
+          end
+          label="Settings"
+          iconId="settings"
+          tourId="nav-settings"
+          onNavigate={onNavigate}
+          active={location.pathname === "/settings"}
+        />
       </List>
 
       <Divider />

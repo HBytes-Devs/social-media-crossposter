@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageStateLoader } from "../components/ui/PageState";
 import { PageHeaderButton } from "../components/ui/PageHeaderButton";
+import { PageHeader } from "../components/ui/PageHeader";
 import { api } from "../lib/api";
 import { useAppSelector } from "../store/hooks";
 import { selectAuth, selectToken } from "../store/slices/authSlice";
@@ -290,16 +291,9 @@ export function LinkedInMarketingPage() {
 
   return (
     <Box sx={{ fontFamily: dashboardFonts.body, width: "100%", minWidth: 0 }}>
-      {/* Header */}
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        gap={2}
-        sx={{ mb: 3.5 }}
-      >
-        <Box>
-          <Stack direction="row" alignItems="center" gap={1.25} sx={{ mb: 0.75 }}>
+      <PageHeader
+        title={
+          <Stack direction="row" alignItems="center" gap={1.25}>
             <Box
               sx={{
                 width: 32,
@@ -319,22 +313,21 @@ export function LinkedInMarketingPage() {
               LinkedIn Marketing
             </Typography>
           </Stack>
-          <Typography color="text.secondary" sx={{ fontSize: 13.5 }}>
-            Organic post performance — impressions, reactions, comments &amp; reach
-          </Typography>
-        </Box>
-
-        <Stack direction="row" gap={1.25} flexShrink={0} alignItems="center">
-          <PageHeaderButton variant="outlined" onClick={() => navigate("/posts/published")}>
-            View all posts
-          </PageHeaderButton>
-          {!isLinkedInConnected && (
-            <PageHeaderButton variant="primary" onClick={() => navigate("/accounts")}>
-              Connect LinkedIn
+        }
+        subtitle="Organic post performance — impressions, reactions, comments & reach"
+        actions={
+          <>
+            <PageHeaderButton variant="outlined" onClick={() => navigate("/posts/published")}>
+              View all posts
             </PageHeaderButton>
-          )}
-        </Stack>
-      </Stack>
+            {!isLinkedInConnected && (
+              <PageHeaderButton variant="primary" onClick={() => navigate("/accounts")}>
+                Connect LinkedIn
+              </PageHeaderButton>
+            )}
+          </>
+        }
+      />
 
       {/* Plan lock */}
       {!canViewAnalytics && (

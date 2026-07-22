@@ -27,6 +27,8 @@ export type SidebarIconId =
   | "linkedin-marketing"
   | "instagram-analytics"
   | "settings"
+  | "posting"
+  | "analytics"
   | "posts-all"
   | "posts-published"
   | "posts-scheduled"
@@ -91,6 +93,16 @@ const ICONS: Record<SidebarIconId, IconConfig> = {
     shadow: "rgba(100,116,139,0.35)",
     round: true,
     render: (s) => <SettingsOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
+  },
+  posting: {
+    gradient: ["#7dd3fc", "#38bdf8", "#0284c7"],
+    shadow: "rgba(56,189,248,0.45)",
+    render: (s) => <EditOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
+  },
+  analytics: {
+    gradient: ["#c4b5fd", "#8b5cf6", "#6d28d9"],
+    shadow: "rgba(139,92,246,0.45)",
+    render: (s) => <InsightsOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
   },
   "posts-all": {
     gradient: ["#a5b4fc", "#6366F1", "#4f46e5"],

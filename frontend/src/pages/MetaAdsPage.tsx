@@ -17,6 +17,7 @@ import { MetaAdsChart } from "../components/analytics/MetaAdsChart";
 import { MetaAdsStatsGrid } from "../components/analytics/MetaAdsStatsGrid";
 import { dashboardFonts } from "../components/dashboard/dashboardTheme";
 import { PageHeaderButton } from "../components/ui/PageHeaderButton";
+import { PageHeader } from "../components/ui/PageHeader";
 import { PageStateLoader } from "../components/ui/PageState";
 import { api } from "../lib/api";
 import { useAppSelector } from "../store/hooks";
@@ -195,31 +196,11 @@ export function MetaAdsPage() {
 
   return (
     <Box sx={{ fontFamily: dashboardFonts.body, width: "100%" }}>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "flex-start", sm: "center" }}
-        gap={2}
-        sx={{ mb: 3.5 }}
-      >
-        <Box>
-          <Typography
-            sx={{
-              fontFamily: dashboardFonts.heading,
-              fontSize: 28,
-              fontWeight: 700,
-              letterSpacing: "-0.4px",
-            }}
-          >
-            Meta Ads
-          </Typography>
-          <Typography color="text.secondary" sx={{ fontSize: 13.5, mt: 0.75 }}>
-            Facebook &amp; Instagram ad metrics — impressions, clicks, spend, conversions, CTR
-          </Typography>
-        </Box>
-
-        <Stack direction="row" spacing={1.25} flexShrink={0} alignItems="center">
-          {analytics?.account ? (
+      <PageHeader
+        title="Meta Ads"
+        subtitle="Facebook & Instagram ad metrics — impressions, clicks, spend, conversions, CTR"
+        actions={
+          analytics?.account ? (
             <>
               <PageHeaderButton
                 variant="outlined"
@@ -246,9 +227,9 @@ export function MetaAdsPage() {
             >
               {connecting ? "Redirecting..." : "Connect Meta Ads"}
             </PageHeaderButton>
-          ) : null}
-        </Stack>
-      </Stack>
+          ) : null
+        }
+      />
 
       {!canViewAnalytics && (
         <NoticeBanner>
