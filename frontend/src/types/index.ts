@@ -320,6 +320,43 @@ export type LinkedInAdsStatus = {
   connectHint?: string;
 };
 
+export type MetaAdsDatePreset = GoogleAdsDatePreset;
+
+export type MetaAdsMetricTotals = GoogleAdsMetricTotals;
+
+export type MetaAdsDailyMetric = GoogleAdsDailyMetric;
+
+export type MetaAdsCampaignSummary = GoogleAdsCampaignSummary;
+
+export type MetaAdsAccountPublic = {
+  id: string;
+  adAccountId: string;
+  adAccountName: string | null;
+  isActive: boolean;
+  lastSyncedAt: string | null;
+  createdAt: string;
+};
+
+export type MetaAdsAnalyticsSummary = {
+  account: MetaAdsAccountPublic | null;
+  datePreset: MetaAdsDatePreset;
+  from: string;
+  to: string;
+  totals: MetaAdsMetricTotals;
+  daily: MetaAdsDailyMetric[];
+  topCampaigns: MetaAdsCampaignSummary[];
+  lastSyncedAt: string | null;
+  error?: string;
+};
+
+export type MetaAdsStatus = {
+  configured: boolean;
+  connected: boolean;
+  needsAdAccountId: boolean;
+  redirectUri: string | null;
+  connectHint: string;
+};
+
 export type CalendarPostItem = {
   id: string;
   contentPreview: string;
@@ -348,4 +385,5 @@ export type DashboardData = {
   linkedInAnalytics: LinkedInAnalyticsSummary | null;
   googleAdsAnalytics: GoogleAdsAnalyticsSummary | null;
   linkedInAdsAnalytics: LinkedInAdsAnalyticsSummary | null;
+  metaAdsAnalytics: MetaAdsAnalyticsSummary | null;
 };

@@ -595,6 +595,76 @@ export const api = {
       token,
     );
   },
+
+  async getMetaAdsStatus(token: string) {
+    return request<{ success: boolean; data: import("../types").MetaAdsStatus }>(
+      "/meta-ads/status",
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async getMetaAdsConnectUrl(token: string) {
+    return request<{ success: boolean; data: { authUrl: string } }>(
+      "/meta-ads/connect-url",
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async getMetaAdsAnalytics(
+    token: string,
+    params?: {
+      preset?: import("../types").MetaAdsDatePreset;
+      from?: string;
+      to?: string;
+      sync?: boolean;
+    },
+  ) {
+    const search = new URLSearchParams();
+    if (params?.preset) search.set("preset", params.preset);
+    if (params?.from) search.set("from", params.from);
+    if (params?.to) search.set("to", params.to);
+    if (params?.sync) search.set("sync", "true");
+    const query = search.toString() ? `?${search.toString()}` : "";
+
+    return request<{ success: boolean; data: import("../types").MetaAdsAnalyticsSummary }>(
+      `/meta-ads/analytics${query}`,
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async syncMetaAds(
+    token: string,
+    payload?: {
+      preset?: import("../types").MetaAdsDatePreset;
+      from?: string;
+      to?: string;
+    },
+  ) {
+    return request<{ success: boolean; data: import("../types").MetaAdsAnalyticsSummary }>(
+      "/meta-ads/sync",
+      { method: "POST", body: JSON.stringify(payload ?? {}) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async disconnectMetaAdsAccount(token: string, accountId: string) {
+    return request<{ success: boolean; message: string }>(
+      `/meta-ads/accounts/${accountId}`,
+      { method: "DELETE" },
+      token,
+    );
+  },
+
+  async linkMetaAdsAccount(token: string, adAccountId: string) {
+    return request<{ success: boolean; data: import("../types").MetaAdsAccountPublic }>(
+      "/meta-ads/link-account",
+      { method: "POST", body: JSON.stringify({ adAccountId }) },
+      token,
+    ).then((res) => res.data);
+  },
 };
 
 export { ApiError };

@@ -23,6 +23,7 @@ export type SidebarIconId =
   | "accounts"
   | "google-ads"
   | "linkedin-ads"
+  | "meta-ads"
   | "linkedin-marketing"
   | "instagram-analytics"
   | "settings"
@@ -68,6 +69,11 @@ const ICONS: Record<SidebarIconId, IconConfig> = {
   "linkedin-ads": {
     gradient: ["#7dd3fc", "#0A66C2", "#004182"],
     shadow: "rgba(10,102,194,0.45)",
+    render: (s) => <CampaignOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
+  },
+  "meta-ads": {
+    gradient: ["#60a5fa", "#1877F2", "#0d47a1"],
+    shadow: "rgba(24,119,242,0.45)",
     render: (s) => <CampaignOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
   },
   "linkedin-marketing": {

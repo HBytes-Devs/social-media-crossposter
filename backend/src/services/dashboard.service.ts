@@ -2,6 +2,7 @@ import { prisma } from "../config/database.js";
 import * as analyticsService from "./analytics.service.js";
 import * as googleAdsService from "./google-ads.service.js";
 import * as linkedInAdsService from "./linkedin-ads.service.js";
+import * as metaAdsService from "./meta-ads.service.js";
 import { getPostCounts, toPostPublic } from "./posts.service.js";
 
 type DashboardOptions = {
@@ -25,6 +26,7 @@ export async function getDashboard(userId: string, options: DashboardOptions = {
     linkedInAnalytics,
     googleAdsAnalytics,
     linkedInAdsAnalytics,
+    metaAdsAnalytics,
   ] = await Promise.all([
       getPostCounts(userId),
       prisma.post.count({
@@ -70,6 +72,9 @@ export async function getDashboard(userId: string, options: DashboardOptions = {
       options.includeAnalytics
         ? linkedInAdsService.getAnalyticsSummary(userId, { preset: "LAST_30_DAYS" })
         : Promise.resolve(null),
+      options.includeAnalytics
+        ? metaAdsService.getAnalyticsSummary(userId, { preset: "LAST_30_DAYS" })
+        : Promise.resolve(null),
     ]);
 
   const accountsByPlatform = accounts.reduce<Record<string, number>>((acc, account) => {
@@ -97,5 +102,6 @@ export async function getDashboard(userId: string, options: DashboardOptions = {
     linkedInAnalytics,
     googleAdsAnalytics,
     linkedInAdsAnalytics,
+    metaAdsAnalytics,
   };
 }

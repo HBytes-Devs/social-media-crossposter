@@ -26,6 +26,9 @@ const envSchema = z.object({
   META_REDIRECT_URI: z.string().optional(),
   META_CONFIG_ID: z.string().optional(),
   META_INSTAGRAM_REDIRECT_URI: z.string().optional(),
+  META_ADS_REDIRECT_URI: z.string().optional(),
+  /** Optional Login for Business config with ads permissions */
+  META_ADS_CONFIG_ID: z.string().optional(),
   TWITTER_CLIENT_ID: z.string().optional(),
   TWITTER_CLIENT_SECRET: z.string().optional(),
   TWITTER_REDIRECT_URI: z.string().optional(),

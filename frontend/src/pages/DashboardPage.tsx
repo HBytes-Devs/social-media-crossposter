@@ -18,6 +18,7 @@ import { DashboardStatCard } from "../components/dashboard/DashboardStatCard";
 import { dashboardFonts, useDashboardTheme } from "../components/dashboard/dashboardTheme";
 import { GoogleAdsPerformancePanel } from "../components/dashboard/GoogleAdsPerformancePanel";
 import { LinkedInAdsPerformancePanel } from "../components/dashboard/LinkedInAdsPerformancePanel";
+import { MetaAdsPerformancePanel } from "../components/dashboard/MetaAdsPerformancePanel";
 import { LinkedInPerformancePanel } from "../components/dashboard/LinkedInPerformancePanel";
 import { PageHeaderButton } from "../components/ui/PageHeaderButton";
 import { PageStateLoader } from "../components/ui/PageState";
@@ -205,6 +206,11 @@ export function DashboardPage() {
 
       <LinkedInAdsPerformancePanel
         analytics={data.linkedInAdsAnalytics}
+        analyticsLocked={!canViewAnalytics}
+      />
+
+      <MetaAdsPerformancePanel
+        analytics={data.metaAdsAnalytics}
         analyticsLocked={!canViewAnalytics}
       />
 

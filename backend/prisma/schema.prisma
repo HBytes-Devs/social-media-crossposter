@@ -26,6 +26,7 @@ model User {
   aiCredentials        UserAiCredential[]
   googleAdsAccounts    GoogleAdsAccount[]
   linkedInAdsAccounts  LinkedInAdsAccount[]
+  metaAdsAccounts      MetaAdsAccount[]
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
 }
@@ -153,6 +154,68 @@ model LinkedInAdsCampaignMetric {
   @@unique([linkedInAdsAccountId, campaignId, date])
   @@index([linkedInAdsAccountId, date])
   @@index([linkedInAdsAccountId, campaignId])
+}
+
+model MetaAdsAccount {
+  id            String   @id @default(cuid())
+  userId        String
+  adAccountId   String
+  adAccountName String?
+  accessToken   String
+  refreshToken  String?
+  expiresAt     DateTime?
+  scopes        String[]
+  metadata      Json?
+  isActive      Boolean  @default(true)
+  lastSyncedAt  DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user            User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountMetrics  MetaAdsAccountMetric[]
+  campaignMetrics MetaAdsCampaignMetric[]
+
+  @@unique([userId, adAccountId])
+  @@index([userId])
+}
+
+model MetaAdsAccountMetric {
+  id               String   @id @default(cuid())
+  metaAdsAccountId String
+  date             DateTime @db.Date
+  impressions      Int      @default(0)
+  clicks           Int      @default(0)
+  costMicros       BigInt   @default(0)
+  conversions      Float    @default(0)
+  ctr              Float    @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  account MetaAdsAccount @relation(fields: [metaAdsAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([metaAdsAccountId, date])
+  @@index([metaAdsAccountId, date])
+}
+
+model MetaAdsCampaignMetric {
+  id               String   @id @default(cuid())
+  metaAdsAccountId String
+  campaignId       String
+  campaignName     String?
+  date             DateTime @db.Date
+  impressions      Int      @default(0)
+  clicks           Int      @default(0)
+  costMicros       BigInt   @default(0)
+  conversions      Float    @default(0)
+  ctr              Float    @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  account MetaAdsAccount @relation(fields: [metaAdsAccountId], references: [id], onDelete: Cascade)
+
+  @@unique([metaAdsAccountId, campaignId, date])
+  @@index([metaAdsAccountId, date])
+  @@index([metaAdsAccountId, campaignId])
 }
 
 model UserAiCredential {

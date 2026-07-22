@@ -12,6 +12,7 @@ import { ComposePage } from "./pages/ComposePage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { GoogleAdsPage } from "./pages/GoogleAdsPage";
 import { LinkedInAdsPage } from "./pages/LinkedInAdsPage";
+import { MetaAdsPage } from "./pages/MetaAdsPage";
 import { LinkedInMarketingPage } from "./pages/LinkedInMarketingPage";
 import { InstagramAnalyticsPage } from "./pages/InstagramAnalyticsPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -70,6 +71,7 @@ export default function App() {
               <Route path="accounts" element={<AccountsPage />} />
               <Route path="google-ads" element={<GoogleAdsPage />} />
               <Route path="linkedin-ads" element={<LinkedInAdsPage />} />
+              <Route path="meta-ads" element={<MetaAdsPage />} />
               <Route path="linkedin-marketing" element={<LinkedInMarketingPage />} />
               <Route path="instagram" element={<InstagramAnalyticsPage />} />
               <Route path="settings" element={<SettingsPage />} />

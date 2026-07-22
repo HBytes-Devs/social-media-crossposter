@@ -46,6 +46,7 @@ const navItems: Array<{
   { to: "/accounts", label: "Accounts", iconId: "accounts", end: true, tourId: "nav-accounts" },
   { to: "/google-ads", label: "Google Ads", iconId: "google-ads", end: true, tourId: "nav-google-ads" },
   { to: "/linkedin-ads", label: "LinkedIn Ads", iconId: "linkedin-ads", end: true, tourId: "nav-linkedin-ads" },
+  { to: "/meta-ads", label: "Meta Ads", iconId: "meta-ads", end: true, tourId: "nav-meta-ads" },
   { to: "/linkedin-marketing", label: "LinkedIn Marketing", iconId: "linkedin-marketing", end: true, tourId: "nav-linkedin-marketing" },
   { to: "/instagram", label: "Instagram", iconId: "instagram-analytics", end: true, tourId: "nav-instagram" },
   { to: "/settings", label: "Settings", iconId: "settings", end: true, tourId: "nav-settings" },

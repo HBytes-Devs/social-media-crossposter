@@ -106,9 +106,8 @@ type AdAccountsResponse = {
 };
 
 export async function listAdAccounts(accessToken: string): Promise<LinkedInAdAccount[]> {
-  const search =
-    "(status:(values:List(ACTIVE,DRAFT,CANCELED,PENDING_DELETION,REMOVED)))";
-  const url = `${API_BASE}/adAccounts?q=search&search=${encodeURIComponent(search)}&pageSize=50`;
+  // Omit `search` entirely — LinkedIn returns all ad accounts the user can access.
+  const url = `${API_BASE}/adAccounts?q=search&pageSize=50`;
 
   const response = await fetch(url, { headers: adsHeaders(accessToken) });
   if (!response.ok) {
@@ -138,9 +137,9 @@ export async function listCampaigns(
   accessToken: string,
   adAccountId: string,
 ): Promise<LinkedInCampaign[]> {
-  const accountUrn = `urn:li:sponsoredAccount:${adAccountId}`;
-  const search = `(account:(values:List(${accountUrn})))`;
-  const url = `${API_BASE}/adCampaigns?q=search&search=${encodeURIComponent(search)}&pageSize=100`;
+  const url =
+    `${API_BASE}/adAccounts/${adAccountId}/adCampaigns` +
+    "?q=search&pageSize=100";
 
   const response = await fetch(url, { headers: adsHeaders(accessToken) });
   if (!response.ok) {

@@ -194,4 +194,5 @@ export type DashboardData = {
   linkedInAnalytics: LinkedInAnalyticsSummary | null;
   googleAdsAnalytics: import("../integrations/google-ads/google-ads.types.js").GoogleAdsAnalyticsSummary | null;
   linkedInAdsAnalytics: import("../integrations/linkedin-ads/linkedin-ads.types.js").LinkedInAdsAnalyticsSummary | null;
+  metaAdsAnalytics: import("../integrations/meta-ads/meta-ads.types.js").MetaAdsAnalyticsSummary | null;
 };
