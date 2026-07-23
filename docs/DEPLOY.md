@@ -11,6 +11,8 @@ Step-by-step guide for staging and production. Target stack:
 
 Full env reference: `backend/.env.example`, `frontend/.env.example`.
 
+Contabo VPS (Docker, IP-first): [CONTABO_DOCKER.md](CONTABO_DOCKER.md)
+
 ---
 
 ## Prerequisites
