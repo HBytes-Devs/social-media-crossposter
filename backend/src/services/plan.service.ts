@@ -1,8 +1,22 @@
-import type { Platform, SubscriptionStatus, SubscriptionTier } from "@prisma/client";
+import type {
+  Platform,
+  SubscriptionStatus,
+  SubscriptionTier,
+  UserRole,
+} from "@prisma/client";
 import { prisma } from "../config/database.js";
 import { env } from "../config/env.js";
 import { getPlan, isPlatformAllowedForTier, PLANS } from "../config/plans.js";
 import { AppError } from "../middleware/error.middleware.js";
+
+export type OrganizationSummary = {
+  id: string;
+  name: string;
+  tier: SubscriptionTier;
+  status: SubscriptionStatus;
+  seatLimit: number;
+  seatUsed: number;
+};
 
 export type SubscriptionPublic = {
   tier: SubscriptionTier;
@@ -10,6 +24,7 @@ export type SubscriptionPublic = {
   currentPeriodEnd: string | null;
   plan: ReturnType<typeof getPlan>;
   premierMember?: boolean;
+  source?: "individual" | "organization" | "premier";
 };
 
 function parseCsvSet(value: string | undefined): Set<string> {
@@ -24,6 +39,7 @@ function parseCsvSet(value: string | undefined): Set<string> {
 
 const premierEmails = () => parseCsvSet(env.PREMIER_MEMBER_EMAILS);
 const premierHandles = () => parseCsvSet(env.PREMIER_MEMBER_HANDLES);
+const superAdminEmails = () => parseCsvSet(env.SUPER_ADMIN_EMAILS);
 
 export function isPremierMember(user: {
   email: string;
@@ -44,16 +60,86 @@ export function isPremierMember(user: {
   return false;
 }
 
-function resolveEffectiveTier(
-  user: UserSubscriptionFields & { email?: string; name?: string | null },
-): SubscriptionTier {
-  if (user.email && isPremierMember({ email: user.email, name: user.name })) {
-    return "PREMIUM";
+export function isSuperAdminEmail(email: string): boolean {
+  return superAdminEmails().has(email.trim().toLowerCase());
+}
+
+export async function syncSuperAdminRole(userId: string, email: string): Promise<UserRole> {
+  if (!isSuperAdminEmail(email)) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    return user?.role ?? "USER";
   }
 
-  return hasActivePaidAccess(user.subscriptionTier, user.subscriptionStatus)
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: { role: "SUPER_ADMIN" },
+    select: { role: true },
+  });
+  return updated.role;
+}
+
+export function hasActivePaidAccess(
+  tier: SubscriptionTier,
+  status: SubscriptionStatus,
+): boolean {
+  if (tier === "FREE") return true;
+  return status === "ACTIVE" || status === "TRIALING";
+}
+
+type OrgFields = {
+  subscriptionTier: SubscriptionTier;
+  subscriptionStatus: SubscriptionStatus;
+} | null;
+
+function resolveEffectiveTier(
+  user: UserSubscriptionFields & {
+    email?: string;
+    name?: string | null;
+    organization?: OrgFields;
+  },
+): { tier: SubscriptionTier; source: SubscriptionPublic["source"]; status: SubscriptionStatus } {
+  if (user.email && isPremierMember({ email: user.email, name: user.name })) {
+    return {
+      tier: "PREMIUM",
+      source: "premier",
+      status: user.subscriptionStatus,
+    };
+  }
+
+  const org = user.organization;
+  if (org && hasActivePaidAccess(org.subscriptionTier, org.subscriptionStatus) && org.subscriptionTier !== "FREE") {
+    return {
+      tier: org.subscriptionTier,
+      source: "organization",
+      status: org.subscriptionStatus,
+    };
+  }
+
+  if (org && org.subscriptionTier === "FREE" && hasActivePaidAccess(org.subscriptionTier, org.subscriptionStatus)) {
+    // Org on FREE still counts as org source when member has no better individual paid plan
+    const individualPaid = hasActivePaidAccess(user.subscriptionTier, user.subscriptionStatus)
+      && user.subscriptionTier !== "FREE";
+    if (!individualPaid) {
+      return {
+        tier: "FREE",
+        source: "organization",
+        status: org.subscriptionStatus,
+      };
+    }
+  }
+
+  const tier = hasActivePaidAccess(user.subscriptionTier, user.subscriptionStatus)
     ? user.subscriptionTier
     : "FREE";
+
+  return {
+    tier,
+    source: "individual",
+    status: user.subscriptionStatus,
+  };
 }
 
 export type UsagePublic = {
@@ -65,6 +151,7 @@ export type BillingStatusPublic = {
   subscription: SubscriptionPublic;
   usage: UsagePublic;
   billingConfigured: boolean;
+  organization: OrganizationSummary | null;
 };
 
 function startOfMonth(): Date {
@@ -72,12 +159,22 @@ function startOfMonth(): Date {
   return new Date(now.getFullYear(), now.getMonth(), 1);
 }
 
-export function hasActivePaidAccess(
-  tier: SubscriptionTier,
-  status: SubscriptionStatus,
-): boolean {
-  if (tier === "FREE") return true;
-  return status === "ACTIVE" || status === "TRIALING";
+export async function getOrganizationSummary(
+  organizationId: string,
+): Promise<OrganizationSummary | null> {
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    include: { _count: { select: { members: true } } },
+  });
+  if (!org) return null;
+  return {
+    id: org.id,
+    name: org.name,
+    tier: org.subscriptionTier,
+    status: org.subscriptionStatus,
+    seatLimit: org.seatLimit,
+    seatUsed: org._count.members,
+  };
 }
 
 export async function getBillingStatus(userId: string): Promise<BillingStatusPublic> {
@@ -89,6 +186,17 @@ export async function getBillingStatus(userId: string): Promise<BillingStatusPub
       subscriptionTier: true,
       subscriptionStatus: true,
       currentPeriodEnd: true,
+      organizationId: true,
+      organization: {
+        select: {
+          id: true,
+          name: true,
+          subscriptionTier: true,
+          subscriptionStatus: true,
+          seatLimit: true,
+          _count: { select: { members: true } },
+        },
+      },
     },
   });
 
@@ -107,22 +215,35 @@ export async function getBillingStatus(userId: string): Promise<BillingStatusPub
     }),
   ]);
 
-  const effectiveTier = resolveEffectiveTier(user);
+  const resolved = resolveEffectiveTier(user);
   const premier = isPremierMember(user);
+
+  const organization: OrganizationSummary | null = user.organization
+    ? {
+        id: user.organization.id,
+        name: user.organization.name,
+        tier: user.organization.subscriptionTier,
+        status: user.organization.subscriptionStatus,
+        seatLimit: user.organization.seatLimit,
+        seatUsed: user.organization._count.members,
+      }
+    : null;
 
   return {
     subscription: {
-      tier: effectiveTier,
-      status: user.subscriptionStatus,
+      tier: resolved.tier,
+      status: resolved.status,
       currentPeriodEnd: user.currentPeriodEnd?.toISOString() ?? null,
-      plan: getPlan(effectiveTier),
+      plan: getPlan(resolved.tier),
       premierMember: premier,
+      source: resolved.source,
     },
     usage: {
       accountsConnected,
       postsThisMonth,
     },
     billingConfigured: Boolean(process.env.STRIPE_SECRET_KEY?.trim()),
+    organization,
   };
 }
 
@@ -236,17 +357,32 @@ export type UserSubscriptionFields = {
   currentPeriodEnd: Date | null;
   email?: string;
   name?: string | null;
+  organization?: OrgFields;
 };
 
 export function subscriptionFromUser(user: UserSubscriptionFields): SubscriptionPublic {
-  const effectiveTier = resolveEffectiveTier(user);
+  const resolved = resolveEffectiveTier(user);
   const premier = user.email ? isPremierMember({ email: user.email, name: user.name }) : false;
 
   return {
-    tier: effectiveTier,
-    status: user.subscriptionStatus,
+    tier: resolved.tier,
+    status: resolved.status,
     currentPeriodEnd: user.currentPeriodEnd?.toISOString() ?? null,
-    plan: getPlan(effectiveTier),
+    plan: getPlan(resolved.tier),
     premierMember: premier,
+    source: resolved.source,
   };
+}
+
+export async function assertOrgHasSeat(organizationId: string): Promise<void> {
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    include: { _count: { select: { members: true } } },
+  });
+  if (!org) {
+    throw new AppError(404, "Organization not found");
+  }
+  if (org._count.members >= org.seatLimit) {
+    throw new AppError(403, `Organization seat limit reached (${org.seatLimit}).`);
+  }
 }

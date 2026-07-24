@@ -10,7 +10,7 @@ import { useUiLanguage } from "../i18n/UiLanguageProvider";
 import { api } from "../lib/api";
 
 const authLinkSx = {
-  color: "#9fd4cf !important",
+  color: "primary.main",
   fontWeight: 600,
   "&:hover": { textDecoration: "underline" },
 } as const;
@@ -53,7 +53,7 @@ export function ForgotPasswordPage() {
       title={t("auth.forgot.title")}
       subtitle={t("auth.forgot.subtitle")}
       footer={
-        <Typography sx={{ textAlign: "center", fontSize: 14, color: "rgba(200,210,215,0.7)" }}>
+        <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
           <Link component={RouterLink} to="/login" underline="none" sx={authLinkSx}>
             {t("auth.backToLogin")}
           </Link>
@@ -62,7 +62,7 @@ export function ForgotPasswordPage() {
     >
       {success ? (
         <Box>
-          <Typography variant="body2" sx={{ mb: 2.5, lineHeight: 1.6, color: "#7ec8c4" }}>
+          <Typography variant="body2" sx={{ mb: 2.5, lineHeight: 1.6, color: "success.main" }}>
             {t("auth.forgot.success")}
           </Typography>
           <ImmersiveAuthCta
@@ -86,13 +86,13 @@ export function ForgotPasswordPage() {
           />
 
           {loadError && (
-            <Typography variant="caption" sx={{ display: "block", mb: 1.5, color: "#e8b86d" }}>
+            <Typography variant="caption" sx={{ display: "block", mb: 1.5, color: "warning.main" }}>
               {t("auth.recaptcha.loadError")}
             </Typography>
           )}
 
           {error && (
-            <Typography variant="body2" sx={{ mb: 1.5, color: "#f0a0a0" }}>
+            <Typography variant="body2" sx={{ mb: 1.5, color: "error.main" }}>
               {error}
             </Typography>
           )}

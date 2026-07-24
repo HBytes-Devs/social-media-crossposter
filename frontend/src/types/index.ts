@@ -17,12 +17,25 @@ export type PostOptions = {
   imageOptional: boolean;
 };
 
+export type UserRole = "USER" | "ADMIN" | "SUPER_ADMIN";
+
+export type OrganizationSummary = {
+  id: string;
+  name: string;
+  tier: SubscriptionTier;
+  status: string;
+  seatLimit: number;
+  seatUsed: number;
+};
+
 export type AuthUser = {
   id: string;
   email: string;
   name: string | null;
   avatarUrl: string | null;
   createdAt: string;
+  role: UserRole;
+  organization: OrganizationSummary | null;
   subscription: SubscriptionInfo;
 };
 
@@ -33,6 +46,7 @@ export type SubscriptionInfo = {
   status: string;
   currentPeriodEnd: string | null;
   premierMember?: boolean;
+  source?: "individual" | "organization" | "premier";
   plan: {
     id: SubscriptionTier;
     name: string;
@@ -69,6 +83,171 @@ export type BillingStatus = {
     postsThisMonth: number;
   };
   billingConfigured: boolean;
+  organization: OrganizationSummary | null;
+};
+
+export type AdminUserRow = {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRole;
+  organizationId: string | null;
+  organization: {
+    id: string;
+    name: string;
+    tier: SubscriptionTier;
+    status: string;
+  } | null;
+  subscription: SubscriptionInfo;
+  individualTier: SubscriptionTier;
+  individualStatus: string;
+  createdAt: string;
+};
+
+export type AdminOrganization = {
+  id: string;
+  name: string;
+  subscriptionTier: SubscriptionTier;
+  subscriptionStatus: string;
+  seatLimit: number;
+  seatUsed: number;
+  pendingInvites: number;
+  createdAt: string;
+};
+
+export type SupportIssueStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED";
+
+export type OpsOverview = {
+  usersTotal: number;
+  admins: number;
+  superAdmins: number;
+  paidUsers: number;
+  estimatedMrr: number;
+  postsToday: number;
+  openIssues: number;
+  errors24h: number;
+  tierDistribution: { FREE: number; MEDIUM: number; PREMIUM: number };
+};
+
+export type OpsUserRow = {
+  id: string;
+  email: string;
+  name: string | null;
+  role: UserRole;
+  isSuspended: boolean;
+  organizationId: string | null;
+  organization: {
+    id: string;
+    name: string;
+    tier: SubscriptionTier;
+    status: string;
+  } | null;
+  subscription: SubscriptionInfo;
+  individualTier: SubscriptionTier;
+  individualStatus: string;
+  estimatedMrr: number;
+  postsTotal: number;
+  postsToday: number;
+  lastActiveAt: string | null;
+  connectedAccounts: Array<{
+    id: string;
+    platform: string;
+    accountName: string | null;
+    accountId: string;
+    isActive: boolean;
+  }>;
+  createdAt: string;
+};
+
+export type OpsSubscriptions = {
+  individualByTier: Record<string, number>;
+  individualByStatus: Record<string, number>;
+  effectiveByTier: Record<string, number>;
+  organizations: Array<{
+    id: string;
+    name: string;
+    subscriptionTier: SubscriptionTier;
+    subscriptionStatus: string;
+    seatLimit: number;
+    seatUsed: number;
+    createdAt: string;
+  }>;
+};
+
+export type OpsEarnings = {
+  estimatedMrr: number;
+  paidCount: number;
+  newPaid24h: number;
+  currency: string;
+  note: string;
+  paidAccounts: Array<{
+    id: string;
+    email: string;
+    name: string | null;
+    tier: SubscriptionTier;
+    source: string;
+    mrr: number;
+    updatedAt: string;
+  }>;
+};
+
+export type OpsUsage = {
+  from: string;
+  to: string;
+  dailyCounts: Record<string, number>;
+  hourlyBuckets: number[];
+  perUser: Array<{ userId: string; email: string; name: string | null; count: number }>;
+  events: Array<{
+    id: string;
+    userId: string;
+    email: string;
+    name: string | null;
+    action: string;
+    path: string | null;
+    createdAt: string;
+  }>;
+};
+
+export type OpsPostRow = {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userName: string | null;
+  status: string;
+  contentPreview: string;
+  language: string;
+  platforms: string[];
+  createdAt: string;
+  publishedAt: string | null;
+  scheduledAt: string | null;
+};
+
+export type OpsErrorRow = {
+  id: string;
+  level: string;
+  message: string;
+  stack: string | null;
+  path: string | null;
+  userId: string | null;
+  userEmail: string | null;
+  meta: unknown;
+  createdAt: string;
+};
+
+export type OpsIssueRow = {
+  id: string;
+  title: string;
+  body: string;
+  status: SupportIssueStatus;
+  priority: string;
+  source: string;
+  userId: string | null;
+  userEmail: string | null;
+  userName: string | null;
+  createdById: string | null;
+  createdByEmail: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type SocialAccount = {

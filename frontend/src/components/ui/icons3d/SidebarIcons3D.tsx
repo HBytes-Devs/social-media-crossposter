@@ -12,6 +12,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 import Box from "@mui/material/Box";
 import type { ReactNode } from "react";
 import { Icon3D } from "../Icon3D";
@@ -27,6 +28,7 @@ export type SidebarIconId =
   | "linkedin-marketing"
   | "instagram-analytics"
   | "settings"
+  | "admin"
   | "posting"
   | "analytics"
   | "posts-all"
@@ -93,6 +95,12 @@ const ICONS: Record<SidebarIconId, IconConfig> = {
     shadow: "rgba(100,116,139,0.35)",
     round: true,
     render: (s) => <SettingsOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
+  },
+  admin: {
+    gradient: ["#5EEAD4", "#14B8A6", "#0F766E"],
+    shadow: "rgba(15,118,110,0.45)",
+    round: true,
+    render: (s) => <AdminPanelSettingsOutlinedIcon sx={{ fontSize: s * 0.46 }} />,
   },
   posting: {
     gradient: ["#7dd3fc", "#38bdf8", "#0284c7"],

@@ -13,12 +13,16 @@ model User {
   password             String
   name                 String?
   avatarUrl            String?
+  role                 UserRole            @default(USER)
+  isSuspended          Boolean             @default(false)
+  organizationId       String?
   subscriptionTier     SubscriptionTier    @default(FREE)
   subscriptionStatus   SubscriptionStatus  @default(ACTIVE)
   stripeCustomerId     String?             @unique
   stripeSubscriptionId String?             @unique
   stripePriceId        String?
   currentPeriodEnd     DateTime?
+  organization         Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   accounts             SocialAccount[]
   posts                Post[]
   media                Media[]
@@ -27,8 +31,94 @@ model User {
   googleAdsAccounts    GoogleAdsAccount[]
   linkedInAdsAccounts  LinkedInAdsAccount[]
   metaAdsAccounts      MetaAdsAccount[]
+  activityEvents       UserActivityEvent[]
+  errorLogs            SystemErrorLog[]
+  supportIssues        SupportIssue[]      @relation("IssueSubject")
+  createdIssues        SupportIssue[]      @relation("IssueCreator")
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+
+  @@index([organizationId])
+  @@index([role])
+  @@index([isSuspended])
+}
+
+model UserActivityEvent {
+  id        String               @id @default(cuid())
+  userId    String
+  action    UserActivityAction
+  path      String?
+  meta      Json?
+  createdAt DateTime             @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
+  @@index([createdAt])
+}
+
+model SystemErrorLog {
+  id        String   @id @default(cuid())
+  level     String   @default("error")
+  message   String
+  stack     String?
+  path      String?
+  userId    String?
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+}
+
+model SupportIssue {
+  id          String             @id @default(cuid())
+  title       String
+  body        String
+  status      SupportIssueStatus @default(OPEN)
+  priority    String             @default("medium")
+  source      SupportIssueSource @default(MANUAL)
+  userId      String?
+  createdById String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  user      User? @relation("IssueSubject", fields: [userId], references: [id], onDelete: SetNull)
+  createdBy User? @relation("IssueCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([userId])
+}
+
+model Organization {
+  id                 String             @id @default(cuid())
+  name               String
+  subscriptionTier   SubscriptionTier   @default(FREE)
+  subscriptionStatus SubscriptionStatus @default(ACTIVE)
+  seatLimit          Int                @default(5)
+  members            User[]
+  invites            OrganizationInvite[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+}
+
+model OrganizationInvite {
+  id             String       @id @default(cuid())
+  organizationId String
+  email          String
+  token          String       @unique @default(cuid())
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([token])
 }
 
 model GoogleAdsAccount {
@@ -397,4 +487,30 @@ enum SubscriptionStatus {
   CANCELED
   TRIALING
   INCOMPLETE
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserActivityAction {
+  LOGIN
+  API
+  POST_CREATE
+  POST_PUBLISH
+  ADMIN_ACTION
+}
+
+enum SupportIssueStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum SupportIssueSource {
+  MANUAL
+  PUBLISH_FAIL
+  SYSTEM
 }

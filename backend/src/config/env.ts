@@ -74,8 +74,13 @@ const envSchema = z.object({
   PREMIER_MEMBER_EMAILS: z.string().optional(),
   /** Comma-separated handles matched against user name or email local-part */
   PREMIER_MEMBER_HANDLES: z.string().optional(),
+  /** Comma-separated emails elevated to SUPER_ADMIN on login/register */
+  SUPER_ADMIN_EMAILS: z.string().optional(),
   /** Sentry DSN — leave empty to disable error tracking */
-  SENTRY_DSN: z.string().url().optional(),
+  SENTRY_DSN: z.preprocess(
+    (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+    z.string().url().optional(),
+  ),
 });
 
 function loadEnv() {

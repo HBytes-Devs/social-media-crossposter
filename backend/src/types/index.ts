@@ -11,10 +11,21 @@ export type AuthUser = {
   name: string | null;
   avatarUrl: string | null;
   createdAt: string;
+  role: string;
+  organization: {
+    id: string;
+    name: string;
+    tier: string;
+    status: string;
+    seatLimit: number;
+    seatUsed: number;
+  } | null;
   subscription: {
     tier: string;
     status: string;
     currentPeriodEnd: string | null;
+    premierMember?: boolean;
+    source?: string;
     plan: {
       id: string;
       name: string;

@@ -16,6 +16,7 @@ import type { CreatePostInput, PreviewPostInput, UpdatePostInput } from "../vali
 import { fromHashtagModeEnum, toHashtagModeEnum } from "../validators/post.validator.js";
 import type { PostPublic, PostTargetPublic } from "../types/index.js";
 import * as planService from "./plan.service.js";
+import { createSupportIssue, recordActivity, recordSystemError } from "./ops-telemetry.service.js";
 
 export type PostListTab = "all" | "published" | "drafts" | "scheduled" | "trashed";
 
@@ -260,6 +261,13 @@ export async function createPost(userId: string, input: CreatePostInput): Promis
       },
     },
     include: postInclude,
+  });
+
+  await recordActivity({
+    userId,
+    action: "POST_CREATE",
+    path: "/posts",
+    meta: { postId: post.id, status: post.status },
   });
 
   if (input.publish) {
@@ -615,6 +623,29 @@ export async function publishPost(
     finalStatus = "PARTIAL";
   } else {
     finalStatus = "FAILED";
+  }
+
+  if (finalStatus === "FAILED" || finalStatus === "PARTIAL") {
+    void recordSystemError({
+      message: `Post ${postId} publish ${finalStatus.toLowerCase()} (${failCount} failed)`,
+      userId,
+      path: "/posts/publish",
+      meta: { postId, successCount, failCount, finalStatus },
+    });
+    void createSupportIssue({
+      title: `Publish ${finalStatus.toLowerCase()}: post ${postId}`,
+      body: `User ${userId} post ${postId} ended as ${finalStatus}. Success=${successCount}, fail=${failCount}.`,
+      source: "PUBLISH_FAIL",
+      userId,
+      priority: finalStatus === "FAILED" ? "high" : "medium",
+    });
+  } else {
+    await recordActivity({
+      userId,
+      action: "POST_PUBLISH",
+      path: "/posts/publish",
+      meta: { postId, successCount },
+    });
   }
 
   const updated = await prisma.post.update({

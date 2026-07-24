@@ -29,13 +29,25 @@ function getTransporter(): Transporter {
   return transporter;
 }
 
+function cleanFromAddress(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1);
+  }
+  return trimmed;
+}
+
 export async function sendEmail(options: {
   to: string;
   subject: string;
   text: string;
   html?: string;
 }): Promise<void> {
-  const from = env.SMTP_FROM ?? env.SMTP_USER;
+  const from = cleanFromAddress(env.SMTP_FROM) ?? env.SMTP_USER;
 
   if (!isEmailConfigured()) {
     logger.info(`[email:dev] To: ${options.to} | Subject: ${options.subject}`);

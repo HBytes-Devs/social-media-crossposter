@@ -1,4 +1,6 @@
 import Box from "@mui/material/Box";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
@@ -10,7 +12,7 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { registerUser, selectAuth } from "../store/slices/authSlice";
 
 const authLinkSx = {
-  color: "#9fd4cf !important",
+  color: "primary.main",
   fontWeight: 600,
   "&:hover": { textDecoration: "underline" },
 } as const;
@@ -23,11 +25,23 @@ export function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+
+    if (password !== confirmPassword) {
+      setError(t("auth.error.passwordMismatch"));
+      return;
+    }
+
+    if (!acceptTerms) {
+      setError(t("auth.error.termsRequired"));
+      return;
+    }
 
     const result = await dispatch(registerUser({ email, password, name: name || undefined }));
     if (registerUser.fulfilled.match(result)) {
@@ -43,13 +57,13 @@ export function RegisterPage() {
       subtitle={
         <>
           {t("auth.register.subtitlePrefix")}{" "}
-          <Box component="b" sx={{ fontWeight: 600, color: "rgba(245,246,248,0.95)" }}>
+          <Box component="b" sx={{ fontWeight: 650, color: "text.primary" }}>
             SMC
           </Box>
         </>
       }
       footer={
-        <Typography sx={{ textAlign: "center", fontSize: 14, color: "rgba(200,210,215,0.7)" }}>
+        <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
           {t("auth.haveAccount")}{" "}
           <Link component={RouterLink} to="/login" underline="none" sx={authLinkSx}>
             {t("auth.login")}
@@ -89,9 +103,45 @@ export function RegisterPage() {
           minLength={8}
           autoComplete="new-password"
         />
+        <AuthFieldInput
+          label={t("auth.confirmPassword")}
+          variant="password"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder={t("auth.passwordPlaceholder")}
+          required
+          minLength={8}
+          autoComplete="new-password"
+          id="auth-register-confirm-password"
+        />
+
+        <Typography sx={{ mt: -1, mb: 2, fontSize: 12.5, color: "text.disabled" }}>
+          {t("auth.passwordHint")}
+        </Typography>
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              size="small"
+              checked={acceptTerms}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+              required
+            />
+          }
+          label={
+            <Typography sx={{ fontSize: 13.5, color: "text.secondary", lineHeight: 1.45 }}>
+              {t("auth.termsPrefix")}{" "}
+              <Box component="span" sx={{ fontWeight: 600, color: "text.primary" }}>
+                {t("auth.termsLabel")}
+              </Box>
+            </Typography>
+          }
+          sx={{ alignItems: "flex-start", m: 0, mb: 2.5 }}
+        />
 
         {error && (
-          <Typography variant="body2" sx={{ mb: 1.5, color: "#f0a0a0" }}>
+          <Typography variant="body2" sx={{ mb: 1.5, color: "error.main" }}>
             {error}
           </Typography>
         )}

@@ -493,6 +493,17 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           onNavigate={onNavigate}
           active={location.pathname === "/settings"}
         />
+        {(user?.role === "ADMIN") && (
+          <NavItem
+            to="/admin"
+            end
+            label="Admin"
+            iconId="admin"
+            tourId="nav-admin"
+            onNavigate={onNavigate}
+            active={location.pathname === "/admin" || location.pathname.startsWith("/admin/")}
+          />
+        )}
       </List>
 
       <Divider />
@@ -503,7 +514,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <Typography variant="caption" color="text.secondary" noWrap display="block">
           {user?.email}
         </Typography>
-        {user?.subscription?.plan?.name && (
+            {user?.subscription?.plan?.name && (
           <Typography
             variant="caption"
             sx={{ mt: 0.5, display: "block", color: "primary.main", fontWeight: 600 }}
@@ -511,6 +522,12 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             {user.subscription.premierMember
               ? "Premier member"
               : `${user.subscription.plan.name} plan`}
+            {user.subscription.source === "organization" ? " · Company" : ""}
+          </Typography>
+        )}
+        {user?.role && user.role !== "USER" && (
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+            {user.role.replace("_", " ")}
           </Typography>
         )}
         {onPostsSection && (

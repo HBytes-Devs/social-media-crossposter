@@ -1,26 +1,29 @@
+import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import type { InputHTMLAttributes, ReactNode } from "react";
+import { useState, type InputHTMLAttributes, type ReactNode } from "react";
 import "./authSplit.css";
 
 type Variant = "email" | "password" | "name" | "code";
 
 const BADGE_STYLES: Record<Variant, { bg: string; shadow: string }> = {
   email: {
-    bg: "linear-gradient(155deg, #7C8CFF 0%, #4B5FFF 55%, #3140D6 100%)",
-    shadow: "0 3px 7px -2px rgba(75,95,255,0.5)",
+    bg: "linear-gradient(145deg, #2DD4BF 0%, #0F766E 100%)",
+    shadow: "0 3px 7px -2px rgba(15,118,110,0.45)",
   },
   password: {
-    bg: "linear-gradient(155deg, #B08CFF 0%, #8C6BFF 55%, #5A3FD8 100%)",
-    shadow: "0 3px 7px -2px rgba(140,107,255,0.5)",
+    bg: "linear-gradient(145deg, #38BDF8 0%, #0369A1 100%)",
+    shadow: "0 3px 7px -2px rgba(3,105,161,0.45)",
   },
   name: {
-    bg: "linear-gradient(155deg, #5BE0B3 0%, #22C08A 55%, #0E8F68 100%)",
-    shadow: "0 3px 7px -2px rgba(34,192,138,0.5)",
+    bg: "linear-gradient(145deg, #34D399 0%, #047857 100%)",
+    shadow: "0 3px 7px -2px rgba(4,120,87,0.45)",
   },
   code: {
-    bg: "linear-gradient(155deg, #FFD080 0%, #F5A623 55%, #D48806 100%)",
-    shadow: "0 3px 7px -2px rgba(245,166,35,0.5)",
+    bg: "linear-gradient(145deg, #FBBF24 0%, #B45309 100%)",
+    shadow: "0 3px 7px -2px rgba(180,83,9,0.45)",
   },
 };
 
@@ -64,9 +67,13 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
   requiredMark?: boolean;
 };
 
-export function AuthFieldInput({ label, variant, requiredMark = true, id, ...inputProps }: Props) {
+export function AuthFieldInput({ label, variant, requiredMark = true, id, type, ...inputProps }: Props) {
   const inputId = id ?? `auth-${variant}`;
   const badge = BADGE_STYLES[variant];
+  const isPassword = variant === "password";
+  const [showPassword, setShowPassword] = useState(false);
+
+  const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
   return (
     <Box sx={{ mb: 2.25 }}>
@@ -83,7 +90,7 @@ export function AuthFieldInput({ label, variant, requiredMark = true, id, ...inp
       >
         {label}
         {requiredMark && (
-          <Box component="sup" sx={{ color: "#4B5FFF", fontSize: 11, ml: 0.25 }}>
+          <Box component="sup" sx={{ color: "#0F766E", fontSize: 11, ml: 0.25 }}>
             *
           </Box>
         )}
@@ -116,6 +123,7 @@ export function AuthFieldInput({ label, variant, requiredMark = true, id, ...inp
           component="input"
           id={inputId}
           {...inputProps}
+          type={inputType}
           sx={{
             width: "100%",
             height: 44,
@@ -126,7 +134,7 @@ export function AuthFieldInput({ label, variant, requiredMark = true, id, ...inp
               theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "#F6F7FA",
             py: 0,
             pl: "46px",
-            pr: 1.75,
+            pr: isPassword ? "44px" : 1.75,
             fontSize: 14.5,
             fontFamily: "inherit",
             color: "text.primary",
@@ -134,12 +142,33 @@ export function AuthFieldInput({ label, variant, requiredMark = true, id, ...inp
             transition: "border-color .15s ease, background .15s ease, box-shadow .15s ease",
             "&::placeholder": { color: "text.disabled" },
             "&:focus": {
-              borderColor: "#4B5FFF",
+              borderColor: "#0F766E",
               bgcolor: "background.paper",
-              boxShadow: "0 0 0 3px rgba(75,95,255,0.12)",
+              boxShadow: "0 0 0 3px rgba(15, 118, 110, 0.14)",
             },
           }}
         />
+        {isPassword && (
+          <IconButton
+            type="button"
+            size="small"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowPassword((v) => !v)}
+            sx={{
+              position: "absolute",
+              right: 6,
+              zIndex: 2,
+              color: "text.secondary",
+              "&:hover": { color: "text.primary", bgcolor: "action.hover" },
+            }}
+          >
+            {showPassword ? (
+              <VisibilityOffOutlinedIcon sx={{ fontSize: 18 }} />
+            ) : (
+              <VisibilityOutlinedIcon sx={{ fontSize: 18 }} />
+            )}
+          </IconButton>
+        )}
       </Box>
     </Box>
   );

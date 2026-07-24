@@ -665,6 +665,219 @@ export const api = {
       token,
     ).then((res) => res.data);
   },
+
+  async adminListUsers(token: string, q?: string) {
+    const qs = q?.trim() ? `?q=${encodeURIComponent(q.trim())}` : "";
+    return request<{ success: boolean; data: import("../types").AdminUserRow[] }>(
+      `/admin/users${qs}`,
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async adminUpdateUser(
+    token: string,
+    userId: string,
+    body: {
+      role?: import("../types").UserRole;
+      subscriptionTier?: import("../types").SubscriptionTier;
+      subscriptionStatus?: string;
+      organizationId?: string | null;
+    },
+  ) {
+    return request<{ success: boolean; data: import("../types").AdminUserRow; message?: string }>(
+      `/admin/users/${userId}`,
+      { method: "PATCH", body: JSON.stringify(body) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async adminListOrganizations(token: string) {
+    return request<{ success: boolean; data: import("../types").AdminOrganization[] }>(
+      "/admin/organizations",
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async adminCreateOrganization(
+    token: string,
+    body: {
+      name: string;
+      subscriptionTier?: import("../types").SubscriptionTier;
+      seatLimit?: number;
+    },
+  ) {
+    return request<{ success: boolean; data: import("../types").AdminOrganization }>(
+      "/admin/organizations",
+      { method: "POST", body: JSON.stringify(body) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async adminUpdateOrganization(
+    token: string,
+    orgId: string,
+    body: {
+      name?: string;
+      subscriptionTier?: import("../types").SubscriptionTier;
+      subscriptionStatus?: string;
+      seatLimit?: number;
+    },
+  ) {
+    return request<{ success: boolean; data: import("../types").AdminOrganization }>(
+      `/admin/organizations/${orgId}`,
+      { method: "PATCH", body: JSON.stringify(body) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async adminCreateInvite(token: string, orgId: string, email: string) {
+    return request<{
+      success: boolean;
+      data: { id: string; email: string; token: string; expiresAt: string; organizationId: string };
+      message?: string;
+    }>(
+      `/admin/organizations/${orgId}/invites`,
+      { method: "POST", body: JSON.stringify({ email }) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async acceptOrganizationInvite(token: string, inviteToken: string) {
+    return request<{ success: boolean; data: { organizationId: string }; message?: string }>(
+      "/admin/invites/accept",
+      { method: "POST", body: JSON.stringify({ token: inviteToken }) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async opsOverview(token: string) {
+    return request<{ success: boolean; data: import("../types").OpsOverview }>(
+      "/ops/overview",
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async opsListUsers(token: string, q?: string) {
+    const qs = q?.trim() ? `?q=${encodeURIComponent(q.trim())}` : "";
+    return request<{ success: boolean; data: import("../types").OpsUserRow[] }>(
+      `/ops/users${qs}`,
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async opsUpdateUser(
+    token: string,
+    userId: string,
+    body: {
+      role?: import("../types").UserRole;
+      subscriptionTier?: import("../types").SubscriptionTier;
+      subscriptionStatus?: string;
+      organizationId?: string | null;
+      isSuspended?: boolean;
+    },
+  ) {
+    return request<{ success: boolean; data: import("../types").OpsUserRow; message?: string }>(
+      `/ops/users/${userId}`,
+      { method: "PATCH", body: JSON.stringify(body) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async opsSubscriptions(token: string) {
+    return request<{ success: boolean; data: import("../types").OpsSubscriptions }>(
+      "/ops/subscriptions",
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async opsEarnings(token: string) {
+    return request<{ success: boolean; data: import("../types").OpsEarnings }>(
+      "/ops/earnings",
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async opsUsage(token: string, opts?: { userId?: string; from?: string; to?: string }) {
+    const params = new URLSearchParams();
+    if (opts?.userId) params.set("userId", opts.userId);
+    if (opts?.from) params.set("from", opts.from);
+    if (opts?.to) params.set("to", opts.to);
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    return request<{ success: boolean; data: import("../types").OpsUsage }>(
+      `/ops/usage${qs}`,
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async opsPosts(
+    token: string,
+    opts?: { userId?: string; status?: string; q?: string; limit?: number },
+  ) {
+    const params = new URLSearchParams();
+    if (opts?.userId) params.set("userId", opts.userId);
+    if (opts?.status) params.set("status", opts.status);
+    if (opts?.q) params.set("q", opts.q);
+    if (opts?.limit) params.set("limit", String(opts.limit));
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    return request<{ success: boolean; data: import("../types").OpsPostRow[] }>(
+      `/ops/posts${qs}`,
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async opsErrors(token: string, limit?: number) {
+    const qs = limit ? `?limit=${limit}` : "";
+    return request<{ success: boolean; data: import("../types").OpsErrorRow[] }>(
+      `/ops/errors${qs}`,
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async opsIssues(token: string, status?: string) {
+    const qs = status ? `?status=${encodeURIComponent(status)}` : "";
+    return request<{ success: boolean; data: import("../types").OpsIssueRow[] }>(
+      `/ops/issues${qs}`,
+      {},
+      token,
+    ).then((res) => res.data);
+  },
+
+  async opsCreateIssue(
+    token: string,
+    body: { title: string; body: string; priority?: string; userId?: string },
+  ) {
+    return request<{ success: boolean; data: import("../types").OpsIssueRow }>(
+      "/ops/issues",
+      { method: "POST", body: JSON.stringify(body) },
+      token,
+    ).then((res) => res.data);
+  },
+
+  async opsUpdateIssue(
+    token: string,
+    issueId: string,
+    body: {
+      status?: import("../types").SupportIssueStatus;
+      priority?: string;
+      title?: string;
+      body?: string;
+    },
+  ) {
+    return request<{ success: boolean; data: import("../types").OpsIssueRow }>(
+      `/ops/issues/${issueId}`,
+      { method: "PATCH", body: JSON.stringify(body) },
+      token,
+    ).then((res) => res.data);
+  },
 };
 
 export { ApiError };

@@ -4,7 +4,7 @@ This guide runs the full SMC stack on a Contabo VPS using Docker Compose and the
 
 Current target:
 
-- VPS IP: `185.98.83.125`
+- VPS IP: `169.58.63.125`
 - Protocol: `http`
 - Stack: `nginx` + frontend + backend + PostgreSQL + Redis
 
@@ -27,7 +27,7 @@ Keep database ports closed publicly. PostgreSQL and Redis stay internal to Docke
 ## 2. SSH into the VPS
 
 ```bash
-ssh root@185.98.83.125
+ssh root@169.58.63.125
 ```
 
 ## 3. Install Docker and Compose plugin
@@ -77,8 +77,8 @@ Minimum fields to set before first boot:
 
 For this IP-first setup, leave:
 
-- `API_BASE_URL=http://185.98.83.125`
-- `FRONTEND_URL=http://185.98.83.125`
+- `API_BASE_URL=http://169.58.63.125`
+- `FRONTEND_URL=http://169.58.63.125`
 
 ## 6. Build and start the full stack
 
@@ -98,12 +98,12 @@ docker compose -f docker-compose.prod.yml logs -f proxy
 
 Browser:
 
-- `http://185.98.83.125`
+- `http://169.58.63.125`
 
 API health:
 
 ```bash
-curl http://185.98.83.125/api/v1/health
+curl http://169.58.63.125/api/v1/health
 ```
 
 Expected result includes:

@@ -4,7 +4,6 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
-import "./authLusion.css";
 
 type Props = {
   title: string;
@@ -13,13 +12,10 @@ type Props = {
   footer?: ReactNode;
 };
 
-/**
- * Auth form body only — rendered inside ImmersiveAuthLayout's glass card.
- * Does not remount WebGL (layout owns the ocean).
- */
+/** Form header + body for professional auth pages (theme-aware). */
 export function ImmersiveAuthShell({ title, subtitle, children, footer }: Props) {
   return (
-    <Box className="smc-lusion-card-swap">
+    <Box>
       <Typography
         component="h1"
         sx={{
@@ -27,7 +23,7 @@ export function ImmersiveAuthShell({ title, subtitle, children, footer }: Props)
           fontWeight: 650,
           fontSize: { xs: 26, sm: 30 },
           letterSpacing: "-0.03em",
-          color: "#f5f6f8",
+          color: "text.primary",
           mb: 0.75,
         }}
       >
@@ -37,17 +33,17 @@ export function ImmersiveAuthShell({ title, subtitle, children, footer }: Props)
         sx={{
           fontSize: 14.5,
           lineHeight: 1.5,
-          color: "rgba(200, 210, 215, 0.72)",
+          color: "text.secondary",
           mb: 3.5,
         }}
       >
         {subtitle}
       </Typography>
 
-      <Box className="smc-lusion-form">{children}</Box>
+      <Box>{children}</Box>
 
       {footer && (
-        <Box sx={{ mt: 3.25, pt: 2.5, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <Box sx={{ mt: 3.25, pt: 2.5, borderTop: "1px solid", borderColor: "divider" }}>
           {footer}
         </Box>
       )}
@@ -69,37 +65,35 @@ export function ImmersiveAuthCta({ children, loading, type = "submit", onClick }
       fullWidth
       disabled={loading}
       onClick={onClick}
-      className="smc-lusion-cta"
       sx={{
         height: 48,
-        borderRadius: "12px",
+        borderRadius: "10px",
         textTransform: "none",
         fontSize: 14.5,
         fontWeight: 600,
         letterSpacing: "0.02em",
-        color: "#062028",
-        background: "linear-gradient(120deg, #e8f4f0 0%, #7eb8b0 48%, #3a8a82 100%)",
+        color: "#F0FDFA",
+        background: "linear-gradient(145deg, #14B8A6 0%, #0F766E 55%, #115E59 100%)",
         boxShadow: `
-          0 12px 28px -8px rgba(60, 130, 120, 0.4),
-          inset 0 1px 0 rgba(255,255,255,0.65)
+          0 10px 24px -8px rgba(15, 118, 110, 0.45),
+          inset 0 1px 0 rgba(255,255,255,0.25)
         `,
         gap: 1,
-        transition: "transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
         "&:hover": {
-          background: "linear-gradient(120deg, #f2faf7 0%, #8ec8c0 48%, #4a9a92 100%)",
-          boxShadow: "0 16px 36px -8px rgba(60, 130, 120, 0.5)",
-          transform: "translateY(-2px)",
-          filter: "brightness(1.03)",
+          background: "linear-gradient(145deg, #2DD4BF 0%, #0D9488 55%, #0F766E 100%)",
+          boxShadow: "0 14px 28px -8px rgba(15, 118, 110, 0.55)",
+          transform: "translateY(-1px)",
         },
         "&:active": { transform: "translateY(0)" },
         "&.Mui-disabled": {
-          color: "rgba(6,32,40,0.7)",
-          background: "linear-gradient(120deg, #e8f4f0 0%, #7eb8b0 48%, #3a8a82 100%)",
+          color: "rgba(240,253,250,0.8)",
+          background: "linear-gradient(145deg, #14B8A6 0%, #0F766E 55%, #115E59 100%)",
         },
       }}
     >
       {loading ? (
-        <CircularProgress size={20} sx={{ color: "#062028" }} />
+        <CircularProgress size={20} sx={{ color: "#F0FDFA" }} />
       ) : (
         <>
           {children}

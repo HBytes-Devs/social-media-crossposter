@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { logger } from "../utils/logger.js";
 import { captureException } from "../config/sentry.js";
+import { recordSystemError } from "../services/ops-telemetry.service.js";
 
 export class AppError extends Error {
   constructor(
@@ -16,11 +17,23 @@ export class AppError extends Error {
 
 export function errorHandler(
   err: Error,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction,
 ): void {
+  const userId = (req as Request & { userId?: string }).userId;
+
   if (err instanceof AppError) {
+    if (err.statusCode >= 500) {
+      void recordSystemError({
+        level: "error",
+        message: err.message,
+        stack: err.stack,
+        path: req.originalUrl,
+        userId,
+        meta: { statusCode: err.statusCode },
+      });
+    }
     res.status(err.statusCode).json({
       success: false,
       error: err.message,
@@ -39,6 +52,13 @@ export function errorHandler(
 
   logger.error("Unhandled error", err);
   captureException(err);
+  void recordSystemError({
+    level: "error",
+    message: err.message || "Internal server error",
+    stack: err.stack,
+    path: req.originalUrl,
+    userId,
+  });
 
   res.status(500).json({
     success: false,

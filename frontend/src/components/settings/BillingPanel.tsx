@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -37,6 +38,8 @@ export function BillingPanel() {
   const [actionTier, setActionTier] = useState<SubscriptionTier | "portal" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [inviteToken, setInviteToken] = useState("");
+  const [inviteLoading, setInviteLoading] = useState(false);
 
   const currentTier = user?.subscription.tier ?? "FREE";
 
@@ -167,6 +170,14 @@ export function BillingPanel() {
         </Box>
       )}
 
+      {user?.subscription.source === "organization" && user.organization && (
+        <Alert severity="info" sx={{ mb: 2.5 }}>
+          Your access comes from company <strong>{user.organization.name}</strong> (
+          {user.organization.seatUsed}/{user.organization.seatLimit} seats). Individual Stripe
+          upgrades do not replace the company plan while you remain a member.
+        </Alert>
+      )}
+
       {!billingConfigured && (
         <Alert severity="info" sx={{ mb: 2.5 }}>
           Stripe abhi configure nahi hai. Paid plans ke liye backend `.env` mein Stripe keys add karo.
@@ -184,7 +195,10 @@ export function BillingPanel() {
           const isCurrent = plan.id === currentTier;
           const isPopular = plan.id === "MEDIUM";
           const canUpgrade =
-            billingConfigured && tierRank(plan.id) > tierRank(currentTier) && plan.id !== "FREE";
+            billingConfigured &&
+            user?.subscription.source !== "organization" &&
+            tierRank(plan.id) > tierRank(currentTier) &&
+            plan.id !== "FREE";
           const isPaidCurrent = isCurrent && plan.id !== "FREE";
 
           return (
@@ -351,6 +365,48 @@ export function BillingPanel() {
             </Box>
           );
         })}
+      </Box>
+
+      <Box sx={{ mt: 3, pt: 2.5, borderTop: "1px solid", borderColor: colors.line }}>
+        <Typography sx={{ fontWeight: 600, mb: 1, fontFamily: fonts.body }}>
+          Company invite
+        </Typography>
+        <Typography sx={{ fontSize: 13, color: colors.muted, mb: 1.5, fontFamily: fonts.body }}>
+          Agar admin ne invite token diya hai, yahan paste karke company plan join karo.
+        </Typography>
+        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+          <TextField
+            size="small"
+            label="Invite token"
+            value={inviteToken}
+            onChange={(e) => setInviteToken(e.target.value)}
+            sx={{ flex: 1, minWidth: 220 }}
+          />
+          <Button
+            variant="outlined"
+            disabled={!token || !inviteToken.trim() || inviteLoading}
+            onClick={() => {
+              if (!token) return;
+              setInviteLoading(true);
+              setError(null);
+              void api
+                .acceptOrganizationInvite(token, inviteToken.trim())
+                .then(async () => {
+                  setNotice("Company invite accepted");
+                  setInviteToken("");
+                  await dispatch(initializeAuth());
+                  await loadBilling();
+                })
+                .catch((err: unknown) => {
+                  setError(err instanceof Error ? err.message : "Invite accept failed");
+                })
+                .finally(() => setInviteLoading(false));
+            }}
+            sx={{ textTransform: "none", fontFamily: fonts.body }}
+          >
+            {inviteLoading ? <CircularProgress size={18} /> : "Accept invite"}
+          </Button>
+        </Box>
       </Box>
     </SettingsPanel>
   );

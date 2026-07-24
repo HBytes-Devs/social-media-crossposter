@@ -18,6 +18,12 @@ import {
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { loginUser, selectAuth } from "../store/slices/authSlice";
 
+const authLinkSx = {
+  color: "primary.main",
+  fontWeight: 600,
+  "&:hover": { textDecoration: "underline" },
+} as const;
+
 export function LoginPage() {
   const { t } = useUiLanguage();
   const dispatch = useAppDispatch();
@@ -72,7 +78,8 @@ export function LoginPage() {
         } else {
           clearRememberedLogin();
         }
-        navigate("/");
+        const role = result.payload.user.role;
+        navigate(role === "SUPER_ADMIN" ? "/ops" : "/");
       } else {
         setError((result.payload as string) ?? t("auth.error.loginFailed"));
       }
@@ -87,25 +94,16 @@ export function LoginPage() {
       subtitle={
         <>
           {t("auth.login.subtitlePrefix")}{" "}
-          <Box component="b" sx={{ fontWeight: 600, color: "rgba(245,246,248,0.95)" }}>
+          <Box component="b" sx={{ fontWeight: 650, color: "text.primary" }}>
             SMC
           </Box>{" "}
           {t("auth.login.subtitleSuffix")}
         </>
       }
       footer={
-        <Typography sx={{ textAlign: "center", fontSize: 14, color: "rgba(200,210,215,0.7)" }}>
+        <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
           {t("auth.noAccount")}{" "}
-          <Link
-            component={RouterLink}
-            to="/register"
-            underline="none"
-            sx={{
-              color: "#9fd4cf !important",
-              fontWeight: 600,
-              "&:hover": { textDecoration: "underline" },
-            }}
-          >
+          <Link component={RouterLink} to="/register" underline="none" sx={authLinkSx}>
             {t("auth.createAccount")}
           </Link>
         </Typography>
@@ -155,7 +153,7 @@ export function LoginPage() {
               />
             }
             label={
-              <Typography sx={{ fontSize: 13.5, color: "rgba(200,210,215,0.75)" }}>
+              <Typography sx={{ fontSize: 13.5, color: "text.secondary" }}>
                 {t("auth.rememberMe")}
               </Typography>
             }
@@ -165,30 +163,25 @@ export function LoginPage() {
             component={RouterLink}
             to="/forgot-password"
             underline="none"
-            sx={{
-              fontSize: 13.5,
-              color: "#9fd4cf !important",
-              fontWeight: 500,
-              "&:hover": { textDecoration: "underline" },
-            }}
+            sx={{ ...authLinkSx, fontSize: 13.5, fontWeight: 500 }}
           >
             {t("auth.forgotPassword")}
           </Link>
         </Box>
 
         {loadError && (
-          <Typography variant="caption" sx={{ display: "block", mb: 1.5, color: "#e8b86d" }}>
+          <Typography variant="caption" sx={{ display: "block", mb: 1.5, color: "warning.main" }}>
             {t("auth.recaptcha.loadError")}
           </Typography>
         )}
 
         {info && (
-          <Typography variant="body2" sx={{ mb: 1.5, color: "#7ec8c4" }}>
+          <Typography variant="body2" sx={{ mb: 1.5, color: "success.main" }}>
             {info}
           </Typography>
         )}
         {error && (
-          <Typography variant="body2" sx={{ mb: 1.5, color: "#f0a0a0" }}>
+          <Typography variant="body2" sx={{ mb: 1.5, color: "error.main" }}>
             {error}
           </Typography>
         )}

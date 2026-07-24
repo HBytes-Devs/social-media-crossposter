@@ -13,6 +13,8 @@ import metaRoutes from "./meta.routes.js";
 import googleAdsRoutes from "./google-ads.routes.js";
 import linkedInAdsRoutes from "./linkedin-ads.routes.js";
 import metaAdsRoutes from "./meta-ads.routes.js";
+import adminRoutes from "./admin.routes.js";
+import opsRoutes from "./ops.routes.js";
 import { getProductVersion } from "../lib/product-version.js";
 
 const router = Router();
@@ -31,6 +33,8 @@ router.use("/meta", metaRoutes);
 router.use("/google-ads", googleAdsRoutes);
 router.use("/linkedin-ads", linkedInAdsRoutes);
 router.use("/meta-ads", metaAdsRoutes);
+router.use("/admin", adminRoutes);
+router.use("/ops", opsRoutes);
 
 router.get("/", (_req, res) => {
   const product = getProductVersion();

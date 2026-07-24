@@ -59,10 +59,14 @@ export type MessageKey =
   | "auth.error.requestFailed"
   | "auth.error.resetFailed"
   | "auth.error.passwordMismatch"
+  | "auth.error.termsRequired"
   | "auth.success.passwordUpdated"
   | "auth.recaptcha.loadError"
   | "auth.recaptcha.notice"
-  | "auth.rememberMe";
+  | "auth.rememberMe"
+  | "auth.passwordHint"
+  | "auth.termsPrefix"
+  | "auth.termsLabel";
 
 export type Messages = Record<MessageKey, string>;
 
@@ -120,10 +124,14 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.error.requestFailed": "Request failed",
     "auth.error.resetFailed": "Reset failed",
     "auth.error.passwordMismatch": "Passwords do not match",
+    "auth.error.termsRequired": "Please accept the terms to continue",
     "auth.success.passwordUpdated": "Password updated. Please log in.",
     "auth.recaptcha.loadError": "reCAPTCHA failed to load. Check your site key or try again.",
     "auth.recaptcha.notice": "Protected by reCAPTCHA — Google Privacy & Terms",
     "auth.rememberMe": "Remember email & password",
+    "auth.passwordHint": "Use at least 8 characters.",
+    "auth.termsPrefix": "I agree to the",
+    "auth.termsLabel": "Terms of Service",
   },
   "roman-ur": {
     "auth.email": "Email",
@@ -178,10 +186,14 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.error.requestFailed": "Request fail ho gayi",
     "auth.error.resetFailed": "Reset fail ho gaya",
     "auth.error.passwordMismatch": "Password match nahi kar rahe",
+    "auth.error.termsRequired": "Continue karne ke liye terms accept karo",
     "auth.success.passwordUpdated": "Password update ho gaya. Ab login karo.",
     "auth.recaptcha.loadError": "reCAPTCHA load nahi hua. Site key check karo ya dubara try karo.",
     "auth.recaptcha.notice": "reCAPTCHA se protected — Google Privacy & Terms",
     "auth.rememberMe": "Email aur password yaad rakho",
+    "auth.passwordHint": "Kam az kam 8 characters use karo.",
+    "auth.termsPrefix": "Main agree karta/karti hoon",
+    "auth.termsLabel": "Terms of Service",
   },
   ur: {
     "auth.email": "ای میل",
@@ -236,10 +248,14 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.error.requestFailed": "درخواست ناکام",
     "auth.error.resetFailed": "ری سیٹ ناکام",
     "auth.error.passwordMismatch": "پاس ورڈ مماثل نہیں",
+    "auth.error.termsRequired": "جاری رکھنے کے لیے شرائط قبول کریں",
     "auth.success.passwordUpdated": "پاس ورڈ اپ ڈیٹ ہو گیا۔ اب لاگ اِن کریں۔",
     "auth.recaptcha.loadError": "reCAPTCHA لوڈ نہیں ہوا۔ سائٹ کی چیک کریں یا دوبارہ کوشش کریں۔",
     "auth.recaptcha.notice": "reCAPTCHA سے محفوظ — Google Privacy & Terms",
     "auth.rememberMe": "ای میل اور پاس ورڈ یاد رکھیں",
+    "auth.passwordHint": "کم از کم 8 حروف استعمال کریں۔",
+    "auth.termsPrefix": "میں متفق ہوں",
+    "auth.termsLabel": "سروس کی شرائط",
   },
   hi: {
     "auth.email": "ईमेल",
@@ -294,10 +310,14 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.error.requestFailed": "अनुरोध विफल",
     "auth.error.resetFailed": "रीसेट विफल",
     "auth.error.passwordMismatch": "पासवर्ड मेल नहीं खाते",
+    "auth.error.termsRequired": "जारी रखने के लिए शर्तें स्वीकार करें",
     "auth.success.passwordUpdated": "पासवर्ड अपडेट हो गया। कृपया लॉगिन करें।",
     "auth.recaptcha.loadError": "reCAPTCHA लोड नहीं हुआ। साइट की जांच करें या फिर कोशिश करें।",
     "auth.recaptcha.notice": "reCAPTCHA द्वारा सुरक्षित — Google Privacy & Terms",
     "auth.rememberMe": "ईमेल और पासवर्ड याद रखें",
+    "auth.passwordHint": "कम से कम 8 अक्षर उपयोग करें।",
+    "auth.termsPrefix": "मैं सहमत हूँ",
+    "auth.termsLabel": "सेवा की शर्तें",
   },
 };
 

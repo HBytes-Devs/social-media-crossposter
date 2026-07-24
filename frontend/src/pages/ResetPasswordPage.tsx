@@ -9,7 +9,7 @@ import { useUiLanguage } from "../i18n/UiLanguageProvider";
 import { api } from "../lib/api";
 
 const authLinkSx = {
-  color: "#9fd4cf !important",
+  color: "primary.main",
   fontWeight: 600,
   "&:hover": { textDecoration: "underline" },
 } as const;
@@ -54,7 +54,7 @@ export function ResetPasswordPage() {
       title={t("auth.reset.title")}
       subtitle={t("auth.reset.subtitle")}
       footer={
-        <Typography sx={{ textAlign: "center", fontSize: 14, color: "rgba(200,210,215,0.7)" }}>
+        <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
           {t("auth.codeNotReceived")}{" "}
           <Link component={RouterLink} to="/forgot-password" underline="none" sx={authLinkSx}>
             {t("auth.resendCode")}
@@ -115,7 +115,7 @@ export function ResetPasswordPage() {
         />
 
         {error && (
-          <Typography variant="body2" sx={{ mb: 1.5, color: "#f0a0a0" }}>
+          <Typography variant="body2" sx={{ mb: 1.5, color: "error.main" }}>
             {error}
           </Typography>
         )}

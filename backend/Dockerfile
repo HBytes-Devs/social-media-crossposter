@@ -3,12 +3,12 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-COPY prisma ./prisma/
+COPY backend/package.json backend/package-lock.json ./
+COPY backend/prisma ./prisma/
 RUN npm ci
 
-COPY tsconfig.json ./
-COPY src ./src/
+COPY backend/tsconfig.json ./
+COPY backend/src ./src/
 RUN npm run build
 
 FROM node:22-alpine AS runner
@@ -16,11 +16,13 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-COPY package.json package-lock.json ./
-COPY prisma ./prisma/
+COPY backend/package.json backend/package-lock.json ./
+COPY backend/prisma ./prisma/
 RUN npm ci --omit=dev && npx prisma generate
 
 COPY --from=builder /app/dist ./dist
+# product-version.ts resolves join(cwd, "..", "version.json") => /version.json
+COPY version.json /version.json
 
 EXPOSE 3001
 
