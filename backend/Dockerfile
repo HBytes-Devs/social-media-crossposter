@@ -23,6 +23,7 @@ RUN npm ci --omit=dev && npx prisma generate
 COPY --from=builder /app/dist ./dist
 # product-version.ts resolves join(cwd, "..", "version.json") => /version.json
 COPY version.json /version.json
+COPY backend/scripts ./scripts
 
 EXPOSE 3001
 
