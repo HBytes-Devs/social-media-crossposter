@@ -29,6 +29,18 @@ const envSchema = z.object({
   META_ADS_REDIRECT_URI: z.string().optional(),
   /** Optional Login for Business config with ads permissions */
   META_ADS_CONFIG_ID: z.string().optional(),
+  /** Prefer this Facebook Page when the user manages multiple (name match, case-insensitive). */
+  META_PREFERRED_PAGE_NAME: z.string().optional(),
+  /** Prefer this Facebook Page ID when set (wins over name). */
+  META_PREFERRED_PAGE_ID: z.string().optional(),
+  /** When true and META_CONFIG_ID is unset, request instagram_business_* scopes. */
+  META_INSTAGRAM_USE_BUSINESS_SCOPES: z.string().optional(),
+  /** Use Instagram Login (instagram.com OAuth) — no Facebook Page link required. */
+  META_USE_INSTAGRAM_LOGIN: z.string().optional(),
+  /** Instagram product App ID (from Meta Instagram API setup). Defaults to META_APP_ID. */
+  META_INSTAGRAM_APP_ID: z.string().optional(),
+  /** Instagram product App Secret. Defaults to META_APP_SECRET. */
+  META_INSTAGRAM_APP_SECRET: z.string().optional(),
   TWITTER_CLIENT_ID: z.string().optional(),
   TWITTER_CLIENT_SECRET: z.string().optional(),
   TWITTER_REDIRECT_URI: z.string().optional(),

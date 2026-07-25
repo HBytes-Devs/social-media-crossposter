@@ -38,15 +38,24 @@ for (const u of users) {
       name: u.name,
       password: hash,
       role: u.role,
+      subscriptionTier: "PREMIUM",
+      subscriptionStatus: "ACTIVE",
     },
     update: {
       name: u.name,
       password: hash,
       role: u.role,
+      subscriptionTier: "PREMIUM",
+      subscriptionStatus: "ACTIVE",
     },
-    select: { id: true, email: true, role: true },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      subscriptionTier: true,
+    },
   });
-  console.log("OK", row.role, row.email, row.id);
+  console.log("OK", row.role, row.email, row.subscriptionTier, row.id);
 }
 
 await prisma.$disconnect();

@@ -5,8 +5,9 @@ This guide runs the full SMC stack on a Contabo VPS using Docker Compose and the
 Current target:
 
 - VPS IP: `169.58.63.125`
-- Protocol: `http`
-- Stack: `nginx` + frontend + backend + PostgreSQL + Redis
+- HTTPS app URL (Meta/Facebook OAuth): `https://169.58.63.125.sslip.io`
+- Raw IP HTTP still works for ops: `http://169.58.63.125`
+- Stack: `nginx` + frontend + backend + PostgreSQL + Redis + Let's Encrypt
 
 ## What this deploy includes
 

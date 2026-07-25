@@ -74,6 +74,12 @@ services:
       META_INSTAGRAM_REDIRECT_URI: ${META_INSTAGRAM_REDIRECT_URI}
       META_ADS_REDIRECT_URI: ${META_ADS_REDIRECT_URI}
       META_ADS_CONFIG_ID: ${META_ADS_CONFIG_ID}
+      META_PREFERRED_PAGE_NAME: ${META_PREFERRED_PAGE_NAME:-}
+      META_PREFERRED_PAGE_ID: ${META_PREFERRED_PAGE_ID:-}
+      META_INSTAGRAM_USE_BUSINESS_SCOPES: ${META_INSTAGRAM_USE_BUSINESS_SCOPES:-}
+      META_USE_INSTAGRAM_LOGIN: ${META_USE_INSTAGRAM_LOGIN:-}
+      META_INSTAGRAM_APP_ID: ${META_INSTAGRAM_APP_ID:-}
+      META_INSTAGRAM_APP_SECRET: ${META_INSTAGRAM_APP_SECRET:-}
       GOOGLE_ADS_CLIENT_ID: ${GOOGLE_ADS_CLIENT_ID}
       GOOGLE_ADS_CLIENT_SECRET: ${GOOGLE_ADS_CLIENT_SECRET}
       GOOGLE_ADS_DEVELOPER_TOKEN: ${GOOGLE_ADS_DEVELOPER_TOKEN}
@@ -126,9 +132,13 @@ services:
       - backend
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./deploy/nginx/public:/var/www/smc-public:ro
       - ./deploy/hawkbytes-site:/var/www/hawkbytes:ro
+      - ./deploy/certbot/www:/var/www/certbot:ro
+      - ./deploy/certbot/conf:/etc/letsencrypt:ro
     networks:
       - smc
 

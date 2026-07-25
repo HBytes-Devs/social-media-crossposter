@@ -7,7 +7,7 @@ import type {
   UnifiedPost,
   ValidationResult,
 } from "../platform.types.js";
-import { META_GRAPH_VERSION, fetchJson } from "../platform.config.js";
+import { META_GRAPH_VERSION, fetchJson, pickPreferredMetaPage } from "../platform.config.js";
 
 const SCOPES = [
   "pages_manage_posts",
@@ -65,7 +65,7 @@ export class FacebookAdapter implements PlatformAdapter {
       `https://graph.facebook.com/${META_GRAPH_VERSION}/me/accounts?fields=id,name,access_token&access_token=${tokenData.access_token}`,
     );
 
-    const page = pages.data[0];
+    const page = pickPreferredMetaPage(pages.data);
     if (!page) {
       throw new Error("No Facebook Page found. Create a Page and grant access.");
     }

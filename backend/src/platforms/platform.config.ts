@@ -28,7 +28,13 @@ export function isPlatformConfigured(platform: Platform): boolean {
     case "FACEBOOK":
       return metaConfigured() && Boolean(env.META_REDIRECT_URI);
     case "INSTAGRAM":
-      return metaConfigured() && Boolean(getInstagramRedirectUri());
+      return Boolean(
+        getInstagramRedirectUri() &&
+          ((env.META_USE_INSTAGRAM_LOGIN ?? "").toLowerCase() === "true"
+            ? (env.META_INSTAGRAM_APP_ID || env.META_APP_ID) &&
+              (env.META_INSTAGRAM_APP_SECRET || env.META_APP_SECRET)
+            : env.META_APP_ID && env.META_APP_SECRET),
+      );
     case "TWITTER":
       return Boolean(
         env.TWITTER_CLIENT_ID && env.TWITTER_CLIENT_SECRET && env.TWITTER_REDIRECT_URI,
@@ -43,10 +49,33 @@ export function isPlatformConfigured(platform: Platform): boolean {
 }
 
 export function getInstagramRedirectUri(): string {
-  return (
+  const raw =
     env.META_INSTAGRAM_REDIRECT_URI ??
-    `${env.API_BASE_URL}/api/v1/accounts/instagram/callback`
-  );
+    `${env.API_BASE_URL}/api/v1/accounts/instagram/callback`;
+  return raw.trim();
+}
+
+/** Pick preferred Facebook Page when the user manages several (e.g. HawkBytes vs hamza-toto). */
+export function pickPreferredMetaPage<T extends { id: string; name: string }>(
+  pages: T[],
+): T | undefined {
+  if (pages.length === 0) return undefined;
+
+  const preferredId = env.META_PREFERRED_PAGE_ID?.trim();
+  if (preferredId) {
+    const byId = pages.find((p) => p.id === preferredId);
+    if (byId) return byId;
+  }
+
+  const preferredName = env.META_PREFERRED_PAGE_NAME?.trim().toLowerCase();
+  if (preferredName) {
+    const exact = pages.find((p) => p.name.trim().toLowerCase() === preferredName);
+    if (exact) return exact;
+    const partial = pages.find((p) => p.name.trim().toLowerCase().includes(preferredName));
+    if (partial) return partial;
+  }
+
+  return pages[0];
 }
 
 export function getPlatformStatuses(): PlatformStatus[] {
