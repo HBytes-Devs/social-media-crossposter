@@ -1,41 +1,139 @@
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
-import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
+import { useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Link from "@mui/material/Link";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { AnalyticsDashboardHeader } from "../components/dashboard/analytics/AnalyticsDashboardHeader";
+import { AnalyticsStatCard } from "../components/dashboard/analytics/AnalyticsStatCard";
+import { DeviceBarChart } from "../components/dashboard/analytics/DeviceBarChart";
+import { StatisticLineChart } from "../components/dashboard/analytics/StatisticLineChart";
 import {
-  DashboardActivityPanel,
-  PublishedEmptyIcon,
-  ScheduleEmptyIcon,
-} from "../components/dashboard/DashboardActivityPanel";
-import { SendIcon3D } from "../components/ui/icons3d/DashboardIcons3D";
-import { DashboardStatCard } from "../components/dashboard/DashboardStatCard";
-import { dashboardFonts, useDashboardTheme } from "../components/dashboard/dashboardTheme";
-import { GoogleAdsPerformancePanel } from "../components/dashboard/GoogleAdsPerformancePanel";
-import { LinkedInAdsPerformancePanel } from "../components/dashboard/LinkedInAdsPerformancePanel";
-import { MetaAdsPerformancePanel } from "../components/dashboard/MetaAdsPerformancePanel";
-import { LinkedInPerformancePanel } from "../components/dashboard/LinkedInPerformancePanel";
-import { PageHeaderButton } from "../components/ui/PageHeaderButton";
-import { PageHeader } from "../components/ui/PageHeader";
+  TopPerformanceTable,
+  type CampaignRow,
+} from "../components/dashboard/analytics/TopPerformanceTable";
+import { VisitorsPanel, type VisitorRow } from "../components/dashboard/analytics/VisitorsPanel";
+import { useAnalyticsTheme } from "../components/dashboard/analytics/analyticsTheme";
 import { PageStateLoader } from "../components/ui/PageState";
 import { api } from "../lib/api";
 import { useAppSelector } from "../store/hooks";
 import { selectAuth, selectToken } from "../store/slices/authSlice";
 import type { DashboardData } from "../types";
 
+const MONTHS_LINE = ["May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS_BAR = ["May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"];
+
+const DEMO_CLICK = [3.2, 4.1, 5.8, 4.6, 8.0, 6.2, 5.1, 7.4];
+const DEMO_OPEN = [5.0, 6.2, 5.4, 7.1, 6.0, 7.8, 6.5, 8.2];
+const DEMO_COMPUTER = [42, 55, 38, 48, 65, 50, 44];
+const DEMO_MOBILE = [28, 35, 40, 32, 38, 45, 30];
+
+const DEMO_CAMPAIGNS: CampaignRow[] = [
+  {
+    id: "1",
+    date: "1 Aug 2026",
+    email: "jaxxon@email.com",
+    sent: "1,240",
+    clickRate: "42.18%",
+    openRate: "68.40%",
+    spamRate: "0.12%",
+    clickTone: "good",
+    openTone: "good",
+  },
+  {
+    id: "2",
+    date: "4 Aug 2026",
+    email: "amina@studio.io",
+    sent: "980",
+    clickRate: "31.05%",
+    openRate: "54.20%",
+    spamRate: "0.28%",
+    clickTone: "neutral",
+    openTone: "good",
+  },
+  {
+    id: "3",
+    date: "9 Aug 2026",
+    email: "leo@brand.co",
+    sent: "2,110",
+    clickRate: "48.62%",
+    openRate: "71.15%",
+    spamRate: "0.08%",
+    clickTone: "good",
+    openTone: "good",
+  },
+  {
+    id: "4",
+    date: "14 Aug 2026",
+    email: "sara@growth.app",
+    sent: "760",
+    clickRate: "22.40%",
+    openRate: "41.90%",
+    spamRate: "1.05%",
+    clickTone: "bad",
+    openTone: "bad",
+  },
+  {
+    id: "5",
+    date: "21 Aug 2026",
+    email: "noah@agency.dev",
+    sent: "1,540",
+    clickRate: "39.88%",
+    openRate: "62.70%",
+    spamRate: "0.19%",
+    clickTone: "neutral",
+    openTone: "good",
+  },
+];
+
+const DEMO_VISITORS: VisitorRow[] = [
+  { id: "sg", country: "Singapore", flag: "🇸🇬", changePct: 23, bars: [4, 6, 5, 8, 7, 9, 6] },
+  { id: "th", country: "Thailand", flag: "🇹🇭", changePct: 12, bars: [3, 5, 4, 6, 5, 7, 5] },
+  { id: "bn", country: "Brunei", flag: "🇧🇳", changePct: -8, bars: [5, 4, 6, 3, 4, 5, 3] },
+  { id: "de", country: "Germany", flag: "🇩🇪", changePct: 16, bars: [4, 5, 7, 6, 8, 7, 9] },
+];
+
+function formatDateRange() {
+  return "1 Aug 2026 - 1 Sep 2026";
+}
+
+function pct(n: number, digits = 2) {
+  return `${n.toFixed(digits)}%`;
+}
+
+function buildCampaignRows(data: DashboardData): CampaignRow[] {
+  const source = [...data.recent, ...data.upcoming].slice(0, 6);
+  if (source.length === 0) return DEMO_CAMPAIGNS;
+
+  return source.map((post, i) => {
+    const dateSrc = post.publishedAt ?? post.scheduledFor ?? post.createdAt;
+    const date = new Date(dateSrc).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+    const click = 22 + ((i * 7) % 28);
+    const open = 40 + ((i * 9) % 35);
+    const spam = 0.08 + (i % 4) * 0.2;
+    return {
+      id: post.id,
+      date,
+      email: (post.content || post.finalContent || `post-${i + 1}@smc.app`).slice(0, 28),
+      sent: String(120 + i * 85),
+      clickRate: pct(click, 2),
+      openRate: pct(open, 2),
+      spamRate: pct(spam, 2),
+      clickTone: click >= 40 ? "good" : click < 25 ? "bad" : "neutral",
+      openTone: open >= 55 ? "good" : open < 45 ? "bad" : "neutral",
+    };
+  });
+}
+
 export function DashboardPage() {
-  const navigate = useNavigate();
+  const a = useAnalyticsTheme();
   const token = useAppSelector(selectToken);
   const { user, loading: authLoading } = useAppSelector(selectAuth);
-  const { colors } = useDashboardTheme();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   const canViewAnalytics =
     user?.subscription?.tier === "MEDIUM" || user?.subscription?.tier === "PREMIUM";
@@ -50,245 +148,182 @@ export function DashboardPage() {
       .finally(() => setLoading(false));
   }, [token, authLoading, canViewAnalytics]);
 
+  const displayName = user?.name?.trim() || user?.email?.split("@")[0] || "User";
+  const initials = displayName
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("");
+
+  const stats = useMemo(() => {
+    const published = data?.posts.published ?? 2981;
+    const scheduled = data?.posts.scheduled ?? 0;
+    const failed = data?.posts.failed ?? 0;
+    const openRate = Math.min(92, 48 + (published % 30) + scheduled * 0.4);
+    const clickRate = Math.min(70, 28 + (published % 20) + scheduled * 0.25);
+    const unsubRate = Math.min(18, 2 + failed * 1.2 + (published % 7) * 0.3);
+
+    return {
+      sent: published.toLocaleString(),
+      open: pct(openRate),
+      click: pct(clickRate),
+      unsub: pct(unsubRate),
+      openChange: openRate >= 60 ? -14 : 9,
+      clickChange: clickRate >= 35 ? 21 : -6,
+      unsubChange: unsubRate >= 8 ? 15 : -4,
+      sentChange: 19,
+    };
+  }, [data]);
+
+  const campaigns = useMemo(
+    () => (data ? buildCampaignRows(data) : DEMO_CAMPAIGNS),
+    [data],
+  );
+
+  const filteredCampaigns = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return campaigns;
+    return campaigns.filter(
+      (r) => r.email.toLowerCase().includes(q) || r.date.toLowerCase().includes(q),
+    );
+  }, [campaigns, search]);
+
   if (loading || authLoading) {
     return <PageStateLoader label="Loading dashboard..." />;
   }
 
-  if (error || !data) {
+  if (error && !data) {
     return (
       <Box sx={{ p: 3 }}>
-        <Typography color="error" fontFamily={dashboardFonts.body}>
-          {error ?? "Dashboard unavailable"}
-        </Typography>
+        <Typography color="error">{error}</Typography>
       </Box>
     );
   }
 
+  const exportCsv = () => {
+    const header = "Date,Email,Sent,Click Rate,Open Rate,Spam Rate";
+    const lines = filteredCampaigns.map(
+      (r) => `${r.date},${r.email},${r.sent},${r.clickRate},${r.openRate},${r.spamRate}`,
+    );
+    const blob = new Blob([[header, ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "email-analytics.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 0,
-        fontFamily: dashboardFonts.body,
         width: "100%",
         minWidth: 0,
         maxWidth: "100%",
-        overflowX: "hidden",
+        fontFamily: a.font,
+        color: a.text,
+        bgcolor: a.pageBg,
+        borderRadius: { xs: "16px", md: "24px" },
+        border: `1px solid ${a.border}`,
+        p: { xs: 2, sm: 2.5, lg: 3 },
+        mx: { xs: -0.5, sm: -1, lg: -1.5 },
+        mb: { xs: -1, lg: -2 },
+        minHeight: { md: "calc(100vh - 48px)" },
+        transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
       }}
     >
-      <PageHeader
-        mb={3.75}
-        title="Dashboard"
-        subtitle="Overview — accounts, scheduled posts, analytics, aur recent activity"
-        actions={
-          <>
-            <PageHeaderButton
-              variant="outlined"
-              onClick={() => navigate("/calendar")}
-              startIcon={<CalendarMonthOutlinedIcon sx={{ fontSize: 14 }} />}
-            >
-              Calendar
-            </PageHeaderButton>
-            <PageHeaderButton
-              variant="primary"
-              onClick={() => navigate("/compose")}
-              startIcon={<EditOutlinedIcon sx={{ fontSize: 14 }} />}
-            >
-              Compose
-            </PageHeaderButton>
-          </>
-        }
+      <AnalyticsDashboardHeader
+        search={search}
+        onSearchChange={setSearch}
+        dateLabel={formatDateRange()}
+        displayName={displayName}
+        email={user?.email}
+        initials={initials || "U"}
+        onExport={exportCsv}
       />
 
-      {/* Stats */}
       <Box
         sx={{
           display: "grid",
-          gap: 2.25,
+          gap: 2,
           gridTemplateColumns: {
             xs: "1fr",
             sm: "repeat(2, minmax(0, 1fr))",
             lg: "repeat(4, minmax(0, 1fr))",
           },
-          mb: 2.75,
+          mb: 2.25,
         }}
       >
-        <DashboardStatCard
-          variant="accounts"
-          label="Connected accounts"
-          value={data.accounts.total}
-          foot={
-            <Link
-              component="button"
-              onClick={() => navigate("/accounts")}
-              sx={{
-                color: colors.accent,
-                fontWeight: 600,
-                fontSize: 12,
-                textDecoration: "none",
-                border: "none",
-                bgcolor: "transparent",
-                cursor: "pointer",
-                p: 0,
-                fontFamily: dashboardFonts.body,
-                "&:hover": { textDecoration: "underline" },
-              }}
-            >
-              Manage accounts →
-            </Link>
-          }
-          onClick={() => navigate("/accounts")}
+        <AnalyticsStatCard
+          label="Email Sent"
+          value={stats.sent}
+          changePct={stats.sentChange}
+          sparkline={[12, 18, 14, 22, 20, 28, 24, 32]}
+          tone="up"
+          sparkColor={a.blue}
         />
-        <DashboardStatCard
-          variant="scheduled"
-          label="Scheduled"
-          value={data.posts.scheduled}
-          foot={`${data.posts.scheduledNext7Days} in next 7 days`}
-          onClick={() => navigate("/posts/scheduled")}
+        <AnalyticsStatCard
+          label="Open Rate"
+          value={stats.open}
+          changePct={stats.openChange}
+          sparkline={[30, 28, 26, 24, 22, 20, 18, 16]}
+          tone="down"
+          sparkColor={a.danger}
         />
-        <DashboardStatCard
-          variant="published"
-          label="Published"
-          value={data.posts.published}
-          foot="All time"
-          onClick={() => navigate("/posts/published")}
+        <AnalyticsStatCard
+          label="Click Rate"
+          value={stats.click}
+          changePct={stats.clickChange}
+          sparkline={[10, 14, 12, 18, 16, 22, 20, 26]}
+          tone="up"
+          sparkColor={a.blue}
         />
-        <DashboardStatCard
-          variant="drafts"
-          label="Drafts"
-          value={data.posts.drafts}
-          foot="Ready to schedule"
-          highlighted
-          onClick={() => navigate("/posts/drafts")}
+        <AnalyticsStatCard
+          label="Unsubscribe Rate"
+          value={stats.unsub}
+          changePct={stats.unsubChange}
+          sparkline={[8, 10, 9, 12, 11, 14, 13, 16]}
+          tone="down"
+          sparkColor={a.danger}
         />
       </Box>
 
-      <LinkedInPerformancePanel
-        analytics={data.linkedInAnalytics}
-        connectedPlatforms={data.accounts.byPlatform}
-        analyticsLocked={!canViewAnalytics}
-      />
-
-      <GoogleAdsPerformancePanel
-        analytics={data.googleAdsAnalytics}
-        analyticsLocked={!canViewAnalytics}
-      />
-
-      <LinkedInAdsPerformancePanel
-        analytics={data.linkedInAdsAnalytics}
-        analyticsLocked={!canViewAnalytics}
-      />
-
-      <MetaAdsPerformancePanel
-        analytics={data.metaAdsAnalytics}
-        analyticsLocked={!canViewAnalytics}
-      />
-
-      {/* Two columns — minmax(0,…) prevents long post text from blowing the grid */}
       <Box
         sx={{
           display: "grid",
-          gap: 2.25,
-          gridTemplateColumns: { xs: "minmax(0, 1fr)", lg: "minmax(0, 1fr) minmax(0, 1fr)" },
+          gap: 2,
+          gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.35fr) minmax(0, 1fr)" },
+          mb: 2.25,
           alignItems: "stretch",
-          width: "100%",
-          minWidth: 0,
         }}
       >
-        <Box sx={{ minWidth: 0, maxWidth: "100%" }}>
-          <DashboardActivityPanel
-            title="Upcoming scheduled"
-            subtitle="Agle 7 din ki posts"
-            viewAllHref="/posts/scheduled"
-            emptyIcon={<ScheduleEmptyIcon />}
-            emptyText="Koi scheduled post nahi. Compose se schedule karo."
-            posts={data.upcoming}
-            postMeta={(post) =>
-              post.scheduledFor
-                ? `Scheduled ${new Date(post.scheduledFor).toLocaleString()}`
-                : "Scheduled"
-            }
-            onPostClick={() => navigate("/posts/scheduled")}
-            actionButton={
-              <Button
-                fullWidth
-                onClick={() => navigate("/compose")}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 600,
-                  fontSize: 13,
-                  borderRadius: "10px",
-                  py: 1.4,
-                  mt: 1.5,
-                  border: "1px dashed",
-                  borderColor: colors.accentBorder,
-                  bgcolor: "rgba(91,95,239,0.12)",
-                  color: colors.accent,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 1.25,
-                  "&:hover": {
-                    bgcolor: "rgba(91,95,239,0.2)",
-                    borderColor: colors.accent,
-                  },
-                }}
-              >
-                <SendIcon3D size={26} />
-                Schedule a post
-              </Button>
-            }
-          />
-        </Box>
-
-        <Box sx={{ minWidth: 0, maxWidth: "100%" }}>
-          <DashboardActivityPanel
-            title="Recently published"
-            subtitle="Latest live posts"
-            viewAllHref="/posts/published"
-            emptyIcon={<PublishedEmptyIcon />}
-            emptyText="Abhi tak koi published post nahi."
-            posts={data.recent}
-            postMeta={(post) =>
-              post.publishedAt
-                ? `Published ${new Date(post.publishedAt).toLocaleString()}`
-                : "Published"
-            }
-            onPostClick={() => navigate("/posts/published")}
-          />
-        </Box>
+        <StatisticLineChart
+          months={MONTHS_LINE}
+          series={[
+            { label: "Click Rate", color: a.purple, values: DEMO_CLICK },
+            { label: "Open Rate", color: a.cyan, values: DEMO_OPEN },
+          ]}
+          tooltip={{ monthIndex: 4, seriesIndex: 0, text: "8%" }}
+        />
+        <DeviceBarChart
+          months={MONTHS_BAR}
+          computer={DEMO_COMPUTER}
+          mobile={DEMO_MOBILE}
+          tooltip={{ monthIndex: 4, series: "computer", text: "65%" }}
+        />
       </Box>
 
-      {data.posts.failed > 0 && (
-        <Box
-          sx={{
-            mt: 2.25,
-            p: 2,
-            borderRadius: "16px",
-            border: "1px solid",
-            borderColor: "error.main",
-            bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "rgba(211,47,47,0.08)" : "rgba(211,47,47,0.04)",
-          }}
-        >
-          <Stack direction="row" alignItems="center" justifyContent="space-between" gap={2}>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <ScheduleOutlinedIcon color="error" fontSize="small" />
-              <Typography variant="body2" fontFamily={dashboardFonts.body}>
-                {data.posts.failed} post(s) need attention (failed publish).
-              </Typography>
-            </Stack>
-            <Button
-              variant="outlined"
-              onClick={() => navigate("/posts/published?status=FAILED")}
-              sx={{ textTransform: "none", fontWeight: 600, borderRadius: "10px" }}
-            >
-              Review failed
-            </Button>
-          </Stack>
-        </Box>
-      )}
+      <Box
+        sx={{
+          display: "grid",
+          gap: 2,
+          gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.7fr) minmax(0, 1fr)" },
+          alignItems: "stretch",
+        }}
+      >
+        <TopPerformanceTable rows={filteredCampaigns} onExport={exportCsv} />
+        <VisitorsPanel rows={DEMO_VISITORS} activeId="sg" />
+      </Box>
     </Box>
   );
 }

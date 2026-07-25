@@ -29,7 +29,19 @@ async function request<T>(
     headers,
   });
 
-  const data = await response.json().catch(() => ({}));
+  const raw = await response.text();
+  let data: unknown = {};
+  try {
+    data = raw ? JSON.parse(raw) : {};
+  } catch {
+    if (!response.ok) {
+      throw new ApiError(response.status, `Request failed (${response.status})`);
+    }
+    throw new ApiError(
+      response.status,
+      `Invalid JSON from API (${API_BASE}${path}). Is the backend running and Vite proxy configured?`,
+    );
+  }
 
   if (!response.ok) {
     const message =
@@ -44,11 +56,19 @@ async function request<T>(
 
 export const api = {
   async getAuthConfig() {
-    const res = await request<{
-      success: boolean;
-      data: { recaptchaEnabled: boolean; emailConfigured: boolean };
-    }>("/auth/config");
-    return res.data;
+    const fallback = { recaptchaEnabled: false, emailConfigured: false };
+    try {
+      const res = await request<{
+        success: boolean;
+        data?: { recaptchaEnabled?: boolean; emailConfigured?: boolean };
+      }>("/auth/config");
+      return {
+        recaptchaEnabled: Boolean(res.data?.recaptchaEnabled),
+        emailConfigured: Boolean(res.data?.emailConfigured),
+      };
+    } catch {
+      return fallback;
+    }
   },
 
   async register(email: string, password: string, name?: string) {

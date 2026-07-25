@@ -94,8 +94,8 @@ export function createAppTheme(mode: PaletteMode, tokens: AppTokens) {
         },
         styleOverrides: {
           root: {
-            border: `1px solid ${tokens.border}`,
             ...glass,
+            border: `1px solid ${tokens.border}`,
           },
         },
       },

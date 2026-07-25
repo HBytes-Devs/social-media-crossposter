@@ -56,9 +56,18 @@ export function LoginPage() {
   }, [location.state]);
 
   useEffect(() => {
-    api.getAuthConfig().then((config) => {
-      setRecaptchaEnabled(config.recaptchaEnabled);
-    });
+    let cancelled = false;
+    api
+      .getAuthConfig()
+      .then((config) => {
+        if (!cancelled) setRecaptchaEnabled(Boolean(config?.recaptchaEnabled));
+      })
+      .catch(() => {
+        if (!cancelled) setRecaptchaEnabled(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
