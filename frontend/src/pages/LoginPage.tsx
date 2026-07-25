@@ -37,7 +37,7 @@ export function LoginPage() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
 
-  const { loadError, execute } = useRecaptcha("login", recaptchaEnabled);
+  const { loadError, execute, enabled: captchaActive } = useRecaptcha("login", recaptchaEnabled);
 
   useEffect(() => {
     const saved = loadRememberedLogin();
@@ -67,7 +67,7 @@ export function LoginPage() {
     setInfo("");
 
     try {
-      const recaptchaToken = recaptchaEnabled ? await execute() : undefined;
+      const recaptchaToken = captchaActive ? await execute() : undefined;
 
       const result = await dispatch(
         loginUser({ email, password, recaptchaToken }),
@@ -188,7 +188,7 @@ export function LoginPage() {
 
         <ImmersiveAuthCta loading={authLoading}>{t("auth.login")}</ImmersiveAuthCta>
 
-        <RecaptchaNotice enabled={recaptchaEnabled} />
+        <RecaptchaNotice enabled={captchaActive} />
       </Box>
     </ImmersiveAuthShell>
   );

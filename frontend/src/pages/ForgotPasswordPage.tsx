@@ -24,7 +24,10 @@ export function ForgotPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const { loadError, execute } = useRecaptcha("forgot_password", recaptchaEnabled);
+  const { loadError, execute, enabled: captchaActive } = useRecaptcha(
+    "forgot_password",
+    recaptchaEnabled,
+  );
 
   useEffect(() => {
     api.getAuthConfig().then((config) => {
@@ -38,7 +41,7 @@ export function ForgotPasswordPage() {
 
     setLoading(true);
     try {
-      const recaptchaToken = recaptchaEnabled ? await execute() : undefined;
+      const recaptchaToken = captchaActive ? await execute() : undefined;
       await api.forgotPassword(email, recaptchaToken);
       setSuccess(true);
     } catch (err) {
@@ -99,7 +102,7 @@ export function ForgotPasswordPage() {
 
           <ImmersiveAuthCta loading={loading}>{t("auth.sendResetCode")}</ImmersiveAuthCta>
 
-          <RecaptchaNotice enabled={recaptchaEnabled} />
+          <RecaptchaNotice enabled={captchaActive} />
         </Box>
       )}
     </ImmersiveAuthShell>

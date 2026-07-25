@@ -17,6 +17,9 @@ COPY version.json /workspace/version.json
 ARG VITE_API_BASE_URL=/api/v1
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
+ARG VITE_RECAPTCHA_SITE_KEY=
+ENV VITE_RECAPTCHA_SITE_KEY=$VITE_RECAPTCHA_SITE_KEY
+
 RUN npm run build
 
 FROM nginx:1.27-alpine AS runner
