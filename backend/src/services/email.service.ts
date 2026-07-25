@@ -55,13 +55,24 @@ export async function sendEmail(options: {
     return;
   }
 
-  await getTransporter().sendMail({
-    from,
-    to: options.to,
-    subject: options.subject,
-    text: options.text,
-    html: options.html,
-  });
+  try {
+    await getTransporter().sendMail({
+      from,
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html,
+    });
+  } catch (err) {
+    logger.error("SMTP sendMail failed", {
+      to: options.to,
+      from,
+      host: env.SMTP_HOST,
+      port: env.SMTP_PORT,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    throw err;
+  }
 }
 
 export async function sendPasswordResetCode(email: string, code: string): Promise<void> {

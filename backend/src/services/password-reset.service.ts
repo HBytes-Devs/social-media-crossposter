@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { randomInt } from "crypto";
 import { prisma } from "../config/database.js";
 import { AppError } from "../middleware/error.middleware.js";
+import { logger } from "../utils/logger.js";
 import { sendPasswordResetCode } from "./email.service.js";
 import type { ForgotPasswordInput, ResetPasswordInput } from "../validators/auth.validator.js";
 
@@ -17,6 +18,7 @@ export async function requestPasswordReset(input: ForgotPasswordInput): Promise<
   const email = input.email.toLowerCase();
   const user = await prisma.user.findUnique({ where: { email } });
 
+  // Always look like success when the account does not exist (do not leak emails).
   if (!user) {
     return;
   }
@@ -36,7 +38,7 @@ export async function requestPasswordReset(input: ForgotPasswordInput): Promise<
   const code = generateCode();
   const codeHash = await bcrypt.hash(code, SALT_ROUNDS);
 
-  await prisma.passwordResetCode.create({
+  const created = await prisma.passwordResetCode.create({
     data: {
       userId: user.id,
       codeHash,
@@ -44,7 +46,21 @@ export async function requestPasswordReset(input: ForgotPasswordInput): Promise<
     },
   });
 
-  await sendPasswordResetCode(user.email, code);
+  try {
+    await sendPasswordResetCode(user.email, code);
+  } catch (err) {
+    await prisma.passwordResetCode.delete({ where: { id: created.id } }).catch(() => undefined);
+
+    logger.error("Password reset email failed", {
+      email: user.email,
+      error: err instanceof Error ? err.message : String(err),
+    });
+
+    throw new AppError(
+      503,
+      "Unable to send reset email right now. Please try again later or contact support.",
+    );
+  }
 }
 
 export async function resetPassword(input: ResetPasswordInput): Promise<void> {
