@@ -12,9 +12,11 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { registerUser, selectAuth } from "../store/slices/authSlice";
 
 const authLinkSx = {
-  color: "primary.main",
+  color: (theme: { palette: { mode: string } }) =>
+    theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E",
   fontWeight: 600,
-  "&:hover": { textDecoration: "underline" },
+  textDecoration: "underline",
+  "&:hover": { textDecoration: "none" },
 } as const;
 
 export function RegisterPage() {
@@ -53,7 +55,19 @@ export function RegisterPage() {
 
   return (
     <ImmersiveAuthShell
-      title={t("auth.register.title")}
+      title={
+        // Mirror the brand-panel pattern: primary word + teal accent word
+        // (matches "Publish everywhere, from one place." styling on the left)
+        <>
+          {t("auth.register.titlePrefix")}{" "}
+          <Box
+            component="span"
+            sx={{ color: (theme) => (theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E") }}
+          >
+            {t("auth.register.titleAccent")}
+          </Box>
+        </>
+      }
       subtitle={
         <>
           {t("auth.register.subtitlePrefix")}{" "}
@@ -65,7 +79,7 @@ export function RegisterPage() {
       footer={
         <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
           {t("auth.haveAccount")}{" "}
-          <Link component={RouterLink} to="/login" underline="none" sx={authLinkSx}>
+          <Link component={RouterLink} to="/login" sx={authLinkSx}>
             {t("auth.login")}
           </Link>
         </Typography>
@@ -116,7 +130,7 @@ export function RegisterPage() {
           id="auth-register-confirm-password"
         />
 
-        <Typography sx={{ mt: -1, mb: 2, fontSize: 12.5, color: "text.disabled" }}>
+        <Typography sx={{ mt: -0.5, mb: 1.75, fontSize: 12.5, color: "text.disabled", lineHeight: 1.45 }}>
           {t("auth.passwordHint")}
         </Typography>
 
@@ -127,17 +141,28 @@ export function RegisterPage() {
               checked={acceptTerms}
               onChange={(e) => setAcceptTerms(e.target.checked)}
               required
+              sx={{
+                p: 0,
+                mr: 0,
+                color: (theme) => (theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E"),
+                "&.Mui-checked": {
+                  color: (theme) => (theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E"),
+                },
+              }}
             />
           }
           label={
-            <Typography sx={{ fontSize: 13.5, color: "text.secondary", lineHeight: 1.45 }}>
+            <Typography
+              component="span"
+              sx={{ fontSize: 13, color: "text.secondary", lineHeight: 1.45 }}
+            >
               {t("auth.termsPrefix")}{" "}
               <Box component="span" sx={{ fontWeight: 600, color: "text.primary" }}>
                 {t("auth.termsLabel")}
               </Box>
             </Typography>
           }
-          sx={{ alignItems: "flex-start", m: 0, mb: 2.5 }}
+          sx={{ alignItems: "center", m: 0, mb: 2, gap: 0.75 }}
         />
 
         {error && (

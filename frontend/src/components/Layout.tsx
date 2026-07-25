@@ -351,7 +351,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               </Box>
             </div>
           </Box>
-          <ThemeToggle size="small" />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <UiLanguageSelect compact />
+            <ThemeToggle size="small" />
+          </Box>
         </Box>
       </Box>
 
@@ -535,9 +538,6 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             Managing posts
           </Typography>
         )}
-        <Box sx={{ mt: 2, mb: 1.5 }}>
-          <UiLanguageSelect compact />
-        </Box>
         <Box sx={{ mt: 1 }}>
           <Button variant="secondary" className="w-full" onClick={() => dispatch(logout())}>
             Logout

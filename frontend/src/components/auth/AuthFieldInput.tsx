@@ -76,7 +76,7 @@ export function AuthFieldInput({ label, variant, requiredMark = true, id, type, 
   const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
   return (
-    <Box sx={{ mb: 2.25 }}>
+    <Box sx={{ mb: 1.75 }}>
       <Typography
         component="label"
         htmlFor={inputId}
@@ -85,7 +85,7 @@ export function AuthFieldInput({ label, variant, requiredMark = true, id, type, 
           fontSize: 13,
           fontWeight: 500,
           color: "text.primary",
-          mb: "7px",
+          mb: "6px",
         }}
       >
         {label}
@@ -100,7 +100,7 @@ export function AuthFieldInput({ label, variant, requiredMark = true, id, type, 
           className="smc-auth-icon-badge"
           sx={{
             position: "absolute",
-            left: 9,
+            left: 8,
             zIndex: 2,
             width: 26,
             height: 26,
@@ -126,15 +126,15 @@ export function AuthFieldInput({ label, variant, requiredMark = true, id, type, 
           type={inputType}
           sx={{
             width: "100%",
-            height: 44,
+            height: 42,
             borderRadius: "10px",
             border: "1px solid",
             borderColor: "divider",
             bgcolor: (theme) =>
-              theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "#F6F7FA",
+              theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "#F6F7FA",
             py: 0,
-            pl: "46px",
-            pr: isPassword ? "44px" : 1.75,
+            pl: "44px",
+            pr: isPassword ? "42px" : 1.75,
             fontSize: 14.5,
             fontFamily: "inherit",
             color: "text.primary",
@@ -143,7 +143,8 @@ export function AuthFieldInput({ label, variant, requiredMark = true, id, type, 
             "&::placeholder": { color: "text.disabled" },
             "&:focus": {
               borderColor: "#0F766E",
-              bgcolor: "background.paper",
+              bgcolor: (theme) =>
+                theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "background.paper",
               boxShadow: "0 0 0 3px rgba(15, 118, 110, 0.14)",
             },
           }}

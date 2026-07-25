@@ -28,6 +28,7 @@ import { useTheme } from "@mui/material/styles";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { NavLink, Navigate, Outlet, useLocation } from "react-router-dom";
 import { ThemeToggle } from "./ui/ThemeToggle";
+import { UiLanguageSelect } from "./ui/UiLanguageSelect";
 import { OpsStatusChip, opsFonts } from "./ops/OpsUi";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { logout, selectAuth } from "../store/slices/authSlice";
@@ -402,6 +403,7 @@ export function OpsLayout() {
               })}
             </Typography>
             <ThemeToggle />
+            <UiLanguageSelect compact />
           </Toolbar>
         </AppBar>
 
