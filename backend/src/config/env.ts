@@ -18,6 +18,14 @@ const envSchema = z.object({
   AWS_S3_BUCKET: z.string().optional(),
   AWS_S3_PUBLIC_URL: z.string().optional(),
   AWS_S3_ROOT_PREFIX: z.string().default("smc"),
+  /**
+   * Media storage mode:
+   * - auto: prefer S3 when configured, fall back to local disk on S3 failure
+   * - local: always store/serve media from disk (use when S3 keys are quarantined)
+   * - s3: require S3 only
+   */
+  MEDIA_STORAGE: z.enum(["auto", "local", "s3"]).default("auto"),
+  MEDIA_LOCAL_DIR: z.string().default("./data/media"),
   LINKEDIN_CLIENT_ID: z.string().optional(),
   LINKEDIN_CLIENT_SECRET: z.string().optional(),
   LINKEDIN_REDIRECT_URI: z.string().optional(),

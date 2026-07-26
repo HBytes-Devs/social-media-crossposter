@@ -6,6 +6,16 @@ import * as mediaService from "../services/media.service.js";
 
 const router = Router();
 
+/** Public media bytes for platform crawlers (Instagram/Meta). No auth. */
+router.get("/file/:token", async (req, res) => {
+  const file = await mediaService.getPublicMediaFile(String(req.params.token));
+
+  res.setHeader("Content-Type", file.mimeType);
+  res.setHeader("Cache-Control", "public, max-age=86400");
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  res.send(file.buffer);
+});
+
 router.get("/status", authenticate, async (_req, res) => {
   const status = await mediaService.getMediaStatus();
 

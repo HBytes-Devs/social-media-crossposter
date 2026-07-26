@@ -1,7 +1,21 @@
 import sharp from "sharp";
 import { randomUUID } from "crypto";
 import { prisma } from "../config/database.js";
-import { deleteFromS3, getPublicUrl, isS3Configured, uploadToS3 } from "../config/s3.js";
+import {
+  deleteLocalMedia,
+  getLocalPublicUrl,
+  isLocalMediaEnabled,
+  preferLocalMedia,
+  readLocalMedia,
+  saveLocalMedia,
+} from "../config/local-media.js";
+import {
+  deleteFromS3,
+  getPublicUrl,
+  isMediaConfigured,
+  isS3Configured,
+  uploadToS3,
+} from "../config/s3.js";
 import { AppError } from "../middleware/error.middleware.js";
 import { LINKEDIN_IMAGE, validateLinkedInDimensions } from "../lib/linkedin-image.js";
 import { buildUserMediaKey } from "../lib/s3-paths.js";
@@ -108,12 +122,37 @@ function toMediaItem(media: {
   };
 }
 
-function ensureS3Configured(): void {
-  if (!isS3Configured()) {
+function ensureMediaConfigured(): void {
+  if (!isMediaConfigured()) {
     throw new AppError(
       503,
-      "S3 is not configured. Add AWS credentials to backend/.env",
+      "Media storage is not configured. Set MEDIA_STORAGE=local or add AWS credentials.",
     );
+  }
+}
+
+async function storeMediaBytes(
+  key: string,
+  buffer: Buffer,
+  contentType: string,
+): Promise<string> {
+  if (preferLocalMedia() || !isS3Configured()) {
+    await saveLocalMedia(key, buffer);
+    return getLocalPublicUrl(key);
+  }
+
+  try {
+    await uploadToS3(key, buffer, contentType);
+    if (isLocalMediaEnabled()) {
+      await saveLocalMedia(key, buffer).catch(() => undefined);
+    }
+    return getPublicUrl(key);
+  } catch (err) {
+    if (!isLocalMediaEnabled()) {
+      throw err;
+    }
+    await saveLocalMedia(key, buffer);
+    return getLocalPublicUrl(key);
   }
 }
 
@@ -166,7 +205,7 @@ export async function uploadImage(
   userId: string,
   file: Express.Multer.File,
 ): Promise<MediaItem> {
-  ensureS3Configured();
+  ensureMediaConfigured();
 
   const sourceMeta = await sharp(file.buffer).metadata();
   const sourceWidth = sourceMeta.width ?? 0;
@@ -215,13 +254,13 @@ export async function uploadImage(
   const key = buildUserMediaKey(userId, `${randomUUID()}.${ext}`);
   const contentType = file.mimetype;
 
-  await uploadToS3(key, buffer, contentType);
+  const publicUrl = await storeMediaBytes(key, buffer, contentType);
 
   const media = await prisma.media.create({
     data: {
       userId,
       s3Key: key,
-      s3Url: getPublicUrl(key),
+      s3Url: publicUrl,
       fileName: file.originalname,
       mimeType: contentType,
       sizeBytes,
@@ -292,9 +331,17 @@ export async function deleteMedia(userId: string, mediaId: string): Promise<void
   }
 
   try {
-    await deleteFromS3(media.s3Key);
+    await deleteLocalMedia(media.s3Key);
   } catch {
-    // S3 file may already be deleted — still remove DB record
+    // local file may already be deleted
+  }
+
+  if (isS3Configured()) {
+    try {
+      await deleteFromS3(media.s3Key);
+    } catch {
+      // S3 file may already be deleted — still remove DB record
+    }
   }
 
   await prisma.media.delete({
@@ -303,7 +350,31 @@ export async function deleteMedia(userId: string, mediaId: string): Promise<void
 }
 
 export async function getMediaStatus(): Promise<{ configured: boolean }> {
-  return { configured: isS3Configured() };
+  return { configured: isMediaConfigured() };
+}
+
+export async function getPublicMediaFile(token: string): Promise<{
+  buffer: Buffer;
+  mimeType: string;
+}> {
+  const { decodeMediaToken, guessMimeFromKey } = await import("../config/local-media.js");
+  let key: string;
+  try {
+    key = decodeMediaToken(token);
+  } catch {
+    throw new AppError(400, "Invalid media token");
+  }
+
+  if (!key || key.includes("..")) {
+    throw new AppError(400, "Invalid media token");
+  }
+
+  const buffer = await readLocalMedia(key);
+  if (!buffer) {
+    throw new AppError(404, "Media file not found");
+  }
+
+  return { buffer, mimeType: guessMimeFromKey(key) };
 }
 
 export async function getMediaFile(
@@ -337,12 +408,22 @@ export async function getMediaFileByUrl(
 }
 
 async function streamMediaFile(media: {
+  s3Key: string;
   s3Url: string;
   fileName: string;
   mimeType: string;
 }): Promise<{ buffer: Buffer; mimeType: string; fileName: string }> {
-  if (!isS3Configured()) {
-    throw new AppError(503, "S3 is not configured");
+  const local = await readLocalMedia(media.s3Key);
+  if (local) {
+    return {
+      buffer: local,
+      mimeType: media.mimeType,
+      fileName: media.fileName,
+    };
+  }
+
+  if (!isMediaConfigured()) {
+    throw new AppError(503, "Media storage is not configured");
   }
 
   const { downloadImageBytes } = await import("../config/s3.js");

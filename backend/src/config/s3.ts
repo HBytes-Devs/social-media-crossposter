@@ -1,6 +1,14 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand, CopyObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "./env.js";
+import {
+  extractLocalMediaKey,
+  getLocalPublicUrl,
+  guessMimeFromKey,
+  isLocalMediaEnabled,
+  preferLocalMedia,
+  readLocalMedia,
+} from "./local-media.js";
 
 export function isS3Configured(): boolean {
   return Boolean(
@@ -8,6 +16,12 @@ export function isS3Configured(): boolean {
       env.AWS_SECRET_ACCESS_KEY &&
       env.AWS_S3_BUCKET,
   );
+}
+
+export function isMediaConfigured(): boolean {
+  if (preferLocalMedia()) return true;
+  if (isS3Configured()) return true;
+  return env.MEDIA_STORAGE === "auto";
 }
 
 export const s3Client = new S3Client({
@@ -23,6 +37,10 @@ export const s3Client = new S3Client({
 });
 
 export function getPublicUrl(key: string): string {
+  if (preferLocalMedia() || !isS3Configured()) {
+    return getLocalPublicUrl(key);
+  }
+
   if (env.AWS_S3_PUBLIC_URL) {
     return `${env.AWS_S3_PUBLIC_URL.replace(/\/$/, "")}/${key}`;
   }
@@ -31,7 +49,7 @@ export function getPublicUrl(key: string): string {
 }
 
 function extractS3Key(imageUrl: string): string | null {
-  if (!isS3Configured() || !imageUrl.includes(env.AWS_S3_BUCKET!)) {
+  if (!isS3Configured() || !env.AWS_S3_BUCKET || !imageUrl.includes(env.AWS_S3_BUCKET)) {
     return null;
   }
 
@@ -41,19 +59,40 @@ function extractS3Key(imageUrl: string): string | null {
 
 /** Presigned URL for platforms (Instagram/Meta) that must fetch images from a public URL */
 export async function resolvePublicImageUrl(imageUrl: string, expiresIn = 3600): Promise<string> {
-  const key = extractS3Key(imageUrl);
-  if (!key) {
+  const localKey = extractLocalMediaKey(imageUrl);
+  if (localKey) {
     return imageUrl;
   }
 
-  return getSignedUrl(
-    s3Client,
-    new GetObjectCommand({
-      Bucket: env.AWS_S3_BUCKET!,
-      Key: key,
-    }),
-    { expiresIn },
-  );
+  const s3Key = extractS3Key(imageUrl);
+  if (s3Key) {
+    const cached = await readLocalMedia(s3Key);
+    if (cached) {
+      return getLocalPublicUrl(s3Key);
+    }
+
+    if (!isS3Configured()) {
+      return imageUrl;
+    }
+
+    try {
+      return await getSignedUrl(
+        s3Client,
+        new GetObjectCommand({
+          Bucket: env.AWS_S3_BUCKET!,
+          Key: s3Key,
+        }),
+        { expiresIn },
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        `Cannot create public image URL (S3 denied). Re-upload the image. ${message}`,
+      );
+    }
+  }
+
+  return imageUrl;
 }
 
 export async function uploadToS3(
@@ -107,33 +146,55 @@ export async function deleteFromS3(key: string): Promise<void> {
   );
 }
 
-/** Download image bytes — uses S3 SDK for our bucket, fetch for public URLs */
+/** Download image bytes — local disk first, then S3 SDK, then HTTP fetch */
 export async function downloadImageBytes(imageUrl: string): Promise<{
   buffer: Buffer;
   mimeType: string;
 }> {
-  if (isS3Configured() && imageUrl.includes(env.AWS_S3_BUCKET!)) {
-    const key = extractS3Key(imageUrl);
-    if (!key) {
-      throw new Error("Invalid S3 image URL");
+  const localKey = extractLocalMediaKey(imageUrl);
+  if (localKey) {
+    const buffer = await readLocalMedia(localKey);
+    if (!buffer) {
+      throw new Error("Local media file not found — re-upload the image");
+    }
+    return { buffer, mimeType: guessMimeFromKey(localKey) };
+  }
+
+  const s3Key = extractS3Key(imageUrl);
+  if (s3Key) {
+    const cached = await readLocalMedia(s3Key);
+    if (cached) {
+      return { buffer: cached, mimeType: guessMimeFromKey(s3Key) };
     }
 
-    const response = await s3Client.send(
-      new GetObjectCommand({
-        Bucket: env.AWS_S3_BUCKET!,
-        Key: key,
-      }),
-    );
+    if (isS3Configured()) {
+      try {
+        const response = await s3Client.send(
+          new GetObjectCommand({
+            Bucket: env.AWS_S3_BUCKET!,
+            Key: s3Key,
+          }),
+        );
 
-    const bytes = await response.Body?.transformToByteArray();
-    if (!bytes) {
-      throw new Error("Empty image from S3");
+        const bytes = await response.Body?.transformToByteArray();
+        if (!bytes) {
+          throw new Error("Empty image from S3");
+        }
+
+        return {
+          buffer: Buffer.from(bytes),
+          mimeType: response.ContentType ?? "image/jpeg",
+        };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (isLocalMediaEnabled()) {
+          throw new Error(
+            `S3 GetObject denied/failed — re-upload the image so it is stored locally. ${message}`,
+          );
+        }
+        throw err;
+      }
     }
-
-    return {
-      buffer: Buffer.from(bytes),
-      mimeType: response.ContentType ?? "image/jpeg",
-    };
   }
 
   const response = await fetch(imageUrl);

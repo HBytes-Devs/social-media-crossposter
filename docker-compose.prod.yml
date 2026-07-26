@@ -56,6 +56,8 @@ services:
       AWS_S3_BUCKET: ${AWS_S3_BUCKET}
       AWS_S3_PUBLIC_URL: ${AWS_S3_PUBLIC_URL}
       AWS_S3_ROOT_PREFIX: ${AWS_S3_ROOT_PREFIX}
+      MEDIA_STORAGE: ${MEDIA_STORAGE:-local}
+      MEDIA_LOCAL_DIR: ${MEDIA_LOCAL_DIR:-/app/data/media}
       LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID}
       LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET}
       LINKEDIN_REDIRECT_URI: ${LINKEDIN_REDIRECT_URI}
@@ -110,6 +112,8 @@ services:
       PREMIER_MEMBER_EMAILS: ${PREMIER_MEMBER_EMAILS}
       PREMIER_MEMBER_HANDLES: ${PREMIER_MEMBER_HANDLES}
       SUPER_ADMIN_EMAILS: ${SUPER_ADMIN_EMAILS}
+    volumes:
+      - media_data:/app/data/media
     networks:
       - smc
 
@@ -145,6 +149,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  media_data:
 
 networks:
   smc:
