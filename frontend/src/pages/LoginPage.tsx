@@ -19,9 +19,11 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { loginUser, selectAuth } from "../store/slices/authSlice";
 
 const authLinkSx = {
-  color: "primary.main",
+  color: (theme: { palette: { mode: string } }) =>
+    theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E",
   fontWeight: 600,
-  "&:hover": { textDecoration: "underline" },
+  textDecoration: "underline",
+  "&:hover": { textDecoration: "none" },
 } as const;
 
 export function LoginPage() {
@@ -99,7 +101,17 @@ export function LoginPage() {
 
   return (
     <ImmersiveAuthShell
-      title={t("auth.login.title")}
+      title={
+        <>
+          {t("auth.login.titlePrefix")}{" "}
+          <Box
+            component="span"
+            sx={{ color: (theme) => (theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E") }}
+          >
+            {t("auth.login.titleAccent")}
+          </Box>
+        </>
+      }
       subtitle={
         <>
           {t("auth.login.subtitlePrefix")}{" "}
@@ -112,7 +124,7 @@ export function LoginPage() {
       footer={
         <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
           {t("auth.noAccount")}{" "}
-          <Link component={RouterLink} to="/register" underline="none" sx={authLinkSx}>
+          <Link component={RouterLink} to="/register" sx={authLinkSx}>
             {t("auth.createAccount")}
           </Link>
         </Typography>
@@ -159,6 +171,14 @@ export function LoginPage() {
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
                 slotProps={{ input: { "aria-label": t("auth.rememberMe") } }}
+                sx={{
+                  p: 0.5,
+                  mr: 0.5,
+                  color: (theme) => (theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E"),
+                  "&.Mui-checked": {
+                    color: (theme) => (theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E"),
+                  },
+                }}
               />
             }
             label={
@@ -171,7 +191,6 @@ export function LoginPage() {
           <Link
             component={RouterLink}
             to="/forgot-password"
-            underline="none"
             sx={{ ...authLinkSx, fontSize: 13.5, fontWeight: 500 }}
           >
             {t("auth.forgotPassword")}

@@ -13,7 +13,15 @@ import "./authLusion.css";
  */
 export function ImmersiveAuthLayout() {
   return (
-    <Box className="smc-lusion-root" sx={{ position: "relative", minHeight: "100vh", overflow: "hidden" }}>
+    <Box
+      className="smc-lusion-root"
+      sx={{
+        position: "relative",
+        height: "100vh",
+        height: "100dvh", // dynamic viewport — handles mobile browser chrome
+        overflow: "hidden",
+      }}
+    >
       <Box
         sx={{
           position: "absolute",
@@ -41,34 +49,37 @@ export function ImmersiveAuthLayout() {
         sx={{
           position: "relative",
           zIndex: 2,
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          height: "100vh",
+          height: "100dvh",
+          display: "grid",
+          placeItems: "center",
           px: { xs: 2.5, sm: 4 },
-          py: { xs: 3, lg: 5 },
+          py: { xs: 2, lg: 3 },
           pointerEvents: "none",
         }}
       >
         <Box
           sx={{
+            // Single grid cell so both sides share space, but each positions itself
+            // independently — the form stays centered even when the left marketing
+            // text is present, hidden, or its content changes.
+            gridArea: "1 / 1",
+            display: "grid",
+            placeItems: "center",
             width: "100%",
-            maxWidth: 980,
-            display: "flex",
-            flexDirection: { xs: "column", lg: "row" },
-            alignItems: { xs: "stretch", lg: "center" },
-            justifyContent: "center",
-            gap: { xs: 0, lg: 5 },
+            height: "100%",
           }}
         >
           <Box
             sx={{
+              gridArea: "1 / 1",
+              alignSelf: "center",
+              justifySelf: "start",
               display: { xs: "none", lg: "flex" },
               flexDirection: "column",
               justifyContent: "center",
-              flex: "1 1 0",
-              minWidth: 0,
               maxWidth: 380,
+              pl: { lg: 2 },
               color: "#f2f4f7",
             }}
           >
@@ -121,13 +132,16 @@ export function ImmersiveAuthLayout() {
           <Box
             className="smc-lusion-card"
             sx={{
+              // Independent grid placement: form is always centered in the
+              // viewport, regardless of the left marketing column.
+              gridArea: "1 / 1",
+              alignSelf: "center",
+              justifySelf: "center",
               width: "100%",
               maxWidth: 420,
-              flex: { lg: "0 0 420px" },
-              mx: { xs: "auto", lg: 0 },
               mt: { xs: 2, lg: 0 },
-              p: { xs: "28px 24px", sm: "36px 32px" },
-              borderRadius: "20px",
+              p: { xs: "18px 18px 22px", sm: "22px 24px 28px" },
+              borderRadius: "18px",
               bgcolor: "rgba(12, 22, 30, 0.72)",
               border: "1px solid rgba(255,255,255,0.14)",
               boxShadow: `
@@ -137,6 +151,16 @@ export function ImmersiveAuthLayout() {
               backdropFilter: "blur(22px) saturate(1.2)",
               WebkitBackdropFilter: "blur(22px) saturate(1.2)",
               pointerEvents: "auto",
+              maxHeight: "calc(100dvh - 32px)",
+              overflowY: "auto",
+              // nicer scrollbar inside the dark card
+              scrollbarWidth: "thin",
+              scrollbarColor: "rgba(255,255,255,0.2) transparent",
+              "&::-webkit-scrollbar": { width: 6 },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: "rgba(255,255,255,0.18)",
+                borderRadius: 3,
+              },
             }}
           >
             <Box
@@ -144,23 +168,23 @@ export function ImmersiveAuthLayout() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                mb: { xs: 3, lg: 4 },
+                mb: { xs: 1.75, lg: 2 },
               }}
             >
               <Box sx={{ display: { xs: "flex", lg: "none" }, alignItems: "baseline", gap: 1 }}>
                 <Typography
                   sx={{
-                    fontFamily: "'Syne', sans-serif",
+                    fontFamily: "'Inter', system-ui, sans-serif",
                     fontWeight: 700,
-                    fontSize: 22,
-                    letterSpacing: "-0.03em",
+                    fontSize: 20,
+                    letterSpacing: "-0.02em",
                     color: "#f5f6f8",
                   }}
                 >
                   SMC
                 </Typography>
               </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: "auto" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, ml: "auto" }}>
                 <Box
                   sx={{
                     "& .MuiSelect-select, & .MuiTypography-root, & button": {
@@ -172,9 +196,9 @@ export function ImmersiveAuthLayout() {
                 </Box>
                 <Box
                   sx={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: "10px",
+                    width: 30,
+                    height: 30,
+                    borderRadius: "9px",
                     border: "1px solid rgba(255,255,255,0.12)",
                     display: "grid",
                     placeItems: "center",

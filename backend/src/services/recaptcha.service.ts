@@ -7,8 +7,25 @@ type RecaptchaVerifyResponse = {
   "error-codes"?: string[];
 };
 
+/**
+ * Returns true only when the value looks like a real secret — not a
+ * `.env.example` placeholder (e.g. `your_recaptcha_secret_key`,
+ * `change-this-...`, `<...>`, `xxx`). Without this guard, a developer
+ * who hasn't filled in `.env` would get a 400 on every login because
+ * the placeholder key fails Google's siteverify.
+ */
+function isRealSecret(value: string | undefined): boolean {
+  if (!value) return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  if (/^(your[_-]|change[-_]this|<.*>|\{\{.*\}\}|xxx+|xxxx+|placeholder)/i.test(trimmed)) {
+    return false;
+  }
+  return true;
+}
+
 export function isRecaptchaConfigured(): boolean {
-  return Boolean(env.RECAPTCHA_SECRET_KEY);
+  return isRealSecret(env.RECAPTCHA_SECRET_KEY);
 }
 
 export async function verifyRecaptcha(token?: string, expectedAction?: string): Promise<void> {

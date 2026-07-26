@@ -9,9 +9,11 @@ import { useUiLanguage } from "../i18n/UiLanguageProvider";
 import { api } from "../lib/api";
 
 const authLinkSx = {
-  color: "primary.main",
+  color: (theme: { palette: { mode: string } }) =>
+    theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E",
   fontWeight: 600,
-  "&:hover": { textDecoration: "underline" },
+  textDecoration: "underline",
+  "&:hover": { textDecoration: "none" },
 } as const;
 
 export function ResetPasswordPage() {
@@ -51,16 +53,26 @@ export function ResetPasswordPage() {
 
   return (
     <ImmersiveAuthShell
-      title={t("auth.reset.title")}
+      title={
+        <>
+          {t("auth.reset.titlePrefix")}{" "}
+          <Box
+            component="span"
+            sx={{ color: (theme) => (theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E") }}
+          >
+            {t("auth.reset.titleAccent")}
+          </Box>
+        </>
+      }
       subtitle={t("auth.reset.subtitle")}
       footer={
         <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
           {t("auth.codeNotReceived")}{" "}
-          <Link component={RouterLink} to="/forgot-password" underline="none" sx={authLinkSx}>
+          <Link component={RouterLink} to="/forgot-password" sx={authLinkSx}>
             {t("auth.resendCode")}
           </Link>
           {" · "}
-          <Link component={RouterLink} to="/login" underline="none" sx={authLinkSx}>
+          <Link component={RouterLink} to="/login" sx={authLinkSx}>
             {t("auth.login")}
           </Link>
         </Typography>

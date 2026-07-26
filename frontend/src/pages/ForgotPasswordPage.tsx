@@ -10,9 +10,11 @@ import { useUiLanguage } from "../i18n/UiLanguageProvider";
 import { api } from "../lib/api";
 
 const authLinkSx = {
-  color: "primary.main",
+  color: (theme: { palette: { mode: string } }) =>
+    theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E",
   fontWeight: 600,
-  "&:hover": { textDecoration: "underline" },
+  textDecoration: "underline",
+  "&:hover": { textDecoration: "none" },
 } as const;
 
 export function ForgotPasswordPage() {
@@ -62,11 +64,21 @@ export function ForgotPasswordPage() {
 
   return (
     <ImmersiveAuthShell
-      title={t("auth.forgot.title")}
+      title={
+        <>
+          {t("auth.forgot.titlePrefix")}{" "}
+          <Box
+            component="span"
+            sx={{ color: (theme) => (theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E") }}
+          >
+            {t("auth.forgot.titleAccent")}
+          </Box>
+        </>
+      }
       subtitle={t("auth.forgot.subtitle")}
       footer={
         <Typography sx={{ textAlign: "center", fontSize: 14, color: "text.secondary" }}>
-          <Link component={RouterLink} to="/login" underline="none" sx={authLinkSx}>
+          <Link component={RouterLink} to="/login" sx={authLinkSx}>
             {t("auth.backToLogin")}
           </Link>
         </Typography>
