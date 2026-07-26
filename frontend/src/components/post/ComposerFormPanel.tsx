@@ -42,8 +42,8 @@ import { useComposeTheme } from "./composeTheme";
 import type { ReactNode } from "react";
 import type { SxProps, Theme } from "@mui/material/styles";
 
-const MIN_CONTENT_FOR_AUTO_IMAGE = 40;
-const AUTO_IMAGE_DEBOUNCE_MS = 2800;
+const MIN_CONTENT_FOR_AUTO_IMAGE = 20;
+const AUTO_IMAGE_DEBOUNCE_MS = 2200;
 
 function ComposeSection({
   title,
@@ -206,7 +206,11 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
       .getAiStatus(token)
       .then((s) => {
         setAiConfigured(s.configured);
-        setAiImageAvailable(Boolean(s.imageGeneration));
+        setAiImageAvailable(
+          Boolean(s.imageGeneration) ||
+            s.features?.includes("generate-image") ||
+            (s.configured && (s.provider === "minimax" || s.source === "server")),
+        );
       })
       .catch(() => {
         setAiConfigured(false);
@@ -318,6 +322,24 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
           onHashtagsChange={(tags) => dispatch(setHashtags(tags))}
           onHashtagModeChange={(mode) => dispatch(setHashtagMode(mode))}
         />
+        <Box sx={{ mt: 2 }}>
+          <AutoGenerateImageToggle
+            enabled={autoGenerateImage}
+            available={aiImageAvailable}
+            aiConfigured={aiConfigured}
+            generating={generatingImage}
+            error={generateImageError}
+            hasContent={content.trim().length >= MIN_CONTENT_FOR_AUTO_IMAGE}
+            onEnabledChange={(value) => {
+              setAutoGenerateImage(value);
+              writeComposePref(COMPOSE_AUTO_IMAGE_KEY, value);
+              if (value && content.trim().length >= MIN_CONTENT_FOR_AUTO_IMAGE) {
+                triggerGenerateImage();
+              }
+            }}
+            onGenerateNow={triggerGenerateImage}
+          />
+        </Box>
       </ComposeSection>
 
       {hasRedditSelected && (
@@ -385,21 +407,6 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
         title="Images"
         description="LinkedIn recommends 1200×627 or 1200×1200 · min 552×276px · max 8MB · ratio 4:5 to 1.91:1"
       >
-        <Box sx={{ mb: 2 }}>
-          <AutoGenerateImageToggle
-            enabled={autoGenerateImage}
-            available={aiImageAvailable}
-            aiConfigured={aiConfigured}
-            generating={generatingImage}
-            error={generateImageError}
-            hasContent={content.trim().length >= MIN_CONTENT_FOR_AUTO_IMAGE}
-            onEnabledChange={(value) => {
-              setAutoGenerateImage(value);
-              writeComposePref(COMPOSE_AUTO_IMAGE_KEY, value);
-            }}
-            onGenerateNow={triggerGenerateImage}
-          />
-        </Box>
         <ImagePicker
           images={images}
           mediaLibrary={mediaLibrary}
