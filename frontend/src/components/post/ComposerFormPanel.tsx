@@ -173,7 +173,7 @@ export const ComposerFormPanel = memo(function ComposerFormPanel() {
   const [aiConfigured, setAiConfigured] = useState(false);
   const [aiImageAvailable, setAiImageAvailable] = useState(false);
   const [autoGenerateImage, setAutoGenerateImage] = useState(() =>
-    readComposePref(COMPOSE_AUTO_IMAGE_KEY, false),
+    readComposePref(COMPOSE_AUTO_IMAGE_KEY, true),
   );
 
   const selectedPlatformNames = useMemo(

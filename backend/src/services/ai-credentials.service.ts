@@ -47,7 +47,7 @@ function toPublic(credential: UserAiCredential, keyHint: string): AiCredentialPu
 export function getProviderDefaults(provider: AiProvider): { baseUrl: string; model: string } {
   switch (provider) {
     case "MINIMAX":
-      return { baseUrl: "https://api.minimax.io/v1", model: "MiniMax-M2.5" };
+      return { baseUrl: "https://api.minimax.io/v1", model: "MiniMax-M3" };
     case "OPENAI":
       return { baseUrl: "https://api.openai.com/v1", model: "gpt-4o-mini" };
     case "ANTHROPIC":

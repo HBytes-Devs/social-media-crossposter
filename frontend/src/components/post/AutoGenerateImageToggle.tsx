@@ -1,8 +1,9 @@
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import Box from "@mui/material/Box";
+import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import Typography from "@mui/material/Typography";
-import { ComposeSwitch } from "./ComposeAssistToggles";
 import { useComposeTheme } from "./composeTheme";
 import { Button } from "../ui/Button";
 
@@ -32,7 +33,7 @@ export function AutoGenerateImageToggle({
   if (!aiConfigured) {
     return (
       <Typography sx={{ fontSize: 12, color: colors.textTertiary, fontFamily: fonts.body }}>
-        Auto image ke liye Settings mein AI API key add karo (Medium/Premium plan).
+        Auto image ke liye Settings mein MiniMax API key add karo (Medium/Premium plan).
       </Typography>
     );
   }
@@ -40,14 +41,24 @@ export function AutoGenerateImageToggle({
   if (!available) {
     return (
       <Typography sx={{ fontSize: 12, color: colors.textTertiary, fontFamily: fonts.body }}>
-        Image auto-generate ke liye Settings mein MiniMax API key add karo (recommended), ya OpenAI
-        key — ya server par MINIMAX_API_KEY set karo.
+        Image auto-generate ke liye MiniMax key chahiye — Settings → AI Keys, ya server{" "}
+        <Box component="code" sx={{ fontFamily: fonts.mono, fontSize: 11 }}>
+          MINIMAX_API_KEY
+        </Box>
+        .
       </Typography>
     );
   }
 
   return (
-    <Box>
+    <Box
+      sx={{
+        p: 1.5,
+        borderRadius: "12px",
+        border: `1px solid ${enabled ? colors.accent : colors.border}`,
+        bgcolor: enabled ? colors.accentSoft : colors.surface2,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -57,22 +68,27 @@ export function AutoGenerateImageToggle({
           flexWrap: "wrap",
         }}
       >
-        <Box
-          component="label"
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            fontSize: 13,
-            color: colors.textSecondary,
-            cursor: "pointer",
-            fontFamily: fonts.body,
-          }}
-        >
-          <ComposeSwitch checked={enabled} onChange={onEnabledChange} />
-          <AutoAwesomeOutlinedIcon sx={{ fontSize: 16, color: colors.accent }} />
-          Auto-generate image from post
-        </Box>
+        <FormControlLabel
+          sx={{ m: 0, gap: 0.5 }}
+          control={
+            <Checkbox
+              checked={enabled}
+              onChange={(e) => onEnabledChange(e.target.checked)}
+              sx={{
+                color: colors.textTertiary,
+                "&.Mui-checked": { color: colors.accent },
+              }}
+            />
+          }
+          label={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+              <AutoAwesomeOutlinedIcon sx={{ fontSize: 16, color: colors.accent }} />
+              <Typography sx={{ fontSize: 13.5, fontWeight: 600, color: colors.textPrimary, fontFamily: fonts.body }}>
+                Auto-generate image from post
+              </Typography>
+            </Box>
+          }
+        />
 
         {enabled && hasContent && onGenerateNow && (
           <Button
@@ -93,20 +109,20 @@ export function AutoGenerateImageToggle({
         )}
       </Box>
 
-      <Typography sx={{ fontSize: 12, color: colors.textTertiary, mt: 1, fontFamily: fonts.body }}>
+      <Typography sx={{ fontSize: 12, color: colors.textTertiary, mt: 1, ml: 4.5, fontFamily: fonts.body }}>
         {enabled
-          ? "Post likhte hi AI aapke content ke mutabiq image banayegi (≈3 sec delay)."
-          : "Checkbox off — image khud upload karo ya library se choose karo."}
+          ? "On — post likhte hi MiniMax content se image banayega (~3 sec delay)."
+          : "Off — image khud upload karo ya library se choose karo."}
       </Typography>
 
       {generating && (
-        <Typography sx={{ fontSize: 12, color: colors.accent, mt: 0.75, fontFamily: fonts.body }}>
+        <Typography sx={{ fontSize: 12, color: colors.accent, mt: 0.75, ml: 4.5, fontFamily: fonts.body }}>
           AI image bana rahi hai… thora wait karo.
         </Typography>
       )}
 
       {error && (
-        <Typography sx={{ fontSize: 12, color: colors.danger, mt: 0.75, fontFamily: fonts.body }}>
+        <Typography sx={{ fontSize: 12, color: colors.danger, mt: 0.75, ml: 4.5, fontFamily: fonts.body }}>
           {error}
         </Typography>
       )}

@@ -62,7 +62,7 @@ const envSchema = z.object({
   SMTP_FROM: z.string().optional(),
   MINIMAX_API_KEY: z.string().optional(),
   MINIMAX_BASE_URL: z.string().url().default("https://api.minimax.io/v1"),
-  MINIMAX_MODEL: z.string().default("MiniMax-M2.5"),
+  MINIMAX_MODEL: z.string().default("MiniMax-M3"),
   MINIMAX_IMAGE_MODEL: z.string().default("image-01"),
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_IMAGE_MODEL: z.string().default("dall-e-3"),
