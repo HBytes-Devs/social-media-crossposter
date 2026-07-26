@@ -17,8 +17,9 @@ export function ImmersiveAuthLayout() {
       className="smc-lusion-root"
       sx={{
         position: "relative",
+        // 100dvh handles mobile browser chrome; 100vh is the fallback
         height: "100vh",
-        height: "100dvh", // dynamic viewport — handles mobile browser chrome
+        "@supports (height: 100dvh)": { height: "100dvh" },
         overflow: "hidden",
       }}
     >
@@ -50,7 +51,7 @@ export function ImmersiveAuthLayout() {
           position: "relative",
           zIndex: 2,
           height: "100vh",
-          height: "100dvh",
+          "@supports (height: 100dvh)": { height: "100dvh" },
           display: "grid",
           placeItems: "center",
           px: { xs: 2.5, sm: 4 },

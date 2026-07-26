@@ -22,7 +22,7 @@ export function ProfessionalAuthLayout() {
         display: "grid",
         gridTemplateColumns: { xs: "1fr", md: "1.05fr 1fr" },
         height: "100vh",
-        height: "100dvh",
+        "@supports (height: 100dvh)": { height: "100dvh" },
         bgcolor: (theme) => (theme.palette.mode === "dark" ? "background.default" : "#F4F6F8"),
         overflow: "hidden",
       }}
@@ -37,7 +37,7 @@ export function ProfessionalAuthLayout() {
           display: "grid",
           gridTemplateRows: "auto 1fr",
           height: "100vh",
-          height: "100dvh",
+          "@supports (height: 100dvh)": { height: "100dvh" },
           overflow: "hidden",
         }}
       >
