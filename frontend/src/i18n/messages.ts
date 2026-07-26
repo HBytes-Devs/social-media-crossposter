@@ -3,8 +3,6 @@ export type UiLocale = "en" | "roman-ur" | "ur" | "hi";
 export const UI_LOCALES: Array<{ code: UiLocale; label: string }> = [
   { code: "en", label: "English" },
   { code: "roman-ur", label: "Roman Urdu" },
-  { code: "ur", label: "اردو" },
-  { code: "hi", label: "हिन्दी" },
 ];
 
 export const UI_LOCALE_STORAGE_KEY = "smc_ui_locale";
@@ -29,6 +27,8 @@ export type MessageKey =
   | "auth.codeNotReceived"
   | "auth.language"
   | "auth.login.title"
+  | "auth.login.titlePrefix"
+  | "auth.login.titleAccent"
   | "auth.login.subtitle"
   | "auth.login.subtitlePrefix"
   | "auth.login.subtitleSuffix"
@@ -48,11 +48,17 @@ export type MessageKey =
   | "auth.brand.quote"
   | "auth.brand.quoteAuthor"
   | "auth.register.title"
+  | "auth.register.titlePrefix"
+  | "auth.register.titleAccent"
   | "auth.register.subtitle"
   | "auth.forgot.title"
+  | "auth.forgot.titlePrefix"
+  | "auth.forgot.titleAccent"
   | "auth.forgot.subtitle"
   | "auth.forgot.success"
   | "auth.reset.title"
+  | "auth.reset.titlePrefix"
+  | "auth.reset.titleAccent"
   | "auth.reset.subtitle"
   | "auth.error.loginFailed"
   | "auth.error.registerFailed"
@@ -91,6 +97,8 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.codeNotReceived": "Didn't get the code?",
     "auth.language": "Language",
     "auth.login.title": "Welcome back",
+    "auth.login.titlePrefix": "Welcome",
+    "auth.login.titleAccent": "Back",
     "auth.login.subtitle": "Sign in to SMC",
     "auth.login.subtitlePrefix": "Sign in to",
     "auth.login.subtitleSuffix": "to continue",
@@ -112,12 +120,18 @@ export const messages: Record<UiLocale, Messages> = {
       "We cut our posting time in half. Scheduling and analytics in one dashboard was exactly what our team needed.",
     "auth.brand.quoteAuthor": "Marketing Lead, B2B SaaS company",
     "auth.register.title": "Create account",
+    "auth.register.titlePrefix": "Create",
+    "auth.register.titleAccent": "Account",
     "auth.register.subtitle": "Register for SMC",
     "auth.forgot.title": "Forgot password",
+    "auth.forgot.titlePrefix": "Forgot",
+    "auth.forgot.titleAccent": "Password",
     "auth.forgot.subtitle": "Enter your email — we'll send a 6-digit code",
     "auth.forgot.success":
       "If an account exists for this email, a reset code has been sent. Check your inbox or spam folder.",
     "auth.reset.title": "Reset password",
+    "auth.reset.titlePrefix": "Reset",
+    "auth.reset.titleAccent": "Password",
     "auth.reset.subtitle": "Enter the 6-digit code from your email and a new password",
     "auth.error.loginFailed": "Login failed",
     "auth.error.registerFailed": "Registration failed",
@@ -153,6 +167,8 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.codeNotReceived": "Code nahi mila?",
     "auth.language": "Zubaan",
     "auth.login.title": "Welcome back",
+    "auth.login.titlePrefix": "Welcome",
+    "auth.login.titleAccent": "Back",
     "auth.login.subtitle": "SMC mein login karo",
     "auth.login.subtitlePrefix": "Sign in to",
     "auth.login.subtitleSuffix": "to continue",
@@ -174,12 +190,18 @@ export const messages: Record<UiLocale, Messages> = {
       "Hamara posting time aadha ho gaya. Ek dashboard mein scheduling aur analytics bilkul wahi tha jo team ko chahiye tha.",
     "auth.brand.quoteAuthor": "Marketing Lead, B2B SaaS company",
     "auth.register.title": "Account banayein",
+    "auth.register.titlePrefix": "Account",
+    "auth.register.titleAccent": "Banayein",
     "auth.register.subtitle": "SMC ke liye register karo",
     "auth.forgot.title": "Password bhool gaye",
+    "auth.forgot.titlePrefix": "Password",
+    "auth.forgot.titleAccent": "Bhool Gaye",
     "auth.forgot.subtitle": "Apna email daalo — hum 6-digit code bhejenge",
     "auth.forgot.success":
       "Agar is email par account hai to reset code bhej diya gaya hai. Inbox ya spam check karo.",
     "auth.reset.title": "Password reset",
+    "auth.reset.titlePrefix": "Password",
+    "auth.reset.titleAccent": "Reset",
     "auth.reset.subtitle": "Email par aaya 6-digit code aur naya password daalo",
     "auth.error.loginFailed": "Login fail ho gaya",
     "auth.error.registerFailed": "Registration fail ho gayi",
@@ -215,6 +237,8 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.codeNotReceived": "کوڈ نہیں ملا؟",
     "auth.language": "زبان",
     "auth.login.title": "خوش آمدید",
+    "auth.login.titlePrefix": "خوش",
+    "auth.login.titleAccent": "آمدید",
     "auth.login.subtitle": "SMC میں لاگ اِن کریں",
     "auth.login.subtitlePrefix": "سائن اِن کریں",
     "auth.login.subtitleSuffix": "جاری رکھنے کے لیے",
@@ -236,12 +260,18 @@ export const messages: Record<UiLocale, Messages> = {
       "ہمارا پوسٹنگ وقت آدھا ہو گیا۔ ایک ڈیش بورڈ میں شیڈولنگ اور تجزیات بالکل وہی تھی جو ٹیم کو چاہیے تھی۔",
     "auth.brand.quoteAuthor": "مارکیٹنگ لیڈ، B2B SaaS کمپنی",
     "auth.register.title": "اکاؤنٹ بنائیں",
+    "auth.register.titlePrefix": "اکاؤنٹ",
+    "auth.register.titleAccent": "بنائیں",
     "auth.register.subtitle": "SMC کے لیے رجسٹر کریں",
     "auth.forgot.title": "پاس ورڈ بھول گئے",
+    "auth.forgot.titlePrefix": "پاس ورڈ",
+    "auth.forgot.titleAccent": "بھول گئے",
     "auth.forgot.subtitle": "اپنا ای میل درج کریں — ہم 6 ہندسوں کا کوڈ بھیجیں گے",
     "auth.forgot.success":
       "اگر اس ای میل پر اکاؤنٹ ہے تو ری سیٹ کوڈ بھیج دیا گیا ہے۔ ان باکس یا سپیم چیک کریں۔",
     "auth.reset.title": "پاس ورڈ ری سیٹ",
+    "auth.reset.titlePrefix": "پاس ورڈ",
+    "auth.reset.titleAccent": "ری سیٹ",
     "auth.reset.subtitle": "ای میل پر آیا 6 ہندسوں کا کوڈ اور نیا پاس ورڈ درج کریں",
     "auth.error.loginFailed": "لاگ اِن ناکام",
     "auth.error.registerFailed": "رجسٹریشن ناکام",
@@ -277,6 +307,8 @@ export const messages: Record<UiLocale, Messages> = {
     "auth.codeNotReceived": "कोड नहीं मिला?",
     "auth.language": "भाषा",
     "auth.login.title": "वापसी पर स्वागत है",
+    "auth.login.titlePrefix": "वापसी पर",
+    "auth.login.titleAccent": "स्वागत है",
     "auth.login.subtitle": "SMC में लॉगिन करें",
     "auth.login.subtitlePrefix": "साइन इन करें",
     "auth.login.subtitleSuffix": "जारी रखने के लिए",
@@ -298,12 +330,18 @@ export const messages: Record<UiLocale, Messages> = {
       "हमारा पोस्टिंग समय आधा हो गया। एक डैशबोर्ड में शेड्यूलिंग और एनालिटिक्स वही था जो टीम को चाहिए था।",
     "auth.brand.quoteAuthor": "मार्केटिंग लीड, B2B SaaS कंपनी",
     "auth.register.title": "खाता बनाएं",
+    "auth.register.titlePrefix": "खाता",
+    "auth.register.titleAccent": "बनाएं",
     "auth.register.subtitle": "SMC के लिए रजिस्टर करें",
     "auth.forgot.title": "पासवर्ड भूल गए",
+    "auth.forgot.titlePrefix": "पासवर्ड",
+    "auth.forgot.titleAccent": "भूल गए",
     "auth.forgot.subtitle": "अपना ईमेल दर्ज करें — हम 6 अंकों का कोड भेजेंगे",
     "auth.forgot.success":
       "यदि इस ईमेल पर खाता है तो रीसेट कोड भेज दिया गया है। इनबॉक्स या स्पैम जांचें।",
     "auth.reset.title": "पासवर्ड रीसेट",
+    "auth.reset.titlePrefix": "पासवर्ड",
+    "auth.reset.titleAccent": "रीसेट",
     "auth.reset.subtitle": "ईमेल पर आया 6 अंकों का कोड और नया पासवर्ड दर्ज करें",
     "auth.error.loginFailed": "लॉगिन विफल",
     "auth.error.registerFailed": "रजिस्ट्रेशन विफल",

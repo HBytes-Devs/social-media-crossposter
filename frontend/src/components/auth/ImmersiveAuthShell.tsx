@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 
 type Props = {
-  title: string;
+  title: ReactNode;
   subtitle: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
@@ -19,22 +19,23 @@ export function ImmersiveAuthShell({ title, subtitle, children, footer }: Props)
       <Typography
         component="h1"
         sx={{
-          fontFamily: "'Syne', 'Sora', sans-serif",
-          fontWeight: 650,
-          fontSize: { xs: 26, sm: 30 },
-          letterSpacing: "-0.03em",
+          fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif",
+          fontWeight: 700,
+          fontSize: "clamp(20px, 2.1vw, 28px)",
+          lineHeight: 1.25,
+          letterSpacing: "-0.02em",
           color: "text.primary",
-          mb: 0.75,
+          mb: 1.5,
         }}
       >
         {title}
       </Typography>
       <Typography
         sx={{
-          fontSize: 14.5,
-          lineHeight: 1.5,
+          fontSize: 13.5,
+          lineHeight: 1.45,
           color: "text.secondary",
-          mb: 3.5,
+          mb: 2.25,
         }}
       >
         {subtitle}
@@ -43,7 +44,7 @@ export function ImmersiveAuthShell({ title, subtitle, children, footer }: Props)
       <Box>{children}</Box>
 
       {footer && (
-        <Box sx={{ mt: 3.25, pt: 2.5, borderTop: "1px solid", borderColor: "divider" }}>
+        <Box sx={{ mt: 2, pt: 1.75, borderTop: "1px solid", borderColor: "divider" }}>
           {footer}
         </Box>
       )}
@@ -66,7 +67,7 @@ export function ImmersiveAuthCta({ children, loading, type = "submit", onClick }
       disabled={loading}
       onClick={onClick}
       sx={{
-        height: 48,
+        height: 46,
         borderRadius: "10px",
         textTransform: "none",
         fontSize: 14.5,

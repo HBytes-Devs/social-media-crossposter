@@ -57,7 +57,7 @@ export function AuthBrandPanel() {
               boxShadow: "0 8px 18px -6px rgba(15, 118, 110, 0.55)",
               display: "grid",
               placeItems: "center",
-              fontFamily: "'Syne', sans-serif",
+              fontFamily: "'Inter', system-ui, sans-serif",
               fontWeight: 700,
               fontSize: 15,
             }}
@@ -86,11 +86,11 @@ export function AuthBrandPanel() {
         <Typography
           component="h2"
           sx={{
-            fontFamily: "'Syne', 'Sora', sans-serif",
+            fontFamily: "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif",
             fontWeight: 700,
             fontSize: { md: 38, lg: 44 },
-            lineHeight: 1.08,
-            letterSpacing: "-0.03em",
+            lineHeight: 1.15,
+            letterSpacing: "-0.02em",
             mb: 2.25,
             color: "#F5F8FC",
           }}
