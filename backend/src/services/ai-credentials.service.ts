@@ -1,7 +1,15 @@
 import type { AiProvider, UserAiCredential } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../config/database.js";
 import { AppError } from "../middleware/error.middleware.js";
 import { decrypt, encrypt } from "./encryption.service.js";
+
+function isMissingAiCredentialTable(err: unknown): boolean {
+  return (
+    err instanceof Prisma.PrismaClientKnownRequestError &&
+    (err.code === "P2021" || err.code === "P2010")
+  );
+}
 
 export type AiCredentialPublic = {
   id: string;
@@ -60,20 +68,25 @@ export function getProviderDefaults(provider: AiProvider): { baseUrl: string; mo
 }
 
 export async function listAiCredentials(userId: string): Promise<AiCredentialPublic[]> {
-  const rows = await prisma.userAiCredential.findMany({
-    where: { userId },
-    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
-  });
+  try {
+    const rows = await prisma.userAiCredential.findMany({
+      where: { userId },
+      orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+    });
 
-  return rows.map((row) => {
-    let hint = "••••••••";
-    try {
-      hint = maskApiKey(decrypt(row.apiKeyEnc));
-    } catch {
-      // keep masked placeholder
-    }
-    return toPublic(row, hint);
-  });
+    return rows.map((row) => {
+      let hint = "••••••••";
+      try {
+        hint = maskApiKey(decrypt(row.apiKeyEnc));
+      } catch {
+        // keep masked placeholder
+      }
+      return toPublic(row, hint);
+    });
+  } catch (err) {
+    if (isMissingAiCredentialTable(err)) return [];
+    throw err;
+  }
 }
 
 export async function createAiCredential(
@@ -195,23 +208,28 @@ export async function deleteAiCredential(userId: string, credentialId: string): 
 }
 
 export async function resolveAiCredential(userId: string): Promise<ResolvedAiCredential | null> {
-  const row = await prisma.userAiCredential.findFirst({
-    where: { userId },
-    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
-  });
+  try {
+    const row = await prisma.userAiCredential.findFirst({
+      where: { userId },
+      orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+    });
 
-  if (!row) return null;
+    if (!row) return null;
 
-  const defaults = getProviderDefaults(row.provider);
+    const defaults = getProviderDefaults(row.provider);
 
-  return {
-    id: row.id,
-    name: row.name,
-    provider: row.provider,
-    apiKey: decrypt(row.apiKeyEnc),
-    baseUrl: row.baseUrl ?? defaults.baseUrl ?? null,
-    model: row.model ?? defaults.model ?? null,
-  };
+    return {
+      id: row.id,
+      name: row.name,
+      provider: row.provider,
+      apiKey: decrypt(row.apiKeyEnc),
+      baseUrl: row.baseUrl ?? defaults.baseUrl ?? null,
+      model: row.model ?? defaults.model ?? null,
+    };
+  } catch (err) {
+    if (isMissingAiCredentialTable(err)) return null;
+    throw err;
+  }
 }
 
 function isOpenAiCompatibleBaseUrl(baseUrl: string | null | undefined): boolean {
@@ -219,14 +237,19 @@ function isOpenAiCompatibleBaseUrl(baseUrl: string | null | undefined): boolean 
   return /openai\.com/i.test(baseUrl);
 }
 
-/** Credential for DALL-E / images/generations (OpenAI or compatible). */
 export async function resolveOpenAiImageCredential(
   userId: string,
 ): Promise<ResolvedAiCredential | null> {
-  const rows = await prisma.userAiCredential.findMany({
-    where: { userId },
-    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
-  });
+  let rows: UserAiCredential[] = [];
+  try {
+    rows = await prisma.userAiCredential.findMany({
+      where: { userId },
+      orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+    });
+  } catch (err) {
+    if (isMissingAiCredentialTable(err)) return null;
+    throw err;
+  }
 
   const openAiRow =
     rows.find((r) => r.provider === "OPENAI") ??
@@ -254,10 +277,16 @@ export async function resolveOpenAiImageCredential(
 export async function resolveMiniMaxImageCredential(
   userId: string,
 ): Promise<ResolvedAiCredential | null> {
-  const row = await prisma.userAiCredential.findFirst({
-    where: { userId, provider: "MINIMAX" },
-    orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
-  });
+  let row: UserAiCredential | null = null;
+  try {
+    row = await prisma.userAiCredential.findFirst({
+      where: { userId, provider: "MINIMAX" },
+      orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+    });
+  } catch (err) {
+    if (isMissingAiCredentialTable(err)) return null;
+    throw err;
+  }
 
   if (!row) return null;
 

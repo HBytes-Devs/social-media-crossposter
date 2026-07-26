@@ -123,11 +123,19 @@ export function AiKeysPanel({ token }: Props) {
   const { colors, fonts, inputSx } = useSettingsTheme();
   const [credentials, setCredentials] = useState<AiCredential[]>([]);
   const [providers, setProviders] = useState<AiProviderPreset[]>([]);
+  const [serverAi, setServerAi] = useState<{
+    configured: boolean;
+    source: string;
+    provider: string;
+    model: string;
+    imageGeneration: boolean;
+    keyName: string | null;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [form, setForm] = useState<FormState>(emptyForm());
+  const [form, setForm] = useState<FormState>(emptyForm("MINIMAX"));
   const [showForm, setShowForm] = useState(false);
 
   const selectedPreset = useMemo(
@@ -139,12 +147,21 @@ export function AiKeysPanel({ token }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const [keys, providerList] = await Promise.all([
+      const [keys, providerList, aiStatus] = await Promise.all([
         api.listAiKeys(token),
         api.listAiProviders(token),
+        api.getAiStatus(token),
       ]);
       setCredentials(keys);
       setProviders(providerList);
+      setServerAi({
+        configured: aiStatus.configured,
+        source: aiStatus.source,
+        provider: aiStatus.provider,
+        model: aiStatus.model,
+        imageGeneration: aiStatus.imageGeneration,
+        keyName: aiStatus.keyName,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load AI keys");
     } finally {
@@ -243,14 +260,31 @@ export function AiKeysPanel({ token }: Props) {
           Default key sab features ke liye use hogi.
         </SettingsInfoAlert>
 
+        {serverAi?.configured && serverAi.source === "server" && (
+          <SettingsInfoAlert>
+            <strong>Server MiniMax active hai</strong> ({serverAi.model}
+            {serverAi.imageGeneration ? " · image generation ON" : ""}). Compose pe AI Assist aur
+            auto-generate image is key se chalenge — alag se key add karna optional hai.
+          </SettingsInfoAlert>
+        )}
+
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
             <CircularProgress size={28} />
           </Box>
         ) : credentials.length === 0 ? (
           <SettingsInfoAlert tone="muted">
-            Abhi koi AI key nahi. Neeche se add karo — jaise <strong>&quot;My Claude&quot;</strong> ya{" "}
-            <strong>&quot;Work GPT&quot;</strong>.
+            {serverAi?.configured ? (
+              <>
+                Personal key list empty hai, lekin server AI already connected hai. Apni custom key
+                add karna optional hai (jaise <strong>&quot;My MiniMax&quot;</strong>).
+              </>
+            ) : (
+              <>
+                Abhi koi AI key nahi. Neeche se add karo — jaise <strong>&quot;My MiniMax&quot;</strong>{" "}
+                ya <strong>&quot;Work GPT&quot;</strong>.
+              </>
+            )}
           </SettingsInfoAlert>
         ) : (
           <Stack sx={{ gap: 1.5, mb: 2.25 }}>
