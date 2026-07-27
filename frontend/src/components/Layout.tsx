@@ -5,13 +5,6 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import ScheduleOutlinedIcon from "@mui/icons-material/ScheduleOutlined";
-import DraftsOutlinedIcon from "@mui/icons-material/DraftsOutlined";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import LinkOutlinedIcon from "@mui/icons-material/LinkOutlined";
 import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
 import CampaignOutlinedIcon from "@mui/icons-material/CampaignOutlined";
 import BarChartOutlinedIcon from "@mui/icons-material/BarChartOutlined";
@@ -21,8 +14,6 @@ import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettin
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import InstagramIcon from "@mui/icons-material/Instagram";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
@@ -42,14 +33,12 @@ import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme, type SxProps, type Theme } from "@mui/material/styles";
 import { useState, useEffect, type ReactNode, type ElementType } from "react";
-import { NavLink, Outlet, useLocation, useSearchParams } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { TokenExpiryBanner } from "./accounts/TokenExpiryBanner";
 import { OnboardingFlow } from "./onboarding/OnboardingFlow";
-import { PLATFORM_META, postsPath } from "../lib/platforms";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { logout, selectAuth } from "../store/slices/authSlice";
 import { selectOnboarding } from "../store/slices/onboardingSlice";
-import { isPostTab, selectPosts } from "../store/slices/postsSlice";
 import { ThemeToggle } from "./ui/ThemeToggle";
 import { useThemeMode } from "../theme/AppThemeProvider";
 import { CyberOceanBackground } from "./cyber-ocean/CyberOceanBackground";
@@ -58,7 +47,7 @@ const DRAWER_EXPANDED = 280;
 const DRAWER_COLLAPSED = 72;
 const SIDEBAR_COLLAPSE_KEY = "smc-sidebar-collapsed";
 
-const POSTING_PATH_PREFIXES = ["/compose", "/calendar", "/posts", "/accounts"] as const;
+const POSTING_PATH_PREFIXES = ["/compose", "/calendar", "/posts", "/accounts", "/posting"] as const;
 const ANALYTICS_PATH_PREFIXES = [
   "/google-ads",
   "/linkedin-ads",
@@ -66,22 +55,7 @@ const ANALYTICS_PATH_PREFIXES = [
   "/linkedin-marketing",
   "/instagram",
 ] as const;
-const POSTING_PLATFORMS = ["FACEBOOK", "INSTAGRAM", "LINKEDIN"] as const;
-
 type NavIcon = ElementType;
-
-const postSubItems: Array<{
-  to: string;
-  label: string;
-  tab: "all" | "published" | "scheduled" | "drafts" | "trashed";
-  Icon: NavIcon;
-}> = [
-  { to: "/posts", label: "All", tab: "all", Icon: ArticleOutlinedIcon },
-  { to: "/posts/published", label: "Published", tab: "published", Icon: CheckCircleOutlinedIcon },
-  { to: "/posts/scheduled", label: "Scheduled", tab: "scheduled", Icon: ScheduleOutlinedIcon },
-  { to: "/posts/drafts", label: "Drafts", tab: "drafts", Icon: DraftsOutlinedIcon },
-  { to: "/posts/trashed", label: "Trashed", tab: "trashed", Icon: DeleteOutlinedIcon },
-];
 
 const linkedInAnalyticsItems = [
   { to: "/linkedin-marketing", label: "Marketing", tourId: "nav-linkedin-marketing", Icon: WorkOutlinedIcon },
@@ -100,23 +74,12 @@ function isAnalyticsPath(pathname: string) {
   );
 }
 
-function getActivePostTab(pathname: string) {
-  const segment = pathname.split("/")[2];
-  return segment && isPostTab(segment) ? segment : "all";
-}
-
 function readCollapsedPreference() {
   try {
     return localStorage.getItem(SIDEBAR_COLLAPSE_KEY) === "1";
   } catch {
     return false;
   }
-}
-
-function platformIcon(platform: (typeof POSTING_PLATFORMS)[number]): NavIcon {
-  if (platform === "FACEBOOK") return FacebookIcon;
-  if (platform === "INSTAGRAM") return InstagramIcon;
-  return LinkedInIcon;
 }
 
 function WithTooltip({
@@ -169,7 +132,11 @@ function WithTooltip({
 function navItemSx(active: boolean, collapsed: boolean, nested = false): SxProps<Theme> {
   return {
     position: "relative",
-    borderRadius: collapsed ? 0 : 2,
+    borderRadius: collapsed ? 0 : 20,
+    border: "1.5px solid",
+    borderColor: active
+      ? (t) => (t.palette.mode === "dark" ? "#5EEAD4" : "#0F766E")
+      : "transparent",
     mb: collapsed ? 0.15 : 0.15,
     mx: collapsed ? 0 : nested ? 0.5 : 1,
     px: collapsed ? 0 : nested ? 1.25 : 1.5,
@@ -177,33 +144,39 @@ function navItemSx(active: boolean, collapsed: boolean, nested = false): SxProps
     minHeight: collapsed ? 44 : nested ? 36 : 44,
     justifyContent: collapsed ? "center" : "flex-start",
     color: active ? "text.primary" : "text.secondary",
-    bgcolor: "transparent",
+    bgcolor: active
+      ? (t) =>
+          t.palette.mode === "dark"
+            ? "rgba(94, 234, 212, 0.10)"
+            : "rgba(15, 118, 110, 0.08)"
+      : "transparent",
+    boxShadow: "none",
+    transition:
+      "border-color 0.18s ease, background-color 0.18s ease",
     "&:hover": {
       bgcolor: (t) =>
-        t.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(16,24,40,0.035)",
+        t.palette.mode === "dark"
+          ? active
+            ? "rgba(94, 234, 212, 0.14)"
+            : "rgba(255,255,255,0.05)"
+          : active
+            ? "rgba(15, 118, 110, 0.12)"
+            : "rgba(16,24,40,0.035)",
       color: "text.primary",
     },
     "&.Mui-selected": {
-      bgcolor: "transparent",
+      bgcolor: (t) =>
+        t.palette.mode === "dark"
+          ? "rgba(94, 234, 212, 0.10)"
+          : "rgba(15, 118, 110, 0.08)",
       color: "text.primary",
       "&:hover": {
         bgcolor: (t) =>
-          t.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(16,24,40,0.035)",
+          t.palette.mode === "dark"
+            ? "rgba(94, 234, 212, 0.14)"
+            : "rgba(15, 118, 110, 0.12)",
       },
     },
-    "&::before":
-      active && !nested
-        ? {
-            content: '""',
-            position: "absolute",
-            left: 0,
-            top: "22%",
-            bottom: "22%",
-            width: 3,
-            borderRadius: "0 4px 4px 0",
-            bgcolor: "#3B82F6",
-          }
-        : undefined,
   };
 }
 
@@ -278,25 +251,6 @@ function NavRow({
   );
 }
 
-function SectionCaption({ children }: { children: ReactNode }) {
-  return (
-    <Typography
-      sx={{
-        px: 2.5,
-        pt: 1.25,
-        pb: 0.5,
-        display: "block",
-        fontSize: 11,
-        fontWeight: 600,
-        color: "text.secondary",
-        letterSpacing: 0.2,
-      }}
-    >
-      {children}
-    </Typography>
-  );
-}
-
 function SidebarBrand({
   collapsed,
   onToggleCollapse,
@@ -330,10 +284,10 @@ function SidebarBrand({
             placeItems: "center",
             flexShrink: 0,
             bgcolor: (t) =>
-              t.palette.mode === "dark" ? "#2E3A8C" : "rgba(46,92,255,0.12)",
-            color: (t) => (t.palette.mode === "dark" ? "#C4B5FD" : "primary.main"),
+              t.palette.mode === "dark" ? "rgba(94, 234, 212, 0.15)" : "rgba(15, 118, 110, 0.12)",
+            color: (t) => (t.palette.mode === "dark" ? "#5EEAD4" : "#0F766E"),
             boxShadow: (t) =>
-              t.palette.mode === "dark" ? "inset 0 0 0 1px rgba(196,181,253,0.18)" : "none",
+              t.palette.mode === "dark" ? "inset 0 0 0 1px rgba(94, 234, 212, 0.22)" : "none",
           }}
         >
           <AutoAwesomeIcon sx={{ fontSize: 19 }} />
@@ -405,24 +359,15 @@ function SidebarContent({
   const dispatch = useAppDispatch();
   const theme = useTheme();
   const { user } = useAppSelector(selectAuth);
-  const { filters } = useAppSelector(selectPosts);
   const location = useLocation();
-  const [searchParams] = useSearchParams();
-  const onPostsSection = location.pathname.startsWith("/posts");
-  const activeTab = getActivePostTab(location.pathname);
-  const activePlatform = searchParams.get("platform") ?? filters.platform;
   const onPosting = isPostingPath(location.pathname);
   const onAnalytics = isAnalyticsPath(location.pathname);
   const onLinkedInAnalytics =
     location.pathname === "/linkedin-marketing" || location.pathname === "/linkedin-ads";
 
-  const [postingOpen, setPostingOpen] = useState(onPosting);
   const [analyticsOpen, setAnalyticsOpen] = useState(onAnalytics);
   const [linkedInOpen, setLinkedInOpen] = useState(onLinkedInAnalytics);
 
-  useEffect(() => {
-    if (onPosting) setPostingOpen(true);
-  }, [onPosting]);
   useEffect(() => {
     if (onAnalytics) setAnalyticsOpen(true);
   }, [onAnalytics]);
@@ -482,107 +427,15 @@ function SidebarContent({
           tourId="nav-dashboard"
         />
 
-        {collapsed ? (
-          <NavRow
-            to="/compose"
-            label="Posting"
-            Icon={EditNoteOutlinedIcon}
-            active={onPosting}
-            collapsed
-            onNavigate={onNavigate}
-            tourId="nav-compose"
-          />
-        ) : (
-          <>
-            <ListItemButton
-              onClick={() => setPostingOpen((v) => !v)}
-              selected={onPosting && !postingOpen}
-              sx={navItemSx(onPosting && !postingOpen, false)}
-            >
-              <ListItemIcon sx={{ minWidth: 36, color: onPosting ? "text.primary" : "text.secondary" }}>
-                <EditNoteOutlinedIcon sx={{ fontSize: 20 }} />
-              </ListItemIcon>
-              <ListItemText
-                primary="Posting"
-                slotProps={{
-                  primary: { sx: { fontSize: 14, fontWeight: onPosting ? 600 : 500 } },
-                }}
-              />
-              {postingOpen ? (
-                <ExpandLess sx={{ fontSize: 18, color: "text.secondary" }} />
-              ) : (
-                <ExpandMore sx={{ fontSize: 18, color: "text.secondary" }} />
-              )}
-            </ListItemButton>
-            <Collapse in={postingOpen} timeout="auto" unmountOnExit>
-              <List disablePadding>
-                <NavRow
-                  to="/compose"
-                  end
-                  label="All in one"
-                  Icon={AutoAwesomeIcon}
-                  active={location.pathname === "/compose"}
-                  collapsed={false}
-                  nested
-                  onNavigate={onNavigate}
-                  tourId="nav-compose"
-                />
-                <NavRow
-                  to="/calendar"
-                  end
-                  label="Calendar"
-                  Icon={CalendarMonthOutlinedIcon}
-                  active={location.pathname === "/calendar"}
-                  collapsed={false}
-                  nested
-                  onNavigate={onNavigate}
-                  tourId="nav-calendar"
-                />
-                <SectionCaption>Posts</SectionCaption>
-                {postSubItems.map((item) => (
-                  <NavRow
-                    key={item.to}
-                    to={item.to}
-                    end={item.tab === "all"}
-                    label={item.label}
-                    Icon={item.Icon}
-                    active={location.pathname === item.to && !activePlatform}
-                    collapsed={false}
-                    nested
-                    onNavigate={onNavigate}
-                  />
-                ))}
-                <SectionCaption>By platform</SectionCaption>
-                {POSTING_PLATFORMS.map((platform) => {
-                  const meta = PLATFORM_META[platform];
-                  return (
-                    <NavRow
-                      key={platform}
-                      to={postsPath(activeTab, platform)}
-                      label={meta.label}
-                      Icon={platformIcon(platform)}
-                      active={onPostsSection && activePlatform === platform}
-                      collapsed={false}
-                      nested
-                      onNavigate={onNavigate}
-                    />
-                  );
-                })}
-                <NavRow
-                  to="/accounts"
-                  end
-                  label="Connected accounts"
-                  Icon={LinkOutlinedIcon}
-                  active={location.pathname === "/accounts"}
-                  collapsed={false}
-                  nested
-                  onNavigate={onNavigate}
-                  tourId="nav-accounts"
-                />
-              </List>
-            </Collapse>
-          </>
-        )}
+        <NavRow
+          to="/posting"
+          label="Posting"
+          Icon={EditNoteOutlinedIcon}
+          active={location.pathname === "/posting" || onPosting}
+          collapsed={collapsed}
+          onNavigate={onNavigate}
+          tourId="nav-compose"
+        />
 
         {collapsed ? (
           <NavRow
@@ -728,9 +581,9 @@ function SidebarContent({
 
       <Box
         sx={{
-          px: collapsed ? 0 : 1.5,
-          pb: collapsed ? 1.75 : 1.25,
-          pt: collapsed ? 1 : 0.5,
+          px: collapsed ? 0.75 : 1.5,
+          pb: collapsed ? 1.75 : 1.5,
+          pt: collapsed ? 1 : 0.75,
           flexShrink: 0,
           mt: "auto",
         }}
@@ -742,8 +595,13 @@ function SidebarContent({
             alignItems: "center",
             gap: collapsed ? 1.35 : 1.1,
             justifyContent: collapsed ? "center" : "flex-start",
-            px: collapsed ? 0 : 0.75,
-            py: collapsed ? 0 : 0.85,
+            px: collapsed ? 0.5 : 1,
+            py: collapsed ? 0.5 : 0.85,
+            borderRadius: "10px",
+            border: "1px solid",
+            borderColor: (t) => (t.palette.mode === "dark" ? "#2A303C" : "#E7EAF0"),
+            bgcolor: (t) => (t.palette.mode === "dark" ? "rgba(255,255,255,0.025)" : "#F8F9FC"),
+            transition: "background-color 0.18s ease, border-color 0.18s ease",
           }}
         >
           <WithTooltip collapsed={collapsed} title={displayName}>
@@ -753,8 +611,8 @@ function SidebarContent({
                 height: collapsed ? 36 : 36,
                 fontSize: 12,
                 fontWeight: 700,
-                bgcolor: theme.palette.mode === "dark" ? "#2A3344" : "#E8EEF9",
-                color: theme.palette.mode === "dark" ? "#E8EEF9" : "#1E3A8A",
+                bgcolor: theme.palette.mode === "dark" ? "#10302B" : "#E0F2F1",
+                color: theme.palette.mode === "dark" ? "#5EEAD4" : "#0F766E",
               }}
             >
               {initials || "U"}
@@ -819,7 +677,7 @@ function sidebarPaperSx(width: number, collapsed: boolean): SxProps<Theme> {
     flexDirection: "column",
     borderRadius: {
       xs: 0,
-      md: collapsed ? "999px" : "28px",
+      md: collapsed ? "999px" : "16px",
     },
     border: 1,
     borderColor: (t) => (t.palette.mode === "dark" ? "#2A303C" : "#E7EAF0"),
@@ -887,6 +745,28 @@ export function Layout() {
         transition: "background-color 0.25s ease",
       }}
     >
+      {/* Teal-tinted ambient gradient — mirrors the auth form-panel lighting */}
+      <Box
+        aria-hidden
+        sx={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: "none",
+          background: isDark
+            ? `
+              radial-gradient(900px 520px at 8% -10%, rgba(94, 234, 212, 0.08), transparent 55%),
+              radial-gradient(700px 480px at 100% 30%, rgba(45, 212, 191, 0.06), transparent 50%),
+              radial-gradient(800px 500px at 50% 110%, rgba(15, 118, 110, 0.08), transparent 55%)
+            `
+            : `
+              radial-gradient(900px 520px at 8% -10%, rgba(45, 212, 191, 0.10), transparent 55%),
+              radial-gradient(700px 480px at 100% 30%, rgba(125, 211, 252, 0.08), transparent 50%),
+              radial-gradient(800px 500px at 50% 110%, rgba(94, 234, 212, 0.10), transparent 55%)
+            `,
+        }}
+      />
+
       {isDark && (
         <Box aria-hidden sx={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none" }}>
           <CyberOceanBackground

@@ -19,6 +19,7 @@ import { InstagramAnalyticsPage } from "./pages/InstagramAnalyticsPage";
 import { AdminPage } from "./pages/AdminPage";
 import { LoginPage } from "./pages/LoginPage";
 import { PostsPage } from "./pages/PostsPage";
+import { PostingHubPage } from "./pages/PostingHubPage";
 import { ComingSoonPage } from "./pages/ComingSoonPage";
 import { WorkingOnItPage } from "./pages/WorkingOnItPage";
 import { RegisterPage } from "./pages/RegisterPage";
@@ -116,6 +117,7 @@ export default function App() {
 
             <Route element={<ProductShell />}>
               <Route index element={<HomePage />} />
+              <Route path="posting" element={<PostingHubPage />} />
               <Route path="compose" element={<ComposePage />} />
               <Route path="calendar" element={<CalendarPage />} />
               <Route path="posts" element={<PostsPage />} />

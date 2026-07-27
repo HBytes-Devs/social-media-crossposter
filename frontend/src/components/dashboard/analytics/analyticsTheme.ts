@@ -28,10 +28,10 @@ export type AnalyticsPalette = {
 };
 
 const shared = {
-  purple: "#6C5CE7",
-  purpleDeep: "#5B4BD1",
-  cyan: "#7EC8E3",
-  blue: "#5B8DEF",
+  purple: "#0F766E",
+  purpleDeep: "#115E59",
+  cyan: "#5EEAD4",
+  blue: "#2DD4BF",
   success: "#22C55E",
   danger: "#EF4444",
   radius: "16px",
@@ -41,7 +41,7 @@ const shared = {
 const light: AnalyticsPalette = {
   mode: "light",
   ...shared,
-  purpleSoft: "rgba(108, 92, 231, 0.12)",
+  purpleSoft: "rgba(15, 118, 110, 0.12)",
   successSoft: "rgba(34, 197, 94, 0.12)",
   dangerSoft: "rgba(239, 68, 68, 0.12)",
   pageBg: "#F5F6FA",
@@ -59,7 +59,7 @@ const light: AnalyticsPalette = {
 const dark: AnalyticsPalette = {
   mode: "dark",
   ...shared,
-  purpleSoft: "rgba(108, 92, 231, 0.22)",
+  purpleSoft: "rgba(94, 234, 212, 0.18)",
   successSoft: "rgba(34, 197, 94, 0.16)",
   dangerSoft: "rgba(239, 68, 68, 0.16)",
   // Match sidebar charcoal pill

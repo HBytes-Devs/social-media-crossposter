@@ -149,7 +149,7 @@ export function AnalyticsDashboardHeader({
             color: a.textSoft,
             bgcolor: a.inputBg,
             border: `1px solid ${a.border}`,
-            borderRadius: "12px",
+            borderRadius: "16px",
             px: 1.75,
             height: 40,
             boxShadow: "none",

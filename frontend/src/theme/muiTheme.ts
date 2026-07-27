@@ -12,8 +12,8 @@ export function createAppTheme(mode: PaletteMode, tokens: AppTokens) {
       primary: {
         main: tokens.accent,
         light: tokens.accent2,
-        dark: isDark ? "#4338ca" : "#1d4ed8",
-        contrastText: "#ffffff",
+        dark: isDark ? "#0F766E" : "#115E59",
+        contrastText: isDark ? "#0B1220" : "#ffffff",
       },
       secondary: {
         main: isDark ? "#64748b" : "#475569",

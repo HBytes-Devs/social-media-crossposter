@@ -126,7 +126,7 @@ export function TopPerformanceTable({
             fontSize: 13,
             color: "#fff",
             bgcolor: a.purple,
-            borderRadius: "10px",
+            borderRadius: "16px",
             px: 1.75,
             height: 36,
             boxShadow: "none",

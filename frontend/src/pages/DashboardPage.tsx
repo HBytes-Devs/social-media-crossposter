@@ -217,14 +217,14 @@ export function DashboardPage() {
   return (
     <Box
       sx={{
+        position: "relative",
         width: "100%",
         minWidth: 0,
         maxWidth: "100%",
         fontFamily: a.font,
         color: a.text,
-        bgcolor: a.pageBg,
+        bgcolor: "transparent",
         borderRadius: { xs: "16px", md: "24px" },
-        border: `1px solid ${a.border}`,
         p: { xs: 2, sm: 2.5, lg: 3 },
         mx: { xs: -0.5, sm: -1, lg: -1.5 },
         mb: { xs: -1, lg: -2 },
@@ -232,15 +232,38 @@ export function DashboardPage() {
         transition: "background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease",
       }}
     >
-      <AnalyticsDashboardHeader
-        search={search}
-        onSearchChange={setSearch}
-        dateLabel={formatDateRange()}
-        displayName={displayName}
-        email={user?.email}
-        initials={initials || "U"}
-        onExport={exportCsv}
+      {/* Teal-tinted ambient gradient — matches the auth form-panel lighting */}
+      <Box
+        aria-hidden
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          borderRadius: { xs: "16px", md: "24px" },
+          pointerEvents: "none",
+          background: a.mode === "dark"
+            ? `
+              radial-gradient(700px 480px at 100% 0%, rgba(94, 234, 212, 0.10), transparent 55%),
+              radial-gradient(600px 420px at 0% 50%, rgba(45, 212, 191, 0.06), transparent 50%),
+              radial-gradient(700px 460px at 50% 110%, rgba(15, 118, 110, 0.10), transparent 55%)
+            `
+            : `
+              radial-gradient(700px 480px at 100% 0%, rgba(45, 212, 191, 0.10), transparent 55%),
+              radial-gradient(600px 420px at 0% 50%, rgba(125, 211, 252, 0.08), transparent 50%),
+              radial-gradient(700px 460px at 50% 110%, rgba(94, 234, 212, 0.10), transparent 55%)
+            `,
+        }}
       />
+      <Box sx={{ position: "relative", zIndex: 1 }}>
+        <AnalyticsDashboardHeader
+          search={search}
+          onSearchChange={setSearch}
+          dateLabel={formatDateRange()}
+          displayName={displayName}
+          email={user?.email}
+          initials={initials || "U"}
+          onExport={exportCsv}
+        />
 
       <Box
         sx={{
@@ -323,6 +346,7 @@ export function DashboardPage() {
       >
         <TopPerformanceTable rows={filteredCampaigns} onExport={exportCsv} />
         <VisitorsPanel rows={DEMO_VISITORS} activeId="sg" />
+      </Box>
       </Box>
     </Box>
   );
