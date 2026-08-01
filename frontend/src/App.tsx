@@ -25,6 +25,7 @@ import { WorkingOnItPage } from "./pages/WorkingOnItPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { ResetPasswordPage } from "./pages/ResetPasswordPage";
+import { LandingPage } from "./pages/LandingPage";
 import { OpsOverviewPage } from "./pages/ops/OpsOverviewPage";
 import { OpsUsersPage } from "./pages/ops/OpsUsersPage";
 import { OpsSubscriptionsPage } from "./pages/ops/OpsSubscriptionsPage";
@@ -37,15 +38,19 @@ import { OpsAccessPage } from "./pages/ops/OpsAccessPage";
 import { useAppSelector } from "./store/hooks";
 import { selectAuth } from "./store/slices/authSlice";
 
+function AuthSpinner() {
+  return (
+    <Box sx={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
+      <CircularProgress />
+    </Box>
+  );
+}
+
 function PublicOnly() {
   const { token, loading, user } = useAppSelector(selectAuth);
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <AuthSpinner />;
   }
 
   if (token) {
@@ -61,11 +66,7 @@ function ProductShell() {
   const { user, loading } = useAppSelector(selectAuth);
 
   if (loading) {
-    return (
-      <Box sx={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <AuthSpinner />;
   }
 
   if (user?.role === "SUPER_ADMIN") {
@@ -75,12 +76,23 @@ function ProductShell() {
   return <Layout />;
 }
 
-function HomePage() {
-  const { user } = useAppSelector(selectAuth);
+/** Guests see the marketing landing; signed-in users get the product shell + dashboard. */
+function RootEntry() {
+  const { token, loading, user } = useAppSelector(selectAuth);
+
+  if (loading) {
+    return <AuthSpinner />;
+  }
+
+  if (!token) {
+    return <LandingPage />;
+  }
+
   if (user?.role === "SUPER_ADMIN") {
     return <Navigate to="/ops" replace />;
   }
-  return <DashboardPage />;
+
+  return <Layout />;
 }
 
 function routerBasename(): string | undefined {
@@ -102,6 +114,10 @@ export default function App() {
             </Route>
           </Route>
 
+          <Route path="/" element={<RootEntry />}>
+            <Route index element={<DashboardPage />} />
+          </Route>
+
           <Route element={<ProtectedRoute />}>
             <Route path="/ops" element={<OpsLayout />}>
               <Route index element={<OpsOverviewPage />} />
@@ -116,7 +132,6 @@ export default function App() {
             </Route>
 
             <Route element={<ProductShell />}>
-              <Route index element={<HomePage />} />
               <Route path="posting" element={<PostingHubPage />} />
               <Route path="compose" element={<ComposePage />} />
               <Route path="calendar" element={<CalendarPage />} />

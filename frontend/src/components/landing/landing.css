@@ -1,0 +1,110 @@
+.landing-root {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  color: #1a1a1a;
+  background: #fff;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Kill document-level sideways scroll while landing is mounted */
+html:has(.landing-root),
+html:has(.landing-root) body,
+html:has(.landing-root) #root {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+.landing-hero-grid {
+  background-color: #fafafa;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+.landing-float {
+  position: absolute;
+  animation: landingBob 6s ease-in-out infinite;
+}
+
+.landing-rise {
+  animation: landingRise 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.landing-rise-d {
+  animation: landingRise 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+.landing-reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.landing-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.landing-logo-marquee {
+  animation: landingLogoSlide 35s linear infinite;
+  will-change: transform;
+}
+
+.landing-logo-marquee:hover {
+  animation-play-state: paused;
+}
+
+@keyframes landingRise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes landingBob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes landingLogoSlide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 900px) {
+  .landing-float {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-float,
+  .landing-rise,
+  .landing-rise-d,
+  .landing-logo-marquee {
+    animation: none !important;
+  }
+  .landing-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
