@@ -7,6 +7,16 @@
   --color-brand-500: #3b82f6;
   --color-brand-600: #2563eb;
   --color-brand-700: #1d4ed8;
+  --animate-smc-social-proof-scroll: smc-social-proof-scroll 45s linear infinite;
+}
+
+@keyframes smc-social-proof-scroll {
+  from {
+    transform: translate(0);
+  }
+  to {
+    transform: translate(-50%);
+  }
 }
 
 html[data-theme="light"] {

@@ -1,392 +1,432 @@
-import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import type { ReactNode } from "react";
-import { landing, wrap } from "./landingTheme";
-import { useLandingReveal } from "./useLandingReveal";
+import { useId } from "react";
 
-type ResourceCard = {
+const CDN = "https://buffer.com/cdn-cgi/image";
+
+/** Matches marketing --container-max-inline-size-wide + --space-step-3-step-5 */
+const CONTAINER =
+  "mx-auto max-w-[93.5rem] px-[clamp(1rem,0.6094rem+1.9531vi,2.25rem)]";
+
+const FONT_SANS =
+  '"Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
+const FONT_HEADING =
+  '"Stolzl", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
+
+/** Marketing fluid type / space steps (vi units from marketing-landing.css) */
+const STEP_M1 = "clamp(0.89375rem, 0.8703rem + 0.1172vi, 0.96875rem)"; // --font-size-step--1
+const STEP_0 = "clamp(1rem, 0.9565rem + 0.2174vi, 1.125rem)"; // --font-size-step-0
+const STEP_1 = "clamp(1.25rem, 1.1632rem + 0.4341vi, 1.5rem)"; // --font-size-step-1
+const STEP_3 = "clamp(1.95625rem, 1.7056rem + 1.2375vi, 2.6625rem)"; // --font-size-step-3
+const SPACE_1 = "clamp(0.5rem, 0.4805rem + 0.0977vi, 0.5625rem)"; // --space-step-1
+const SPACE_3 = "clamp(1rem, 0.9609rem + 0.1953vi, 1.125rem)"; // --space-step-3
+const SPACE_4 = "clamp(1.5rem, 1.4414rem + 0.293vi, 1.6875rem)"; // --space-step-4
+const SPACE_5 = "clamp(2rem, 1.9219rem + 0.3906vi, 2.25rem)"; // --space-step-5
+const SPACE_5_7 = "clamp(2rem, 1.2188rem + 3.9063vi, 4.5rem)"; // --space-step-5-step-7 / --gutter
+
+const RAISED =
+  "shadow-[0_0.25rem_0.75rem_-0.125rem_rgba(23,23,23,0.10),0_0_0.0625rem_0.0625rem_rgba(23,23,23,0.05)]";
+
+function srcSet(path: string, w1: number, w2: number) {
+  return [
+    `${CDN}/width=${w1},quality=75,format=auto/img/homepage/${path} 1x`,
+    `${CDN}/width=${w2},quality=75,format=auto/img/homepage/${path} 2x`,
+  ].join(", ");
+}
+
+function src(path: string, w: number) {
+  return `${CDN}/width=${w},quality=75,format=auto/img/homepage/${path}`;
+}
+
+type Theme = "purple" | "aqua" | "coral" | "fuscia" | "yellow";
+
+type Resource = {
+  theme: Theme;
+  href: string;
   title: string;
-  body: string;
-  bg: string;
-  tall?: boolean;
-  mock: ReactNode;
+  text: string;
+  small: string;
+  large: string;
+  largeW2: number;
+  horizontal?: boolean;
+  /** Image first (Best Time to Post) — data-content-trailing in source */
+  contentTrailing?: boolean;
 };
 
-function MockWindow({ children, dark = false }: { children: ReactNode; dark?: boolean }) {
-  return (
-    <Box
-      sx={{
-        bgcolor: dark ? "#1C1C1E" : "#fff",
-        borderRadius: "12px 12px 0 0",
-        boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
-        overflow: "hidden",
-        border: dark ? "1px solid #333" : "1px solid rgba(0,0,0,0.06)",
-        mx: "auto",
-        width: "92%",
-      }}
-    >
-      <Stack direction="row" spacing={0.6} sx={{ px: 1.25, py: 1, bgcolor: dark ? "#2A2A2C" : "#F3F4F6" }}>
-        {["#FF5F57", "#FEBC2E", "#28C840"].map((c) => (
-          <Box key={c} sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: c }} />
-        ))}
-      </Stack>
-      <Box sx={{ p: 1.5 }}>{children}</Box>
-    </Box>
-  );
-}
+/**
+ * SMC --color-*-300 (marketing-landing.css).
+ * purple/yellow are oklch in source; use the hex painted on the live homepage.
+ */
+const THEME_HEX: Record<Theme, string> = {
+  purple: "#d4c2ff",
+  aqua: "#9feae2",
+  coral: "#ffb2a8",
+  fuscia: "#f3bdff",
+  yellow: "#ffd88a",
+};
 
-function MockTools() {
-  return (
-    <MockWindow dark>
-      <Typography sx={{ color: "#A1A1AA", fontSize: 10, fontWeight: 600, mb: 1, textAlign: "center" }}>
-        Social Media AI Assistant
-      </Typography>
-      <Box
-        sx={{
-          bgcolor: "#2C2C2E",
-          borderRadius: 2,
-          px: 1.5,
-          py: 1.25,
-          border: "1px solid #3F3F46",
-          mb: 1.25,
-        }}
-      >
-        <Typography sx={{ color: "#71717A", fontSize: 11 }}>What do you want to write about?</Typography>
-      </Box>
-      <Stack direction="row" spacing={0.75}>
-        {["Ideas", "Rewrite", "Hashtags"].map((t) => (
-          <Box
-            key={t}
-            sx={{
-              flex: 1,
-              bgcolor: "#2C2C2E",
-              borderRadius: 1.5,
-              py: 1,
-              textAlign: "center",
-              border: "1px solid #3F3F46",
-            }}
-          >
-            <Typography sx={{ color: "#D4D4D8", fontSize: 9, fontWeight: 600 }}>{t}</Typography>
-          </Box>
-        ))}
-      </Stack>
-    </MockWindow>
-  );
-}
+const THEME_BG: Record<Theme, string> = {
+  purple: "!bg-[#d4c2ff]",
+  aqua: "!bg-[#9feae2]",
+  coral: "!bg-[#ffb2a8]",
+  fuscia: "!bg-[#f3bdff]",
+  yellow: "!bg-[#ffd88a]",
+};
 
-function MockGlossary() {
-  const terms = [
-    { letter: "A", word: "Affiliate marketing", def: "Promoting products for a commission." },
-    { letter: "A", word: "Algorithm", def: "Rules that rank content in feeds." },
-    { letter: "B", word: "Bio link", def: "A single link in your profile." },
-  ];
-  return (
-    <MockWindow>
-      <Typography sx={{ fontSize: 11, fontWeight: 800, color: landing.ink, mb: 0.75, letterSpacing: "-0.02em" }}>
-        Social Media Terms: A–Z
-      </Typography>
-      <Stack direction="row" spacing={0.5} sx={{ mb: 1.25, flexWrap: "wrap" }}>
-        {"ABCDEFGHIJKLM".split("").map((l) => (
-          <Box
-            key={l}
-            sx={{
-              width: 16,
-              height: 16,
-              borderRadius: 0.5,
-              bgcolor: l === "A" ? landing.green : "#F3F4F6",
-              color: l === "A" ? "#fff" : "#9CA3AF",
-              fontSize: 8,
-              fontWeight: 700,
-              display: "grid",
-              placeItems: "center",
-            }}
-          >
-            {l}
-          </Box>
-        ))}
-      </Stack>
-      <Stack spacing={0.75}>
-        {terms.map((t) => (
-          <Box key={t.word} sx={{ borderBottom: "1px solid #F3F4F6", pb: 0.6 }}>
-            <Typography sx={{ fontSize: 10, fontWeight: 700, color: landing.ink }}>{t.word}</Typography>
-            <Typography sx={{ fontSize: 9, color: landing.soft }}>{t.def}</Typography>
-          </Box>
-        ))}
-      </Stack>
-    </MockWindow>
-  );
-}
-
-function MockMarketing101() {
-  return (
-    <MockWindow>
-      <Typography sx={{ fontSize: 11, fontWeight: 800, color: landing.ink, mb: 1, letterSpacing: "-0.02em", lineHeight: 1.25 }}>
-        Your Everything Guide to Social Media Marketing
-      </Typography>
-      <Stack direction="row" spacing={1} justifyContent="center" sx={{ pt: 0.5 }}>
-        {[landing.pastelPink, landing.pastelBlue, landing.pastelGreen].map((c, i) => (
-          <Box
-            key={c}
-            sx={{
-              width: 52,
-              height: 88,
-              borderRadius: 2,
-              bgcolor: c,
-              border: "2px solid #111",
-              boxShadow: "0 6px 16px rgba(0,0,0,0.1)",
-              transform: i === 1 ? "translateY(-6px)" : "none",
-              p: 0.75,
-            }}
-          >
-            <Box sx={{ height: 8, width: "60%", bgcolor: "rgba(0,0,0,0.15)", borderRadius: 0.5, mb: 0.5, mx: "auto" }} />
-            <Box sx={{ height: 28, bgcolor: "rgba(255,255,255,0.7)", borderRadius: 1, mb: 0.5 }} />
-            <Box sx={{ height: 6, width: "80%", bgcolor: "rgba(0,0,0,0.12)", borderRadius: 0.5, mb: 0.35 }} />
-            <Box sx={{ height: 6, width: "55%", bgcolor: "rgba(0,0,0,0.1)", borderRadius: 0.5 }} />
-          </Box>
-        ))}
-      </Stack>
-    </MockWindow>
-  );
-}
-
-function MockBestTime() {
-  return (
-    <Box sx={{ position: "relative", height: 150, px: 1 }}>
-      {[
-        { top: 8, left: "4%", rotate: "-6deg", color: "#F9A8D4", label: "Best day" },
-        { top: 18, left: "22%", rotate: "2deg", color: "#C4B5FD", label: "Best time" },
-        { top: 36, left: "40%", rotate: "-3deg", color: "#A78BFA", label: "Weekday evenings" },
-      ].map((card) => (
-        <Box
-          key={card.label}
-          sx={{
-            position: "absolute",
-            top: card.top,
-            left: card.left,
-            width: "58%",
-            bgcolor: "#fff",
-            borderRadius: 2,
-            p: 1.25,
-            boxShadow: "0 10px 28px rgba(0,0,0,0.12)",
-            transform: `rotate(${card.rotate})`,
-          }}
-        >
-          <Typography sx={{ fontSize: 9, fontWeight: 700, color: landing.ink, mb: 0.75 }}>{card.label}</Typography>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(7, 1fr)",
-              gap: 0.4,
-            }}
-          >
-            {Array.from({ length: 28 }).map((_, i) => (
-              <Box
-                key={i}
-                sx={{
-                  aspectRatio: "1",
-                  borderRadius: 0.4,
-                  bgcolor: card.color,
-                  opacity: 0.25 + ((i * 7) % 10) / 12,
-                }}
-              />
-            ))}
-          </Box>
-        </Box>
-      ))}
-    </Box>
-  );
-}
-
-function MockBlog() {
-  return (
-    <MockWindow>
-      <Stack direction="row" spacing={1}>
-        <Box sx={{ flex: 1.4 }}>
-          <Box sx={{ height: 72, borderRadius: 1.5, bgcolor: landing.pastelBlue, mb: 1 }} />
-          <Typography sx={{ fontSize: 10, fontWeight: 800, color: landing.ink, lineHeight: 1.3, mb: 0.5 }}>
-            How to Make Money on Instagram in 2026
-          </Typography>
-          <Typography sx={{ fontSize: 8, color: landing.soft, lineHeight: 1.4 }}>
-            Practical tips for creators building revenue from social.
-          </Typography>
-        </Box>
-        <Stack spacing={0.75} sx={{ flex: 1 }}>
-          {["Scheduling tips", "Hashtag strategy", "Creator trends"].map((t) => (
-            <Box key={t} sx={{ display: "flex", gap: 0.75, alignItems: "center" }}>
-              <Box sx={{ width: 28, height: 28, borderRadius: 1, bgcolor: landing.pastelYellow, flexShrink: 0 }} />
-              <Typography sx={{ fontSize: 8, fontWeight: 600, color: landing.ink, lineHeight: 1.25 }}>{t}</Typography>
-            </Box>
-          ))}
-        </Stack>
-      </Stack>
-    </MockWindow>
-  );
-}
-
-const CARDS: ResourceCard[] = [
+const RESOURCES: Resource[] = [
   {
+    theme: "purple",
+    href: "/free-tools",
     title: "Free Marketing Tools",
-    body: "A collection of free tools to make your social media marketing easier and more effective",
-    bg: "#CCFBF1",
-    mock: <MockTools />,
+    text: "A collection of free tools to make your social media marketing easier and more effective",
+    small: "free-marketing-tools-small.webp",
+    large: "free-marketing-tools-large.webp",
+    largeW2: 828,
   },
   {
+    theme: "aqua",
+    href: "/social-media-terms",
     title: "Social Media Glossary",
-    body: "A glossary of the most popular terms to help you make sense of all the social media lingo",
-    bg: "#D5F5EF",
-    mock: <MockGlossary />,
+    text: "A glossary of the most popular terms to help you make sense of all the social media lingo",
+    small: "social-media-glossary-small.webp",
+    large: "social-media-glossary-large.webp",
+    largeW2: 750,
+    horizontal: true,
   },
   {
-    title: "Social Media Resources",
-    body: "A collection of articles and interviews packed with tips, stories, and insights to level up your social media marketing game",
-    bg: "#FEF3C7",
-    tall: true,
-    mock: <MockBlog />,
-  },
-  {
+    theme: "coral",
+    href: "/social-media-marketing",
     title: "Social Media Marketing 101",
-    body: "Your go-to guide for mastering the basics of social media and beyond",
-    bg: "#F8CFC4",
-    mock: <MockMarketing101 />,
+    text: "Your go-to guide for mastering the basics of social media and beyond",
+    small: "social-media-marketing-101-small.webp",
+    large: "social-media-marketing-101-large.webp",
+    largeW2: 828,
   },
   {
+    theme: "fuscia",
+    href: "/resources/best-time-to-post-social-media",
     title: "Best Time to Post",
-    body: "Discover the best times to post on social media to maximize your engagement",
-    bg: "#E0F2F1",
-    mock: <MockBestTime />,
+    text: "Discover the best times to post on social media to maximize your engagement",
+    small: "best-time-to-post-small.webp",
+    large: "best-time-to-post-large.webp",
+    largeW2: 828,
+    contentTrailing: true,
+  },
+  {
+    theme: "yellow",
+    href: "/resources/",
+    title: "Social Media Resources",
+    text: "A collection of articles and interviews packed with tips, stories, and insights to level up your social media marketing game",
+    small: "social-media-resources-small.webp",
+    large: "social-media-resources-large.webp",
+    largeW2: 828,
   },
 ];
 
-function ResourceTile({ card }: { card: ResourceCard }) {
-  return (
-    <Box
-      component="a"
-      href="#resources"
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        minHeight: card.tall ? { xs: 420, md: "100%" } : { xs: 340, md: 360 },
-        bgcolor: card.bg,
-        borderRadius: "24px",
-        overflow: "hidden",
-        textDecoration: "none",
-        color: "inherit",
-        transition: "transform 0.2s ease, box-shadow 0.2s ease",
-        "&:hover": {
-          transform: "translateY(-3px)",
-          boxShadow: "0 16px 40px rgba(0,0,0,0.08)",
-          "& .resource-arrow": { transform: "translateX(4px)" },
-        },
-      }}
-    >
-      <Box sx={{ px: { xs: 2.5, md: 3 }, pt: { xs: 2.5, md: 3 }, pb: 1.5 }}>
-        <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={1} sx={{ mb: 1 }}>
-          <Typography
-            sx={{
-              fontWeight: 800,
-              fontSize: { xs: 18, md: 20 },
-              letterSpacing: "-0.03em",
-              color: landing.ink,
-              lineHeight: 1.2,
-              pr: 1,
-            }}
-          >
-            {card.title}
-          </Typography>
-          <ArrowForwardRoundedIcon
-            className="resource-arrow"
-            sx={{
-              fontSize: 22,
-              color: landing.ink,
-              flexShrink: 0,
-              mt: 0.25,
-              transition: "transform 0.2s ease",
-            }}
-          />
-        </Stack>
-        <Typography sx={{ color: "#4B4B4B", fontSize: { xs: 14, md: 15 }, lineHeight: 1.5, maxWidth: 340 }}>
-          {card.body}
-        </Typography>
-      </Box>
+/**
+ * Bento grid areas — ResourcesSection_resourceContainer nth-of-type at ≥64rem.
+ * Source uses `1/5/1/-1` for glossary; CSS Grid treats end===start as start+1 → one row.
+ * Write explicit `1/5/2/-1` so the span is unambiguous.
+ */
+const GRID_AREA = [
+  "lg:[grid-area:1/1/3/5]",
+  "lg:[grid-area:1/5/2/-1]",
+  "lg:[grid-area:3/1/-1/5]",
+  "lg:[grid-area:2/5/-1/8]",
+  "lg:[grid-area:2/8/-1/-1]",
+] as const;
 
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "center",
-          pt: 1,
-          minHeight: card.tall ? 220 : 160,
-          overflow: "hidden",
-        }}
-      >
-        <Box sx={{ width: "100%", transform: "translateY(12px)" }}>{card.mock}</Box>
-      </Box>
-    </Box>
+function CtaArrow() {
+  return (
+    <svg
+      className="!size-4 ![block-size:1rem] ![inline-size:1rem] text-[#213130] transition-colors duration-150 ease-out"
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      aria-hidden
+    >
+      <path
+        fill="currentColor"
+        d="M11.47 4.47a.75.75 0 0 1 1.06 0l7 7a.75.75 0 0 1 0 1.06l-7 7a.75.75 0 1 1-1.06-1.06l5.72-5.72H5a.75.75 0 0 1 0-1.5h12.19l-5.72-5.72a.75.75 0 0 1 0-1.06Z"
+      />
+    </svg>
   );
 }
 
-export function LandingResources() {
-  const { ref, className } = useLandingReveal<HTMLDivElement>();
+function ResourceCard({ resource, index }: { resource: Resource; index: number }) {
+  return (
+    <div
+      className={[
+        /* shrink-0 for mobile horizontal scroll; grid items fill their area at lg */
+        "flex shrink-0 lg:!h-full lg:!min-h-0 lg:!min-w-0 lg:!shrink",
+        "!rounded-[1.25rem] !bg-[#fefdfb]",
+        "![padding:clamp(0.5rem,0.4805rem+0.0977vi,0.5625rem)]",
+        RAISED,
+        GRID_AREA[index],
+      ].join(" ")}
+      style={{
+        padding: SPACE_1,
+        backgroundColor: "#fefdfb",
+        borderRadius: "1.25rem",
+      }}
+      {...(resource.contentTrailing ? { "data-content-trailing": "true" } : {})}
+    >
+      <div
+        className={[
+          "group relative !flex w-64 flex-col justify-between overflow-hidden",
+          "rounded-[calc(1.25rem-clamp(0.5rem,0.4805rem+0.0977vi,0.5625rem))]",
+          "transition-[filter] duration-150 ease-out hover:brightness-[1.03]",
+          "min-[36rem]:w-80 lg:!h-full lg:!w-full lg:!max-w-none",
+          THEME_BG[resource.theme],
+          /* marketing unlayered .flex beats lg:grid — force grid for horizontal card */
+          resource.horizontal
+            ? "lg:!grid lg:!grid-cols-2 lg:!gap-[clamp(1rem,0.9609rem+0.1953vi,1.125rem)]"
+            : "",
+        ].join(" ")}
+        data-theme={resource.theme}
+        style={{ backgroundColor: THEME_HEX[resource.theme] }}
+      >
+        {/*
+          Marketing CSS is unlayered and beats Tailwind @layer utilities:
+          - h1–h6 { font-size: inherit } → use <p> for title (not h3)
+          - p,h3,… { margin: 0 } → !mb + inline marginBlockEnd
+          Title = text-heading tokens at step-1 / Stolzl
+          Body = Figtree step-0 / #646464
+        */}
+        <div
+          className={[
+            resource.contentTrailing ? "order-1" : "",
+            "![padding-block:clamp(1.5rem,1.4414rem+0.293vi,1.6875rem)]",
+            "![padding-inline:clamp(1rem,0.9609rem+0.1953vi,1.125rem)]",
+          ].join(" ")}
+          style={{ paddingBlock: SPACE_4, paddingInline: SPACE_3 }}
+        >
+          <p
+            className={[
+              "mt-0",
+              "![margin-block-end:clamp(0.5rem,0.4805rem+0.0977vi,0.5625rem)]",
+              "![font-size:clamp(1.25rem,1.1632rem+0.4341vi,1.5rem)]",
+              "text-[#213130]",
+              "!font-normal !leading-[1.1] !tracking-[-0.02em]",
+              "![font-family:Stolzl,ui-sans-serif,system-ui,sans-serif]",
+            ].join(" ")}
+            style={{
+              fontFamily: FONT_HEADING,
+              fontSize: STEP_1,
+              fontWeight: 400,
+              lineHeight: 1.1,
+              letterSpacing: "-0.02em",
+              marginBlockEnd: SPACE_1,
+            }}
+          >
+            <a
+              href={resource.href}
+              className={[
+                "flex items-center justify-between",
+                "gap-[clamp(0.5rem,0.4805rem+0.0977vi,0.5625rem)]",
+                "rounded-[0.625rem] text-inherit no-underline outline-none",
+                "before:pointer-events-auto before:absolute before:inset-0 before:z-[1]",
+                "before:rounded-[1.25rem] before:outline before:outline-2",
+                "before:outline-offset-8 before:outline-transparent",
+                "before:transition-[outline-color] before:duration-150 before:ease-out",
+                "before:content-['']",
+                "focus-visible:before:outline-[#213130]",
+              ].join(" ")}
+              style={{ gap: SPACE_1 }}
+            >
+              <span>{resource.title}</span>
+              <span className="flex shrink-0 items-center justify-center transition-transform duration-150 ease-out will-change-transform group-hover:-rotate-45">
+                <CtaArrow />
+              </span>
+            </a>
+          </p>
+          <p
+            className={[
+              "!m-0",
+              "![font-size:clamp(1rem,0.9565rem+0.2174vi,1.125rem)]",
+              "!font-normal !leading-[1.4] !tracking-[0.0075em] text-[#646464]",
+              "![font-family:Figtree,ui-sans-serif,system-ui,sans-serif]",
+            ].join(" ")}
+            style={{
+              fontFamily: FONT_SANS,
+              fontSize: STEP_0,
+              fontWeight: 400,
+              lineHeight: 1.4,
+              letterSpacing: "0.0075em",
+              margin: 0,
+            }}
+          >
+            {resource.text}
+          </p>
+        </div>
 
-  // Desktop order for CSS grid areas: tools | glossary | resources(tall)
-  //                                     m101  | besttime | resources
-  const desktopOrder = [CARDS[0], CARDS[1], CARDS[2], CARDS[3], CARDS[4]] as ResourceCard[];
+        <div
+          className={[
+            "pointer-events-none relative",
+            resource.contentTrailing ? "order-0" : "",
+          ].join(" ")}
+        >
+          <div className="flex lg:!hidden">
+            <img
+              alt=""
+              width={320}
+              height={224}
+              loading="lazy"
+              decoding="async"
+              src={src(resource.small, 640)}
+              srcSet={srcSet(resource.small, 384, 640)}
+              className="!h-auto ![block-size:auto] !w-full ![inline-size:100%] !max-w-full ![max-inline-size:100%]"
+              style={{ color: "transparent" }}
+            />
+          </div>
+          <div className="hidden transition-transform duration-[400ms] ease-out will-change-transform lg:!flex motion-safe:group-hover:scale-105">
+            <img
+              alt=""
+              loading="lazy"
+              decoding="async"
+              src={src(resource.large, resource.largeW2)}
+              srcSet={srcSet(resource.large, 384, resource.largeW2)}
+              className="!h-auto ![block-size:auto] !w-full ![inline-size:100%] !max-w-full ![max-inline-size:100%]"
+              style={{ color: "transparent" }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Resources bento — pure Tailwind (no ResourcesSection_*).
+ * Tokens from marketing-landing.css ResourcesSection_* + text-eyebrow / text-heading.
+ */
+export function LandingResources() {
+  const headingId = useId();
 
   return (
-    <Box component="section" sx={{ bgcolor: "#fff", py: { xs: 7, md: 11 } }}>
-      <Box ref={ref} className={className} sx={{ ...wrap, maxWidth: 1120 }}>
-        <Typography
-          component="h2"
-          sx={{
-            textAlign: "center",
-            fontWeight: 800,
-            fontSize: { xs: "1.85rem", md: "2.45rem" },
-            letterSpacing: "-0.04em",
-            mb: 1.25,
-            color: landing.ink,
-          }}
+    <section
+      id="resources"
+      className={[
+        "![padding-block:clamp(2rem,1.2188rem+3.9063vi,4.5rem)]",
+        "tracking-[0.0075em] text-[#213130]",
+        "![font-size:clamp(1rem,0.9565rem+0.2174vi,1.125rem)] !leading-[1.4]",
+      ].join(" ")}
+      aria-labelledby={headingId}
+      style={{
+        fontFamily: FONT_SANS,
+        fontSize: STEP_0,
+        letterSpacing: "0.0075em",
+        lineHeight: 1.4,
+        paddingBlock: SPACE_5_7,
+      }}
+    >
+      <div className={CONTAINER}>
+        {/* Intro: headline left, sub right ≥64rem — ResourcesSection_intro */}
+        <div
+          className={[
+            "![margin-block-end:clamp(2rem,1.9219rem+0.3906vi,2.25rem)]",
+            "lg:grid lg:grid-cols-2 lg:items-center",
+            "lg:gap-[clamp(2rem,1.2188rem+3.9063vi,4.5rem)]",
+          ].join(" ")}
+          style={{ marginBlockEnd: SPACE_5 }}
         >
-          Fuel your social media success
-        </Typography>
-        <Typography
-          sx={{
-            textAlign: "center",
-            color: landing.muted,
-            fontSize: { xs: 15.5, md: 17 },
-            mb: { xs: 4, md: 5 },
-            maxWidth: 520,
-            mx: "auto",
-          }}
-        >
-          Everything you need to level up your social strategy—in one place.
-        </Typography>
+          <div>
+            {/*
+              Eyebrow = text-eyebrow (step--1 / medium / tracking 0.0625em / lh 1.4 / Figtree)
+              Use <p> for visible eyebrow; keep h2 sr/id for a11y label — marketing h2 font-size inherit
+            */}
+            <h2
+              id={headingId}
+              className={[
+                "mt-0 uppercase text-[#337047]",
+                "![margin-block-end:clamp(0.5rem,0.4805rem+0.0977vi,0.5625rem)]",
+                "![font-size:clamp(0.89375rem,0.8703rem+0.1172vi,0.96875rem)]",
+                "!font-medium !leading-[1.4] !tracking-[0.0625em]",
+                "![font-family:Figtree,ui-sans-serif,system-ui,sans-serif]",
+              ].join(" ")}
+              style={{
+                fontFamily: FONT_SANS,
+                fontSize: STEP_M1,
+                fontWeight: 500,
+                lineHeight: 1.4,
+                letterSpacing: "0.0625em",
+                marginBlockEnd: SPACE_1,
+              }}
+            >
+              Resources
+            </h2>
+            <p
+              className={[
+                "mt-0 text-[#213130]",
+                "![margin-block-end:clamp(0.5rem,0.4805rem+0.0977vi,0.5625rem)]",
+                "![font-size:clamp(1.95625rem,1.7056rem+1.2375vi,2.6625rem)]",
+                "!font-normal !leading-[1.1] !tracking-[-0.02em]",
+                "![font-family:Stolzl,ui-sans-serif,system-ui,sans-serif]",
+              ].join(" ")}
+              style={{
+                fontFamily: FONT_HEADING,
+                fontSize: STEP_3,
+                fontWeight: 400,
+                lineHeight: 1.1,
+                letterSpacing: "-0.02em",
+                marginBlockEnd: SPACE_1,
+              }}
+            >
+              Fuel your social media success
+            </p>
+          </div>
+          <p
+            className={[
+              "!m-0",
+              "![font-size:clamp(1rem,0.9565rem+0.2174vi,1.125rem)]",
+              "!font-normal !leading-[1.4] !tracking-[0.0075em] text-[#373737]",
+              "![font-family:Figtree,ui-sans-serif,system-ui,sans-serif]",
+            ].join(" ")}
+            style={{
+              fontFamily: FONT_SANS,
+              fontSize: STEP_0,
+              fontWeight: 400,
+              lineHeight: 1.4,
+              letterSpacing: "0.0075em",
+              margin: 0,
+            }}
+          >
+            Everything you need to level up your social strategy—in one place.
+          </p>
+        </div>
 
-        <Box
-          sx={{
-            display: "grid",
-            gap: { xs: 2, md: 2.5 },
-            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr 1fr" },
-            gridTemplateRows: { md: "1fr 1fr" },
-            gridAutoRows: { xs: "auto" },
-            width: "100%",
-            maxWidth: "100%",
-            minWidth: 0,
-            "& > *:nth-of-type(1)": { order: { xs: 1, md: 0 }, gridColumn: { md: "1" }, gridRow: { md: "1" }, minWidth: 0 },
-            "& > *:nth-of-type(2)": { order: { xs: 2, md: 0 }, gridColumn: { md: "2" }, gridRow: { md: "1" }, minWidth: 0 },
-            "& > *:nth-of-type(3)": { order: { xs: 5, md: 0 }, gridColumn: { md: "3" }, gridRow: { md: "1 / span 2" }, minWidth: 0 },
-            "& > *:nth-of-type(4)": { order: { xs: 3, md: 0 }, gridColumn: { md: "1" }, gridRow: { md: "2" }, minWidth: 0 },
-            "& > *:nth-of-type(5)": { order: { xs: 4, md: 0 }, gridColumn: { md: "2" }, gridRow: { md: "2" }, minWidth: 0 },
-          }}
+        <div
+          className={[
+            "-mt-1 w-full !overflow-x-auto pt-1",
+            "![padding-block-end:clamp(1rem,0.9609rem+0.1953vi,1.125rem)]",
+            /* marketing CSS can fight overflow utilities */
+            "lg:!overflow-x-visible lg:!justify-center",
+          ].join(" ")}
+          style={{ paddingBlockEnd: SPACE_3 }}
         >
-          {desktopOrder.map((card) => (
-            <ResourceTile key={card.title} card={card} />
-          ))}
-        </Box>
-      </Box>
-    </Box>
+          {/*
+            CRITICAL: marketing-landing.css ships unlayered `.flex{display:flex}` which
+            beats Tailwind @layer `lg:grid`. Without `lg:!grid` the bento collapses into
+            a single horizontal flex row (what the user was seeing).
+          */}
+          <div
+            className={[
+              /* pe so the last card isn’t flush against the scroll edge on mobile */
+              "!flex gap-[clamp(1rem,0.9609rem+0.1953vi,1.125rem)] max-lg:!pe-1",
+              "lg:!grid lg:!grid-cols-12 lg:!pe-0",
+              /*
+                Source uses minmax(0,min-content), but with overflow:hidden on cards
+                that collapses row tracks. `auto` keeps the bento proportions while
+                sizing to image+text content (matches the screenshot).
+              */
+              "lg:!grid-rows-[repeat(3,auto)]",
+            ].join(" ")}
+            style={{ gap: SPACE_3 }}
+          >
+            {RESOURCES.map((r, i) => (
+              <ResourceCard key={r.title} resource={r} index={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

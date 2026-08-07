@@ -1,507 +1,670 @@
-import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-import { useState, type ReactNode } from "react";
-import { Link as RouterLink } from "react-router-dom";
-import { landing, wrap } from "./landingTheme";
-import { useLandingReveal } from "./useLandingReveal";
+import { useId, useState, type CSSProperties, type ReactNode } from "react";
+import { CHANNEL_ICONS, type ChannelId } from "./channelIcons";
 
-const PLANS = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "/mo",
-    features: ["3 channels", "Basic analytics", "Community support"],
-  },
-  {
-    name: "Essentials",
-    price: "$6",
-    period: "/mo",
-    features: ["8 channels", "Advanced analytics", "AI assistant", "Priority queue"],
-  },
-  {
-    name: "Team",
-    price: "$12",
-    period: "/mo",
-    features: ["Unlimited channels", "Approvals", "Team roles", "Custom reports"],
-  },
-] as const;
+/**
+ * Pure Tailwind Audiences / Verticals section.
+ * Marketing CSS is unlayered and beats Tailwind @layer utilities:
+ * - button { padding:0; border-radius:0; background:#0000; font:inherit }
+ * - h4–h6 { font-size:inherit; margin:0 }
+ * Use `!` + inline styles (same pattern as LandingCoreFeatures).
+ */
 
-export function LandingPricing() {
-  const { ref, className } = useLandingReveal<HTMLDivElement>();
-  const [yearly, setYearly] = useState(false);
+const FONT_SANS =
+  '"Figtree", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
+const FONT_HEADING =
+  '"Stolzl", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"';
 
+/** Marketing fluid tokens (vi from marketing-landing.css) */
+const STEP_M2 = "clamp(0.8rem, 0.7863rem + 0.0687vi, 0.84375rem)"; // --font-size-step--2
+const STEP_M1 = "clamp(0.89375rem, 0.8703rem + 0.1172vi, 0.96875rem)"; // --font-size-step--1
+const STEP_2 = "clamp(1.5625rem, 1.4107rem + 0.7591vi, 2rem)"; // --font-size-step-2
+const SPACE_1 = "clamp(0.5rem, 0.4805rem + 0.0977vi, 0.5625rem)"; // --space-step-1
+const SPACE_2 = "clamp(0.75rem, 0.7109rem + 0.1953vi, 0.875rem)"; // --space-step-2
+const SPACE_3 = "clamp(1rem, 0.9609rem + 0.1953vi, 1.125rem)"; // --space-step-3
+const SPACE_3_5 = "clamp(1rem, 0.6094rem + 1.9531vi, 2.25rem)"; // --space-step-3-step-5
+const SPACE_5 = "clamp(2rem, 1.9219rem + 0.3906vi, 2.25rem)"; // --space-step-5
+const SPACE_5_7 = "clamp(2rem, 1.2188rem + 3.9063vi, 4.5rem)"; // --space-step-5-step-7
+
+const CONTAINER =
+  "mx-auto max-w-[93.5rem] px-[clamp(1rem,0.6094rem+1.9531vi,2.25rem)]";
+
+const CDN = "https://buffer.com/cdn-cgi/image";
+const BRAND = "#213130";
+
+/**
+ * VerticalsSection_contentLeadingHeading__xKagh
+ * Source uses h4, but marketing CSS sets h4–h6 { font-size: inherit },
+ * which kills step-2. Use a non-h4 element + ! utilities (CoreFeatures pattern).
+ *
+ * Tokens:
+ * - font: Stolzl (--font-family-heading)
+ * - size: --font-size-step-2 = clamp(1.5625rem, 1.4107rem + 0.7591vi, 2rem)
+ * - weight: 400
+ * - line-height: 1.1 (--line-height-heading / --line-height-tight)
+ * - letter-spacing: -0.02em (--letter-spacing-heading / --letter-spacing-tight)
+ * - color: #213130
+ * - margin-block-end: --space-step-2
+ */
+const HEADLINE_CLASS = [
+  "!m-0 text-balance text-[#213130]",
+  "![margin-block-end:clamp(0.75rem,0.7109rem+0.1953vi,0.875rem)]",
+  "![font-size:clamp(1.5625rem,1.4107rem+0.7591vi,2rem)]",
+  "!font-normal !leading-[1.1] !tracking-[-0.02em]",
+  "![font-family:Stolzl,ui-sans-serif,system-ui,sans-serif]",
+].join(" ");
+
+const HEADLINE_STYLE: CSSProperties = {
+  fontFamily: FONT_HEADING,
+  fontSize: STEP_2,
+  fontWeight: 400,
+  lineHeight: 1.1,
+  letterSpacing: "-0.02em",
+  margin: 0,
+  marginBlockEnd: SPACE_2,
+  color: BRAND,
+  textWrap: "balance",
+};
+
+/**
+ * Source markup (Creators tab):
+ *   <span class="visually-hidden"> to </span><span aria-hidden="true"> → </span>
+ * Sighted: " → " · Screen readers: " to "
+ */
+function ToArrow() {
   return (
-    <Box component="section" id="pricing" sx={{ bgcolor: landing.bgOff, py: { xs: 7, md: 10 } }}>
-      <Box ref={ref} className={className} sx={wrap}>
-        <Typography
-          component="h2"
-          sx={{ textAlign: "center", fontWeight: 800, fontSize: { xs: "1.75rem", md: "2.35rem" }, letterSpacing: "-0.035em", mb: 1 }}
-        >
-          Choose a plan that’s right for you
-        </Typography>
-        <Typography sx={{ textAlign: "center", color: landing.muted, mb: 3 }}>
-          Flexible pricing that grows with you. From $0/month to get started.
-        </Typography>
-
-        <Stack direction="row" justifyContent="center" sx={{ mb: 4 }}>
-          <Stack
-            direction="row"
-            sx={{
-              p: 0.5,
-              borderRadius: landing.pill,
-              bgcolor: "#fff",
-              border: `1px solid ${landing.line}`,
-              height: 44,
-              alignItems: "center",
-            }}
-          >
-            {(["Monthly", "Yearly"] as const).map((label) => {
-              const active = label === "Yearly" ? yearly : !yearly;
-              return (
-                <Button
-                  key={label}
-                  onClick={() => setYearly(label === "Yearly")}
-                  sx={{
-                    textTransform: "none",
-                    fontWeight: 700,
-                    borderRadius: landing.pill,
-                    px: 2.5,
-                    height: 36,
-                    bgcolor: active ? landing.ink : "transparent",
-                    color: active ? "#fff" : landing.ink,
-                    "&:hover": { bgcolor: active ? landing.ink : "rgba(0,0,0,0.04)" },
-                  }}
-                >
-                  {label}
-                </Button>
-              );
-            })}
-          </Stack>
-        </Stack>
-
-        <Grid container spacing={2.5}>
-          {PLANS.map((plan) => (
-            <Grid key={plan.name} size={{ xs: 12, md: 4 }}>
-              <Box
-                sx={{
-                  height: "100%",
-                  minHeight: 360,
-                  bgcolor: landing.pastelPurple,
-                  borderRadius: `${landing.radius}px`,
-                  p: 3,
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-              >
-                <Typography sx={{ fontWeight: 800, fontSize: 18 }}>{plan.name}</Typography>
-                <Stack direction="row" alignItems="baseline" spacing={0.5} sx={{ my: 1.5 }}>
-                  <Typography sx={{ fontWeight: 800, fontSize: 36, letterSpacing: "-0.03em" }}>
-                    {yearly && plan.price !== "$0" ? `$${Math.max(0, Number(plan.price.slice(1)) * 10)}` : plan.price}
-                  </Typography>
-                  <Typography sx={{ color: landing.soft }}>{yearly ? "/yr" : plan.period}</Typography>
-                </Stack>
-                <Stack spacing={1} sx={{ flex: 1, mb: 2.5 }}>
-                  {plan.features.map((f) => (
-                    <Stack key={f} direction="row" spacing={1} alignItems="center">
-                      <CheckRoundedIcon sx={{ fontSize: 18, color: landing.green }} />
-                      <Typography sx={{ fontSize: 14 }}>{f}</Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-                <Button
-                  component={RouterLink}
-                  to="/register"
-                  variant="contained"
-                  disableElevation
-                  fullWidth
-                  sx={{
-                    textTransform: "none",
-                    fontWeight: 700,
-                    bgcolor: landing.ink,
-                    borderRadius: 2,
-                    height: 44,
-                    "&:hover": { bgcolor: "#000" },
-                  }}
-                >
-                  Get started
-                </Button>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-    </Box>
+    <>
+      <span
+        className={[
+          "!absolute !m-[-1px] !h-px !w-px !overflow-hidden !whitespace-nowrap",
+          "!border-0 !p-0 ![clip:rect(0,0,0,0)] ![clip-path:inset(50%)]",
+        ].join(" ")}
+      >
+        {" "}
+        to{" "}
+      </span>
+      <span aria-hidden="true"> → </span>
+    </>
   );
 }
 
-type Channel = "x" | "linkedin" | "instagram";
+type Theme = "purple" | "yellow" | "aqua";
 
-type CommunityMember = {
-  handle: string;
-  meta: string;
-  avatar: string;
-  channel: Channel;
+type Member = {
+  name: string;
+  user: string;
+  followers: string;
+  channel: ChannelId;
+  img: string;
 };
 
-type VerticalTab = {
+type Tab = {
   label: string;
-  theme: "purple" | "yellow" | "aqua";
-  title: ReactNode;
-  body: string;
-  points: string[];
-  communityEyebrow: string;
-  members: CommunityMember[];
+  theme: Theme;
+  heading: ReactNode;
+  text: string;
+  items: string[];
+  eyebrow: string;
+  members: Member[];
 };
 
-const THEME = {
+/**
+ * Exact Verticals theme hexes from marketing-landing.css.
+ * Prefer the winning hex definitions (not the oklch twins):
+ * --color-purple-100 resolves to #e6dbff (oklch twin ≈ #f3e8ff ≈ purple-050,
+ * which made member cards invisible against the community panel).
+ */
+const THEME: Record<
+  Theme,
+  {
+    /** --color-*-100 — tab active/hover + community panel */
+    accent100: string;
+    /** --color-*-050 — member cards */
+    accent050: string;
+    /** --color-*-900 — community eyebrow */
+    accent900: string;
+    /** --color-*-800 — checklist icons */
+    accent800: string;
+  }
+> = {
   purple: {
-    panel: "#D5F5F0",
-    tabActive: "#CCFBF1",
-    accent: "#0F766E",
-    check: "#0F766E",
+    accent100: "#e6dbff",
+    accent050: "#f1ebff",
+    accent900: "#331282",
+    accent800: "#5628b8",
   },
   yellow: {
-    panel: "#FFF3C4",
-    tabActive: "#FDE68A",
-    accent: "#A16207",
-    check: "#CA8A04",
+    accent100: "#ffebc2",
+    accent050: "#fff6e6",
+    accent900: "#724f08",
+    accent800: "#b2811f",
   },
   aqua: {
-    panel: "#D5F3EE",
-    tabActive: "#A7F3D0",
-    accent: "#0F766E",
-    check: "#0D9488",
+    accent100: "#cdf4f0",
+    accent050: "#e5faf8",
+    accent900: "#175955",
+    accent800: "#2d8b83",
   },
-} as const;
+};
 
-const TABS: VerticalTab[] = [
+/** Important Tailwind bg classes — marketing CSS is unlayered and beats utilities */
+const THEME_BG_100: Record<Theme, string> = {
+  purple: "!bg-[#e6dbff]",
+  yellow: "!bg-[#ffebc2]",
+  aqua: "!bg-[#cdf4f0]",
+};
+const THEME_BG_050: Record<Theme, string> = {
+  purple: "!bg-[#f1ebff]",
+  yellow: "!bg-[#fff6e6]",
+  aqua: "!bg-[#e5faf8]",
+};
+
+const CHANNEL_BG: Partial<Record<ChannelId, string>> = {
+  x: "bg-black",
+  linkedin: "bg-[#2967b3]",
+  instagram: "bg-[#ed0274]",
+};
+
+const TABS: Tab[] = [
   {
     label: "Creators",
     theme: "purple",
-    title: (
+    // Sighted: "Grow from zero → one → one million"
+    // A11y:     "Grow from zero to one to one million"
+    heading: (
       <>
-        Grow from zero <Box component="span" sx={{ fontWeight: 400 }}>→</Box> one{" "}
-        <Box component="span" sx={{ fontWeight: 400 }}>→</Box> one million
+        Grow from zero
+        <ToArrow />
+        one
+        <ToArrow />
+        one million
       </>
     ),
-    body: "Whether you’re just getting started on your creator journey or scaling your audience to new heights, SMC will get your content in front of more people.",
-    points: [
+    text: "Whether you’re just getting started on your creator journey or scaling your audience to new heights, SMC will get your content in front of more people.",
+    items: [
       "Save all your ideas as inspiration strikes",
       "Learn exactly what content works best and why",
       "Create once, crosspost everywhere",
     ],
-    communityEyebrow: "THE SMC CREATOR COMMUNITY",
+    eyebrow: "The SMC creator community",
     members: [
       {
-        handle: "@rita_codes",
-        meta: "34.9K FOLLOWERS ON X",
-        avatar: "https://i.pravatar.cc/160?img=47",
+        name: "Rita Iglesias",
+        user: "@rita_codes",
+        followers: "34.9k followers on X",
         channel: "x",
+        img: "rita-iglesias.webp",
       },
       {
-        handle: "@Pauldelabaume",
-        meta: "21K FOLLOWERS ON LINKEDIN",
-        avatar: "https://i.pravatar.cc/160?img=12",
+        name: "Paul de La Baume",
+        user: "@Pauldelabaume",
+        followers: "21k followers on LinkedIn",
         channel: "linkedin",
+        img: "paul-de-la-baume.webp",
       },
       {
-        handle: "@yola_bastos",
-        meta: "14.6K FOLLOWERS ON INSTAGRAM",
-        avatar: "https://i.pravatar.cc/160?img=32",
+        name: "Lola Tatiana Veiga Bastos",
+        user: "@yola_bastos",
+        followers: "14.6k followers on Instagram",
         channel: "instagram",
+        img: "yola-bastos.webp",
       },
     ],
   },
   {
     label: "Small businesses",
     theme: "yellow",
-    title: "Level up your social presence without draining your time",
-    body: "Every minute and every dollar counts when you’re running a small business. SMC multiplies your efforts and keeps your online presence thriving with minimal effort.",
-    points: [
+    heading: "Level up your social presence without draining your time",
+    text: "Every minute and every dollar counts when you’re running a small business. SMC multiplies your efforts and keeps your online presence thriving with minimal effort.",
+    items: [
       "Schedule content weeks or even months in advance",
       "See all your posts in one simple dashboard",
       "World-class customer support",
     ],
-    communityEyebrow: "THE SMC SMALL BUSINESS COMMUNITY",
+    eyebrow: "The SMC small business community",
     members: [
       {
-        handle: "@midmod.mood",
-        meta: "236K FOLLOWERS ON INSTAGRAM",
-        avatar: "https://i.pravatar.cc/160?img=20",
+        name: "Midmodmood",
+        user: "@midmod.mood",
+        followers: "236k followers on Instagram",
         channel: "instagram",
+        img: "midmodmood.webp",
       },
       {
-        handle: "@tinalarssonli",
-        meta: "12K FOLLOWERS ON LINKEDIN",
-        avatar: "https://i.pravatar.cc/160?img=5",
+        name: "Tina Larsson, The Folson Group",
+        user: "@tinalarssonli",
+        followers: "12k followers on LinkedIn",
         channel: "linkedin",
+        img: "tina-larsson.webp",
       },
       {
-        handle: "@vanillapodbakery",
-        meta: "5.5K FOLLOWERS ON INSTAGRAM",
-        avatar: "https://i.pravatar.cc/160?img=44",
+        name: "Pia Cato",
+        user: "@vanillapodbakery",
+        followers: "5.5k followers on Instagram",
         channel: "instagram",
+        img: "pia-cato.webp",
       },
     ],
   },
   {
     label: "Agencies",
     theme: "aqua",
-    title: "The most trusted tool for freelancers and agencies",
-    body: "SMC has been helping freelancers, consultants, and agencies grow their client accounts for more than a decade.",
-    points: [
+    heading: "The most trusted tool for freelancers and agencies",
+    text: "SMC has been helping freelancers, consultants, and agencies grow their client accounts for more than a decade.",
+    items: [
       "Intuitive review and approval workflows",
       "Custom access and permissions",
       "Unlimited user invites",
       "Pricing that scales with your business",
       "99% post reliability",
     ],
-    communityEyebrow: "THE SMC AGENCY COMMUNITY",
+    eyebrow: "The SMC agency community",
     members: [
       {
-        handle: "@redpigeonmedia",
-        meta: "2.2K FOLLOWERS ON INSTAGRAM",
-        avatar: "https://i.pravatar.cc/160?img=15",
+        name: "Red Pigeon Media",
+        user: "@redpigeonmedia",
+        followers: "2.2k followers on Instagram",
         channel: "instagram",
+        img: "red-pigeon-media.webp",
       },
       {
-        handle: "@shoredupdigital",
-        meta: "2.5K FOLLOWERS ON INSTAGRAM",
-        avatar: "https://i.pravatar.cc/160?img=33",
+        name: "Shored Up Digital",
+        user: "@shoredupdigital",
+        followers: "2.5k followers on Instagram",
         channel: "instagram",
+        img: "shored-up-digital.webp",
+      },
+      {
+        name: "Influence Media",
+        user: "@weareinfluencemedia",
+        followers: "5.5k followers on Instagram",
+        channel: "instagram",
+        img: "influence-media.webp",
       },
     ],
   },
 ];
 
-function ChannelBadge({ channel }: { channel: Channel }) {
-  const styles =
-    channel === "x"
-      ? { bg: "#000", label: null }
-      : channel === "linkedin"
-        ? { bg: "#0A66C2", label: "in" }
-        : { bg: "linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)", label: null };
-
+function CheckIcon({ color }: { color: string }) {
   return (
-    <Box
-      sx={{
-        position: "absolute",
-        right: 0,
-        bottom: 0,
-        width: 28,
-        height: 28,
-        borderRadius: "50%",
-        bgcolor: channel === "instagram" ? undefined : styles.bg,
-        background: channel === "instagram" ? styles.bg : undefined,
-        color: "#fff",
-        display: "grid",
-        placeItems: "center",
-        border: "2.5px solid #fff",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
-      }}
+    <svg
+      className="!size-[1.125rem] ![block-size:1.125rem] ![inline-size:1.125rem] shrink-0"
+      width={24}
+      height={24}
+      viewBox="0 0 24 24"
+      aria-hidden
+      style={{ color }}
     >
-      {channel === "x" ? (
-        <Box
-          component="svg"
-          viewBox="0 0 24 24"
-          sx={{ width: 12, height: 12, fill: "#fff" }}
-          aria-hidden
-        >
-          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.727-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
-        </Box>
-      ) : channel === "linkedin" ? (
-        <Typography sx={{ fontSize: 11, fontWeight: 800, lineHeight: 1, letterSpacing: "-0.04em" }}>in</Typography>
-      ) : (
-        <Box
-          component="svg"
-          viewBox="0 0 24 24"
-          sx={{ width: 13, height: 13, fill: "#fff" }}
-          aria-hidden
-        >
-          <path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
-        </Box>
-      )}
-    </Box>
+      <path
+        fill="currentColor"
+        d="M20.707 5.293a1 1 0 0 1 0 1.414l-11 11a1 1 0 0 1-1.414 0l-5-5a1 1 0 1 1 1.414-1.414L9 15.586 19.293 5.293a1 1 0 0 1 1.414 0Z"
+      />
+    </svg>
   );
 }
 
-function CommunityCard({ member }: { member: CommunityMember }) {
+function MemberCard({ member, theme }: { member: Member; theme: Theme }) {
+  const Icon = CHANNEL_ICONS[member.channel];
+  const t = THEME[theme];
   return (
-    <Box
-      sx={{
-        bgcolor: "#fff",
-        borderRadius: "16px",
-        px: 2,
-        pt: 3,
-        pb: 2.5,
-        height: "100%",
-        minHeight: { xs: 210, md: 230 },
+    <div
+      className={[
+        "inline-flex !flex-col !items-center !text-center",
+        "!rounded-[0.625rem]",
+        THEME_BG_050[theme],
+        "![padding-block:clamp(1rem,0.6094rem+1.9531vi,2.25rem)]",
+        "![padding-inline:clamp(1rem,0.9609rem+0.1953vi,1.125rem)]",
+      ].join(" ")}
+      style={{
+        backgroundColor: t.accent050,
+        background: t.accent050,
+        paddingBlock: SPACE_3_5,
+        paddingInline: SPACE_3,
+        borderRadius: "0.625rem",
         textAlign: "center",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
       }}
     >
-      <Box sx={{ position: "relative", width: 84, height: 84, mb: 2 }}>
-        <Box
-          component="img"
-          src={member.avatar}
-          alt=""
-          sx={{
-            width: 84,
-            height: 84,
-            borderRadius: "50%",
-            objectFit: "cover",
-            display: "block",
-            bgcolor: "#E5E7EB",
-          }}
-        />
-        <ChannelBadge channel={member.channel} />
-      </Box>
-      <Typography sx={{ fontWeight: 700, fontSize: 15, color: landing.ink, mb: 1.25, letterSpacing: "-0.01em" }}>
-        {member.handle}
-      </Typography>
-      <Typography
-        sx={{
-          fontSize: 10.5,
-          fontWeight: 700,
-          letterSpacing: "0.06em",
-          color: "#9A9A9A",
-          lineHeight: 1.4,
-          textTransform: "uppercase",
-          mt: "auto",
-        }}
+      <span
+        className="relative mb-[clamp(0.75rem,0.7109rem+0.1953vi,0.875rem)] inline-flex"
+        style={{ marginBlockEnd: SPACE_2 }}
       >
-        {member.meta}
-      </Typography>
-    </Box>
-  );
-}
-
-export function LandingAudiences() {
-  const [tab, setTab] = useState(0);
-  const { ref, className } = useLandingReveal<HTMLDivElement>();
-  const active = TABS[tab] ?? TABS[0]!;
-  const theme = THEME[active.theme];
-
-  return (
-    <Box component="section" id="audiences" ref={ref} className={className} sx={{ bgcolor: "#fff", py: { xs: 7, md: 10 } }}>
-      <Box sx={{ ...wrap, maxWidth: 1120 }}>
-        <Typography
-          component="h2"
-          sx={{
-            position: "absolute",
-            width: 1,
-            height: 1,
-            p: 0,
-            m: -1,
-            overflow: "hidden",
-            clip: "rect(0,0,0,0)",
-            whiteSpace: "nowrap",
-            border: 0,
-          }}
+        <span className="relative flex !size-[4.75rem] ![block-size:4.75rem] ![inline-size:4.75rem] items-center justify-center overflow-hidden !rounded-full">
+          <img
+            alt=""
+            width={76}
+            height={76}
+            loading="lazy"
+            decoding="async"
+            className="!size-full !h-full !w-full object-cover"
+            style={{ color: "transparent" }}
+            src={`${CDN}/width=256,quality=75,format=auto/img/testimonials/${member.img}`}
+            srcSet={`${CDN}/width=96,quality=75,format=auto/img/testimonials/${member.img} 1x, ${CDN}/width=256,quality=75,format=auto/img/testimonials/${member.img} 2x`}
+          />
+        </span>
+        <span
+          className={[
+            "absolute bottom-0 -end-[0.75rem] flex items-center justify-center",
+            "!rounded-full !border-2 !border-solid !border-white !p-1 text-white",
+            CHANNEL_BG[member.channel] || "bg-black",
+          ].join(" ")}
         >
-          Whoever you are, we’ve got you covered
-        </Typography>
-
-        <Stack direction="row" spacing={1.5} justifyContent="center" flexWrap="wrap" useFlexGap sx={{ mb: { xs: 4.5, md: 5.5 } }}>
-          {TABS.map((t, i) => {
-            const activeTab = i === tab;
-            const tTheme = THEME[t.theme];
-            return (
-              <Button
-                key={t.label}
-                onClick={() => setTab(i)}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 600,
-                  fontSize: 15,
-                  borderRadius: landing.pill,
-                  px: 3,
-                  height: 46,
-                  flexShrink: 0,
-                  bgcolor: activeTab ? tTheme.tabActive : "#fff",
-                  color: landing.ink,
-                  border: "1.5px solid #1A1A1A",
-                  boxShadow: "none",
-                  transition: "background-color 0.2s ease",
-                  "&:hover": {
-                    bgcolor: activeTab ? tTheme.tabActive : "rgba(0,0,0,0.03)",
-                    border: "1.5px solid #1A1A1A",
-                  },
-                }}
-              >
-                {t.label}
-              </Button>
-            );
-          })}
-        </Stack>
-
-        <Stack direction={{ xs: "column", md: "row" }} spacing={{ xs: 4, md: 6 }} alignItems="stretch">
-          <Box sx={{ flex: "0 1 40%", minWidth: 0, pt: { md: 0.5 } }}>
-            <Typography
-              component="h3"
-              sx={{
-                fontWeight: 800,
-                fontSize: { xs: "1.7rem", md: "2.2rem" },
-                letterSpacing: "-0.04em",
-                lineHeight: 1.12,
-                mb: 2,
-                color: landing.ink,
-                maxWidth: 400,
-              }}
-            >
-              {active.title}
-            </Typography>
-            <Typography sx={{ color: "#6B6B6B", fontSize: { xs: 15.5, md: 16.5 }, lineHeight: 1.65, mb: 3.25, maxWidth: 430 }}>
-              {active.body}
-            </Typography>
-            <Stack spacing={1.9}>
-              {active.points.map((p) => (
-                <Stack key={p} direction="row" spacing={1.35} alignItems="flex-start">
-                  <CheckRoundedIcon sx={{ color: theme.check, fontSize: 22, mt: "1px", flexShrink: 0 }} />
-                  <Typography sx={{ fontSize: 15.5, fontWeight: 500, color: "#6B6B6B", lineHeight: 1.45 }}>{p}</Typography>
-                </Stack>
-              ))}
-            </Stack>
-          </Box>
-
-          <Box
-            sx={{
-              flex: 1,
-              minWidth: 0,
-              bgcolor: theme.panel,
-              borderRadius: "24px",
-              p: { xs: 2.25, md: 2.75 },
-              transition: "background-color 0.25s ease",
+          <span className="flex !size-8 ![block-size:2rem] ![inline-size:2rem] items-center justify-center [&_svg]:!size-8 [&_svg]:![block-size:2rem] [&_svg]:![inline-size:2rem]">
+            {Icon ? <Icon /> : null}
+          </span>
+        </span>
+      </span>
+      <h5 className="sr-only">{member.name}</h5>
+      <dl className="m-0 flex flex-1 flex-col">
+        <div>
+          <dt className="sr-only">Username</dt>
+          <dd
+            className={[
+              "!m-0",
+              "![margin-block-end:clamp(0.5rem,0.4805rem+0.0977vi,0.5625rem)]",
+              "![font-size:clamp(0.89375rem,0.8703rem+0.1172vi,0.96875rem)]",
+              "!font-semibold !leading-[1.4] !tracking-[0.0075em]",
+              "text-[#213130]",
+              "![font-family:Figtree,ui-sans-serif,system-ui,sans-serif]",
+            ].join(" ")}
+            style={{
+              fontFamily: FONT_SANS,
+              fontSize: STEP_M1,
+              fontWeight: 600,
+              lineHeight: 1.4,
+              letterSpacing: "0.0075em",
+              margin: 0,
+              marginBlockEnd: SPACE_1,
+              color: BRAND,
             }}
           >
-            <Typography
-              sx={{
-                fontSize: 11.5,
-                fontWeight: 800,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color: theme.accent,
-                mb: 2.25,
+            {member.user}
+          </dd>
+        </div>
+        <div>
+          <dt className="sr-only">Followers</dt>
+          <dd
+            className={[
+              "!m-0 uppercase",
+              "![font-size:clamp(0.8rem,0.7863rem+0.0687vi,0.84375rem)]",
+              "!font-medium !leading-[1.4] !tracking-[0.0625em]",
+              "text-[#213130]",
+              "![font-family:Figtree,ui-sans-serif,system-ui,sans-serif]",
+            ].join(" ")}
+            style={{
+              fontFamily: FONT_SANS,
+              fontSize: STEP_M2,
+              fontWeight: 500,
+              lineHeight: 1.4,
+              letterSpacing: "0.0625em",
+              textTransform: "uppercase",
+              margin: 0,
+              color: BRAND,
+            }}
+          >
+            {member.followers}
+          </dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
+/**
+ * Audiences / verticals tabs — React + pure Tailwind,
+ * matched to marketing-landing.css VerticalsSection_*.
+ */
+export function LandingAudiences() {
+  const headingId = useId();
+  const [active, setActive] = useState(0);
+  const tab = TABS[active];
+  const t = THEME[tab.theme];
+
+  return (
+    <section
+      id="audiences"
+      className="!tracking-[0.0075em] text-[#213130]"
+      aria-labelledby={headingId}
+      style={{ fontFamily: FONT_SANS, color: BRAND, letterSpacing: "0.0075em" }}
+    >
+      <div className={CONTAINER}>
+        <div
+          className="flex !flex-col !bg-transparent py-[clamp(2rem,1.2188rem+3.9063vi,4.5rem)]"
+          style={{
+            gap: SPACE_3_5,
+            paddingBlock: SPACE_5_7,
+            flexDirection: "column",
+            backgroundColor: "transparent",
+            color: BRAND,
+          }}
+          data-theme={tab.theme}
+        >
+          <h2 className="sr-only" id={headingId}>
+            Whoever you are, we’ve got you covered
+          </h2>
+
+          {/*
+            Tab pills — VerticalsSection_tabTrigger__TAWSY
+            padding .5em 1.25em | radius 100vmax | 1px brand border | step--1
+            inactive: transparent bg | active/hover: theme-100
+          */}
+          <div
+            role="tablist"
+            aria-label="Audience"
+            className="flex !flex-wrap !items-center !justify-center"
+            style={{ gap: SPACE_1, alignItems: "center", justifyContent: "center" }}
+          >
+            {TABS.map((item, i) => {
+              const selected = i === active;
+              const theme = THEME[item.theme];
+              const tabStyle: CSSProperties = {
+                fontFamily: FONT_SANS,
+                fontSize: STEP_M1,
+                color: BRAND,
+                backgroundColor: selected ? theme.accent100 : "transparent",
+                borderWidth: "0.0625rem",
+                borderStyle: "solid",
+                borderColor: BRAND,
+                borderRadius: "100vmax",
+                outlineStyle: "solid",
+                outlineWidth: "0.125rem",
+                outlineOffset: "0.125rem",
+                outlineColor: "transparent",
+                cursor: "pointer",
+                transitionProperty: "outline-color, background-color, color",
+                transitionDuration: "0.15s",
+                transitionTimingFunction: "ease-out",
+                opacity: 1,
+                letterSpacing: "0.0075em",
+                lineHeight: 1.4,
+                fontWeight: 400,
+                appearance: "none",
+                WebkitAppearance: "none",
+              };
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  role="tab"
+                  id={`smc-audience-tab-${i}`}
+                  aria-selected={selected}
+                  aria-controls={`smc-audience-panel-${i}`}
+                  tabIndex={selected ? 0 : -1}
+                  data-theme={item.theme}
+                  onClick={() => setActive(i)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.accent100;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = selected
+                      ? theme.accent100
+                      : "transparent";
+                  }}
+                  onFocus={(e) => {
+                    if (e.currentTarget.matches(":focus-visible")) {
+                      e.currentTarget.style.outlineColor = BRAND;
+                    }
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.outlineColor = "transparent";
+                  }}
+                  className={[
+                    /* Beat marketing button reset: padding/radius/bg/font */
+                    "!m-0 !cursor-pointer !border-solid !shrink-0",
+                    "!rounded-full ![border-radius:100vmax]",
+                    "!border ![border-width:0.0625rem] !border-[#213130]",
+                    /* Tighter horizontal pad on narrow viewports so 3 pills fit/wrap cleanly */
+                    "!px-[0.875em] !py-[0.5em] ![padding:0.5em_0.875em]",
+                    "min-[24rem]:!px-[1.25em] min-[24rem]:![padding:0.5em_1.25em]",
+                    "![font-size:clamp(0.89375rem,0.8703rem+0.1172vi,0.96875rem)]",
+                    "!font-normal !leading-[1.4] !tracking-[0.0075em] !text-[#213130]",
+                    "![font-family:Figtree,ui-sans-serif,system-ui,sans-serif]",
+                    "!opacity-100",
+                    "!outline !outline-2 !outline-offset-2 !outline-transparent",
+                    "transition-[outline-color,background-color,color] duration-150 ease-out",
+                    "focus-visible:!outline-[#213130]",
+                  ].join(" ")}
+                  style={tabStyle}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            role="tabpanel"
+            id={`smc-audience-panel-${active}`}
+            aria-labelledby={`smc-audience-tab-${active}`}
+            tabIndex={0}
+          >
+            <div
+              className={[
+                "grid !items-center overflow-hidden !bg-transparent",
+                "p-[clamp(1rem,0.6094rem+1.9531vi,2.25rem)]",
+                "min-[36rem]:!p-0",
+                "min-[84rem]:grid-cols-[2fr_3fr]",
+                "![gap:clamp(1rem,0.6094rem+1.9531vi,2.25rem)]",
+                "min-[84rem]:![gap:clamp(2rem,1.9219rem+0.3906vi,2.25rem)]",
+              ].join(" ")}
+              style={{
+                alignItems: "center",
+                gap: SPACE_3_5,
+                backgroundColor: "transparent",
+                color: BRAND,
               }}
+              data-theme={tab.theme}
             >
-              {active.communityEyebrow}
-            </Typography>
-            <Grid container spacing={1.75}>
-              {active.members.map((m) => (
-                <Grid key={m.handle} size={{ xs: 12, sm: active.members.length > 2 ? 4 : 6 }}>
-                  <CommunityCard member={m} />
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        </Stack>
-      </Box>
-    </Box>
+              {/* Left: copy — Stolzl headline, Figtree body + checklist */}
+              <div
+                className="flex !flex-col !items-center !justify-center !text-center"
+                style={{ textAlign: "center" }}
+              >
+                {/*
+                  Non-h4: marketing h4–h6 { font-size: inherit } kills step-2.
+                  Same class for Creators / Small businesses / Agencies.
+                */}
+                <p
+                  role="heading"
+                  aria-level={4}
+                  className={HEADLINE_CLASS}
+                  style={HEADLINE_STYLE}
+                >
+                  {tab.heading}
+                </p>
+                <p
+                  className={[
+                    "!m-0 max-w-[60ch]",
+                    "![margin-block-end:clamp(2rem,1.9219rem+0.3906vi,2.25rem)]",
+                    "![font-size:clamp(0.89375rem,0.8703rem+0.1172vi,0.96875rem)]",
+                    "!font-normal !leading-[1.4] !tracking-[0.0075em] text-[#213130]",
+                    "![font-family:Figtree,ui-sans-serif,system-ui,sans-serif]",
+                  ].join(" ")}
+                  style={{
+                    fontFamily: FONT_SANS,
+                    fontSize: STEP_M1,
+                    fontWeight: 400,
+                    lineHeight: 1.4,
+                    letterSpacing: "0.0075em",
+                    margin: 0,
+                    marginBlockEnd: SPACE_5,
+                    maxInlineSize: "60ch",
+                    color: BRAND,
+                  }}
+                >
+                  {tab.text}
+                </p>
+                <ul
+                  className={[
+                    "!m-0 flex !list-none !flex-col !items-stretch !justify-center !p-0",
+                    "min-[36rem]:!flex-row min-[36rem]:!flex-wrap min-[36rem]:!items-center",
+                    "![font-size:clamp(0.89375rem,0.8703rem+0.1172vi,0.96875rem)]",
+                    "![font-family:Figtree,ui-sans-serif,system-ui,sans-serif]",
+                  ].join(" ")}
+                  style={{
+                    gap: SPACE_2,
+                    fontSize: STEP_M1,
+                    fontFamily: FONT_SANS,
+                    paddingInlineStart: 0,
+                    listStyle: "none",
+                    margin: 0,
+                  }}
+                >
+                  {tab.items.map((item) => (
+                    <li
+                      key={item}
+                      className="flex !items-start !text-left min-[36rem]:!items-center"
+                      style={{ gap: SPACE_1 }}
+                    >
+                      <CheckIcon color={t.accent800} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Right: community panel + creator cards */}
+              <div
+                className={[
+                  "grid !rounded-[1.25rem]",
+                  THEME_BG_100[tab.theme],
+                ].join(" ")}
+                style={{
+                  backgroundColor: t.accent100,
+                  background: t.accent100,
+                  borderRadius: "1.25rem",
+                  padding: SPACE_3_5,
+                  gap: SPACE_3,
+                }}
+              >
+                <p
+                  className={[
+                    "!m-0 uppercase",
+                    "![font-size:clamp(0.89375rem,0.8703rem+0.1172vi,0.96875rem)]",
+                    "!font-medium !leading-[1.4] !tracking-[0.0625em]",
+                    "![font-family:Figtree,ui-sans-serif,system-ui,sans-serif]",
+                  ].join(" ")}
+                  style={{
+                    fontFamily: FONT_SANS,
+                    fontSize: STEP_M1,
+                    fontWeight: 500,
+                    lineHeight: 1.4,
+                    letterSpacing: "0.0625em",
+                    textTransform: "uppercase",
+                    margin: 0,
+                    color: t.accent900,
+                  }}
+                >
+                  {tab.eyebrow}
+                </p>
+                <div className="grid grid-cols-1 gap-[clamp(1rem,0.9609rem+0.1953vi,1.125rem)] min-[36rem]:grid-cols-2 min-[48rem]:grid-cols-3">
+                  {tab.members.map((m) => (
+                    <MemberCard key={m.user} member={m} theme={tab.theme} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
